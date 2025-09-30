@@ -1,0 +1,856 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Assistente de Cálculos Trabalhistas — ADM SOFT‑ATA</title>
+  <!-- Tailwind via CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            accent: {
+              50: '#FFF7ED', 100: '#FFEDD5', 200: '#FED7AA', 300: '#FDBA74', 400: '#FB923C',
+              500: '#F59E0B', 600: '#D97706', 700: '#B45309', 800: '#92400E', 900: '#78350F'
+            }
+          },
+          fontFamily: { sans: ['Inter', 'ui-sans-serif', 'system-ui'] },
+          boxShadow: {
+            soft: '0 8px 24px rgba(0,0,0,0.06)'
+          }
+        }
+      }
+    }
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root { color-scheme: light dark; }
+    /* OBS: @apply exige build do Tailwind; aqui serve como documentação.
+       As classes utilitárias no HTML garantem o visual mesmo sem processar @apply. */
+    .app { /* @apply min-h-screen bg-neutral-50 dark:bg-neutral-950 text-neutral-900 dark:text-neutral-50; */ }
+    .appbar { /* @apply sticky top-0 z-30 backdrop-blur bg-white/70 dark:bg-neutral-950/60 border-b border-neutral-200 dark:border-neutral-800; */ }
+    .brand { /* @apply flex items-center gap-3; */ }
+    .brand-badge { /* @apply h-9 w-9 rounded-xl bg-accent-600 text-white flex items-center justify-center font-bold; */ }
+    .muted { /* @apply text-neutral-500 dark:text-neutral-400; */ }
+    .btn { /* @apply inline-flex items-center justify-center gap-2 px-3.5 py-2 rounded-xl text-sm font-medium shadow-sm; */ }
+    .btn-primary { /* @apply bg-accent-600 text-white hover:bg-accent-700; */ }
+    .btn-ghost { /* @apply border border-neutral-300 dark:border-neutral-700 hover:bg-neutral-100 dark:hover:bg-neutral-800/60; */ }
+    .btn-outline { /* @apply border border-accent-600 text-accent-700 hover:bg-accent-50 dark:text-accent-400 dark:border-accent-500 dark:hover:bg-accent-900/20; */ }
+    .input { /* @apply w-full px-3 py-2 rounded-xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 text-neutral-900 dark:text-neutral-50; */ }
+    .label { /* @apply text-sm font-medium text-neutral-700 dark:text-neutral-200; */ }
+    .card { /* @apply bg-white dark:bg-neutral-900 rounded-2xl shadow-soft border border-neutral-100 dark:border-neutral-800; */ }
+    .tabs { /* @apply sticky top-[64px] z-20 bg-white/70 dark:bg-neutral-950/60 backdrop-blur border-b border-neutral-200 dark:border-neutral-800; */ }
+    .tab { /* @apply px-4 py-2 rounded-xl text-sm font-medium cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-800; */ }
+    .tab-active { /* @apply bg-accent-600 text-white; */ }
+    .pane { /* @apply grid grid-cols-1 lg:grid-cols-12 gap-6; */ }
+    .form-col { /* @apply lg:col-span-7 xl:col-span-8; */ }
+    .result-col { /* @apply lg:col-span-5 xl:col-span-4; */ }
+    .panel-title { /* @apply text-sm font-semibold uppercase tracking-wide text-neutral-500 dark:text-neutral-400; */ }
+    .mono { font-variant-numeric: tabular-nums; }
+  </style>
+</head>
+<body class="min-h-screen bg-neutral-50 dark:bg-neutral-950 text-neutral-900 dark:text-neutral-50">
+  <!-- APP BAR -->
+  <header class="sticky top-0 z-30 backdrop-blur bg-white/70 dark:bg-neutral-950/60 border-b border-neutral-200 dark:border-neutral-800">
+    <div class="max-w-7xl mx-auto px-4 md:px-8">
+      <div class="h-16 flex items-center justify-between gap-3">
+        <div class="flex items-center gap-3">
+          <div class="h-9 w-9 rounded-xl bg-accent-600 text-white flex items-center justify-center font-bold">SA</div>
+          <div>
+            <div class="font-semibold leading-tight">SOFT‑ATA</div>
+            <div class="text-xs text-neutral-500 dark:text-neutral-400 -mt-0.5">Assistente de Cálculos • set/2025</div>
+          </div>
+        </div>
+        <div class="flex items-center gap-2">
+          <button id="toggleTheme" class="inline-flex items-center justify-center gap-2 px-3.5 py-2 rounded-xl text-sm font-medium shadow-sm border border-neutral-300 dark:border-neutral-700 hover:bg-neutral-100 dark:hover:bg-neutral-800/60" title="Tema">🌗</button>
+          <button id="btnAuto" class="inline-flex items-center justify-center gap-2 px-3.5 py-2 rounded-xl text-sm font-medium shadow-sm bg-accent-600 text-white hover:bg-accent-700" title="Calcular automaticamente">⚡ Auto</button>
+          <button id="btnSalvar" class="inline-flex items-center justify-center gap-2 px-3.5 py-2 rounded-xl text-sm font-medium shadow-sm border border-neutral-300 dark:border-neutral-700 hover:bg-neutral-100 dark:hover:bg-neutral-800/60" title="Salvar cenário">💾</button>
+          <button id="btnCarregar" class="inline-flex items-center justify-center gap-2 px-3.5 py-2 rounded-xl text-sm font-medium shadow-sm border border-neutral-300 dark:border-neutral-700 hover:bg-neutral-100 dark:hover:bg-neutral-800/60" title="Carregar cenário">📂</button>
+          <button id="btnCopiar" class="inline-flex items-center justify-center gap-2 px-3.5 py-2 rounded-xl text-sm font-medium shadow-sm border border-neutral-300 dark:border-neutral-700 hover:bg-neutral-100 dark:hover:bg-neutral-800/60" title="Copiar resumo">⎘</button>
+          <button id="btnImprimir" class="inline-flex items-center justify-center gap-2 px-3.5 py-2 rounded-xl text-sm font-medium shadow-sm border border-neutral-300 dark:border-neutral-700 hover:bg-neutral-100 dark:hover:bg-neutral-800/60" title="Imprimir">🖨️</button>
+          <button id="btnLimpar" class="inline-flex items-center justify-center gap-2 px-3.5 py-2 rounded-xl text-sm font-medium shadow-sm border border-neutral-300 dark:border-neutral-700 hover:bg-neutral-100 dark:hover:bg-neutral-800/60" title="Limpar">↺</button>
+          <button id="btnExportar" class="inline-flex items-center justify-center gap-2 px-3.5 py-2 rounded-xl text-sm font-medium shadow-sm border border-accent-600 text-accent-700 hover:bg-accent-50 dark:text-accent-400 dark:border-accent-500 dark:hover:bg-accent-900/20" title="Exportar JSON">⤓ Exportar</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- TABS -->
+  <div class="sticky top-[64px] z-20 bg-white/70 dark:bg-neutral-950/60 backdrop-blur border-b border-neutral-200 dark:border-neutral-800">
+    <div class="max-w-7xl mx-auto px-4 md:px-8 py-2 flex flex-wrap gap-2">
+      <button class="px-4 py-2 rounded-xl text-sm font-medium cursor-pointer bg-accent-600 text-white" data-tab="folha">🧾 Folha</button>
+      <button class="px-4 py-2 rounded-xl text-sm font-medium cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-800" data-tab="ferias">🌴 Férias</button>
+      <button class="px-4 py-2 rounded-xl text-sm font-medium cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-800" data-tab="decimo">🎁 13º</button>
+      <button class="px-4 py-2 rounded-xl text-sm font-medium cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-800" data-tab="horas">⏱️ Horas</button>
+      <button class="px-4 py-2 rounded-xl text-sm font-medium cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-800" data-tab="noturno">🌙 Noturno</button>
+      <button class="px-4 py-2 rounded-xl text-sm font-medium cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-800" data-tab="rescisao">📄 Rescisão</button>
+      <button class="px-4 py-2 rounded-xl text-sm font-medium cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-800" data-tab="tabelas">⚙️ Parâmetros</button>
+      <button class="px-4 py-2 rounded-xl text-sm font-medium cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-800" data-tab="resumo">📊 Totais</button>
+    </div>
+  </div>
+
+  <!-- CONTENT -->
+  <main class="max-w-7xl mx-auto px-4 md:px-8 py-6">
+
+    <!-- FOLHA -->
+    <section id="tab-folha" class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+      <div class="lg:col-span-7 xl:col-span-8 space-y-4">
+        <div class="bg-white dark:bg-neutral-900 rounded-2xl shadow-soft border border-neutral-100 dark:border-neutral-800 p-5">
+          <h2 class="text-lg font-semibold mb-1">Folha Mensal (CLT)</h2>
+          <p class="text-neutral-500 dark:text-neutral-400 text-sm mb-4">INSS progressivo, FGTS 8%, IRRF (tabelas jan–abr/25 e desde mai/25), dependentes, desconto simplificado e salário‑família.</p>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label class="text-sm font-medium text-neutral-700 dark:text-neutral-200">Remuneração base (R$)</label>
+              <input id="f-salario" type="number" min="0" step="0.01" class="w-full px-3 py-2 rounded-xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 text-neutral-900 dark:text-neutral-50" placeholder="Ex.: 3500,00">
+            </div>
+            <div>
+              <label class="text-sm font-medium text-neutral-700 dark:text-neutral-200">Dependentes (IRRF)</label>
+              <input id="f-dependentes" type="number" min="0" step="1" class="w-full px-3 py-2 rounded-xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 text-neutral-900 dark:text-neutral-50" value="0">
+            </div>
+            <div>
+              <label class="text-sm font-medium text-neutral-700 dark:text-neutral-200">Competência</label>
+              <select id="f-competencia" class="w-full px-3 py-2 rounded-xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 text-neutral-900 dark:text-neutral-50">
+                <option value="2025-09" selected>Set/2025 (pós-maio)</option>
+                <option value="2025-04">Abr/2025 (jan–abr)</option>
+              </select>
+            </div>
+            <div>
+              <label class="text-sm font-medium text-neutral-700 dark:text-neutral-200">Desconto simplificado IRRF</label>
+              <select id="f-simplificado" class="w-full px-3 py-2 rounded-xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 text-neutral-900 dark:text-neutral-50">
+                <option value="nao" selected>Não (tradicional)</option>
+                <option value="sim">Sim (25% até teto)</option>
+              </select>
+            </div>
+            <div>
+              <label class="text-sm font-medium text-neutral-700 dark:text-neutral-200">Outras verbas (R$)</label>
+              <input id="f-outras" type="number" min="0" step="0.01" class="w-full px-3 py-2 rounded-xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 text-neutral-900 dark:text-neutral-50" value="0">
+            </div>
+            <div class="md:col-span-1 flex items-end"><button id="btnCalcularFolha" class="inline-flex items-center justify-center gap-2 px-3.5 py-2 rounded-xl text-sm font-medium shadow-sm bg-accent-600 text-white hover:bg-accent-700 w-full">Calcular</button></div>
+          </div>
+        </div>
+      </div>
+      <aside class="lg:col-span-5 xl:col-span-4">
+        <div class="bg-white dark:bg-neutral-900 rounded-2xl shadow-soft border border-neutral-100 dark:border-neutral-800 p-5 sticky top-[128px] space-y-3">
+          <div class="text-sm font-semibold uppercase tracking-wide text-neutral-500 dark:text-neutral-400">Painel • Folha</div>
+          <div class="flex items-center justify-between"><span class="text-neutral-500 dark:text-neutral-400">Base INSS</span><strong class="mono" id="r-base-inss">—</strong></div>
+          <div class="flex items-center justify-between"><span class="text-neutral-500 dark:text-neutral-400">INSS (progressivo)</span><strong class="mono" id="r-inss">—</strong></div>
+          <div class="flex items-center justify-between"><span class="text-neutral-500 dark:text-neutral-400">Base FGTS</span><strong class="mono" id="r-base-fgts">—</strong></div>
+          <div class="flex items-center justify-between"><span class="text-neutral-500 dark:text-neutral-400">FGTS (8%)</span><strong class="mono" id="r-fgts">—</strong></div>
+          <div class="flex items-center justify-between"><span class="text-neutral-500 dark:text-neutral-400">Base IRRF</span><strong class="mono" id="r-base-irrf">—</strong></div>
+          <div class="flex items-center justify-between"><span class="text-neutral-500 dark:text-neutral-400">IRRF</span><strong class="mono" id="r-irrf">—</strong></div>
+          <div class="flex items-center justify-between"><span class="text-neutral-500 dark:text-neutral-400">Salário‑família</span><strong class="mono" id="r-salario-familia">—</strong></div>
+          <hr class="border-neutral-200 dark:border-neutral-800"/>
+          <div class="flex items-center justify-between"><span class="text-neutral-500 dark:text-neutral-400">Descontos</span><strong class="mono" id="r-descontos">—</strong></div>
+          <div class="flex items-center justify-between"><span class="text-neutral-500 dark:text-neutral-400">Proventos</span><strong class="mono" id="r-proventos">—</strong></div>
+          <div class="flex items-center justify-between text-xl"><span class="font-semibold">Líquido</span><strong class="mono" id="r-liquido">—</strong></div>
+        </div>
+      </aside>
+    </section>
+
+    <!-- FÉRIAS -->
+    <section id="tab-ferias" class="grid grid-cols-1 lg:grid-cols-12 gap-6 hidden">
+      <div class="lg:col-span-7 xl:col-span-8 space-y-4">
+        <div class="bg-white dark:bg-neutral-900 rounded-2xl shadow-soft border border-neutral-100 dark:border-neutral-800 p-5">
+          <h2 class="text-lg font-semibold mb-1">Férias (1/3 constitucional)</h2>
+          <p class="text-neutral-500 dark:text-neutral-400 text-sm mb-4">Com opção de abono (venda) de até 10 dias e cálculo de IRRF/INSS.</p>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label class="text-sm font-medium text-neutral-700 dark:text-neutral-200">Remuneração base (R$)</label>
+              <input id="fer-salario" type="number" min="0" step="0.01" class="w-full px-3 py-2 rounded-xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 text-neutral-900 dark:text-neutral-50">
+            </div>
+            <div>
+              <label class="text-sm font-medium text-neutral-700 dark:text-neutral-200">Dias de férias</label>
+              <input id="fer-dias" type="number" min="0" max="30" class="w-full px-3 py-2 rounded-xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 text-neutral-900 dark:text-neutral-50" value="30">
+            </div>
+            <div>
+              <label class="text-sm font-medium text-neutral-700 dark:text-neutral-200">Abono (dias vendidos)</label>
+              <select id="fer-abono" class="w-full px-3 py-2 rounded-xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 text-neutral-900 dark:text-neutral-50">
+                <option value="0" selected>Não</option>
+                <option value="10">10 dias</option>
+              </select>
+            </div>
+            <div>
+              <label class="text-sm font-medium text-neutral-700 dark:text-neutral-200">Dependentes (IRRF)</label>
+              <input id="fer-dependentes" type="number" min="0" step="1" class="w-full px-3 py-2 rounded-xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 text-neutral-900 dark:text-neutral-50" value="0">
+            </div>
+            <div>
+              <label class="text-sm font-medium text-neutral-700 dark:text-neutral-200">Competência IRRF</label>
+              <select id="fer-competencia" class="w-full px-3 py-2 rounded-xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 text-neutral-900 dark:text-neutral-50">
+                <option value="maio-2025" selected>Mai/2025 em diante</option>
+                <option value="jan-abr-2025">Jan–Abr/2025</option>
+              </select>
+            </div>
+            <div class="md:col-span-1 flex items-end"><button id="btnCalcularFerias" class="inline-flex items-center justify-center gap-2 px-3.5 py-2 rounded-xl text-sm font-medium shadow-sm bg-accent-600 text-white hover:bg-accent-700 w-full">Calcular</button></div>
+          </div>
+        </div>
+      </div>
+      <aside class="lg:col-span-5 xl:col-span-4">
+        <div class="bg-white dark:bg-neutral-900 rounded-2xl shadow-soft border border-neutral-100 dark:border-neutral-800 p-5 sticky top-[128px] space-y-3">
+          <div class="text-sm font-semibold uppercase tracking-wide text-neutral-500 dark:text-neutral-400">Painel • Férias</div>
+          <div class="flex items-center justify-between"><span class="text-neutral-500 dark:text-neutral-400">Remuneração férias</span><strong class="mono" id="fer-remuneracao">—</strong></div>
+          <div class="flex items-center justify-between"><span class="text-neutral-500 dark:text-neutral-400">1/3 constitucional</span><strong class="mono" id="fer-terco">—</strong></div>
+          <div class="flex items-center justify-between"><span class="text-neutral-500 dark:text-neutral-400">Abono</span><strong class="mono" id="fer-abono-out">—</strong></div>
+          <hr class="border-neutral-200 dark:border-neutral-800"/>
+          <div class="flex items-center justify-between"><span class="text-neutral-500 dark:text-neutral-400">INSS</span><strong class="mono" id="fer-inss">—</strong></div>
+          <div class="flex items-center justify-between"><span class="text-neutral-500 dark:text-neutral-400">IRRF</span><strong class="mono" id="fer-irrf">—</strong></div>
+          <div class="flex items-center justify-between text-xl"><span class="font-semibold">Líquido</span><strong class="mono" id="fer-liquido">—</strong></div>
+        </div>
+      </aside>
+    </section>
+
+    <!-- 13º -->
+    <section id="tab-decimo" class="grid grid-cols-1 lg:grid-cols-12 gap-6 hidden">
+      <div class="lg:col-span-7 xl:col-span-8 space-y-4">
+        <div class="bg-white dark:bg-neutral-900 rounded-2xl shadow-soft border border-neutral-100 dark:border-neutral-800 p-5">
+          <h2 class="text-lg font-semibold mb-1">13º Salário</h2>
+          <p class="text-neutral-500 dark:text-neutral-400 text-sm mb-4">Cálculo proporcional por meses no ano, com INSS e IRRF na 2ª parcela.</p>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label class="text-sm font-medium text-neutral-700 dark:text-neutral-200">Salário base (R$)</label>
+              <input id="d-salario" type="number" min="0" step="0.01" class="w-full px-3 py-2 rounded-xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 text-neutral-900 dark:text-neutral-50">
+            </div>
+            <div>
+              <label class="text-sm font-medium text-neutral-700 dark:text-neutral-200">Meses trabalhados</label>
+              <input id="d-meses" type="number" min="0" max="12" class="w-full px-3 py-2 rounded-xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 text-neutral-900 dark:text-neutral-50" value="12">
+            </div>
+            <div>
+              <label class="text-sm font-medium text-neutral-700 dark:text-neutral-200">Dependentes (IRRF)</label>
+              <input id="d-dependentes" type="number" min="0" step="1" class="w-full px-3 py-2 rounded-xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 text-neutral-900 dark:text-neutral-50" value="0">
+            </div>
+            <div>
+              <label class="text-sm font-medium text-neutral-700 dark:text-neutral-200">Adiantamento</label>
+              <select id="d-adiant" class="w-full px-3 py-2 rounded-xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 text-neutral-900 dark:text-neutral-50">
+                <option value="0">Não</option>
+                <option value="1" selected>Sim (50%)</option>
+              </select>
+            </div>
+            <div>
+              <label class="text-sm font-medium text-neutral-700 dark:text-neutral-200">Competência IRRF (2ª parcela)</label>
+              <select id="d-competencia" class="w-full px-3 py-2 rounded-xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 text-neutral-900 dark:text-neutral-50">
+                <option value="maio-2025" selected>Mai/2025 em diante</option>
+                <option value="jan-abr-2025">Jan–Abr/2025</option>
+              </select>
+            </div>
+            <div class="md:col-span-1 flex items-end"><button id="btnCalcular13" class="inline-flex items-center justify-center gap-2 px-3.5 py-2 rounded-xl text-sm font-medium shadow-sm bg-accent-600 text-white hover:bg-accent-700 w-full">Calcular</button></div>
+          </div>
+        </div>
+      </div>
+      <aside class="lg:col-span-5 xl:col-span-4">
+        <div class="bg-white dark:bg-neutral-900 rounded-2xl shadow-soft border border-neutral-100 dark:border-neutral-800 p-5 sticky top-[128px] space-y-3">
+          <div class="text-sm font-semibold uppercase tracking-wide text-neutral-500 dark:text-neutral-400">Painel • 13º</div>
+          <div class="flex items-center justify-between"><span class="text-neutral-500 dark:text-neutral-400">13º bruto</span><strong class="mono" id="d-bruto">—</strong></div>
+          <div class="flex items-center justify-between"><span class="text-neutral-500 dark:text-neutral-400">INSS 13º</span><strong class="mono" id="d-inss">—</strong></div>
+          <div class="flex items-center justify-between"><span class="text-neutral-500 dark:text-neutral-400">IRRF 2ª parcela</span><strong class="mono" id="d-irrf">—</strong></div>
+          <div class="flex items-center justify-between text-xl"><span class="font-semibold">13º líquido</span><strong class="mono" id="d-liquido">—</strong></div>
+        </div>
+      </aside>
+    </section>
+
+    <!-- HORAS EXTRAS -->
+    <section id="tab-horas" class="grid grid-cols-1 lg:grid-cols-12 gap-6 hidden">
+      <div class="lg:col-span-7 xl:col-span-8 space-y-4">
+        <div class="bg-white dark:bg-neutral-900 rounded-2xl shadow-soft border border-neutral-100 dark:border-neutral-800 p-5">
+          <h2 class="text-lg font-semibold mb-1">Horas Extras</h2>
+          <p class="text-neutral-500 dark:text-neutral-400 text-sm mb-4">Cálculo pelo valor hora (220h/mês) com percentuais de 50%, 70% ou 100%.</p>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label class="text-sm font-medium text-neutral-700 dark:text-neutral-200">Salário mensal (R$)</label>
+              <input id="h-salario" type="number" min="0" step="0.01" class="w-full px-3 py-2 rounded-xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 text-neutral-900 dark:text-neutral-50">
+            </div>
+            <div>
+              <label class="text-sm font-medium text-neutral-700 dark:text-neutral-200">Horas extras (mês)</label>
+              <input id="h-horas" type="number" min="0" step="0.01" class="w-full px-3 py-2 rounded-xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 text-neutral-900 dark:text-neutral-50">
+            </div>
+            <div>
+              <label class="text-sm font-medium text-neutral-700 dark:text-neutral-200">Adicional</label>
+              <select id="h-adic" class="w-full px-3 py-2 rounded-xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 text-neutral-900 dark:text-neutral-50">
+                <option value="0.5" selected>50% (dias úteis)</option>
+                <option value="1.0">100% (dom./fer.)</option>
+                <option value="0.7">70%</option>
+              </select>
+            </div>
+            <div class="md:col-span-1 flex items-end"><button id="btnCalcularHoras" class="inline-flex items-center justify-center gap-2 px-3.5 py-2 rounded-xl text-sm font-medium shadow-sm bg-accent-600 text-white hover:bg-accent-700 w-full">Calcular</button></div>
+          </div>
+        </div>
+      </div>
+      <aside class="lg:col-span-5 xl:col-span-4">
+        <div class="bg-white dark:bg-neutral-900 rounded-2xl shadow-soft border border-neutral-100 dark:border-neutral-800 p-5 sticky top-[128px] space-y-3">
+          <div class="text-sm font-semibold uppercase tracking-wide text-neutral-500 dark:text-neutral-400">Painel • Horas Extras</div>
+          <div class="flex items-center justify-between"><span class="text-neutral-500 dark:text-neutral-400">Valor hora</span><strong class="mono" id="h-valor">—</strong></div>
+          <div class="flex items-center justify-between"><span class="text-neutral-500 dark:text-neutral-400">Adicional</span><strong class="mono" id="h-adic-out">—</strong></div>
+          <div class="flex items-center justify-between text-xl"><span class="font-semibold">Total</span><strong class="mono" id="h-total">—</strong></div>
+        </div>
+      </aside>
+    </section>
+
+    <!-- NOTURNO -->
+    <section id="tab-noturno" class="grid grid-cols-1 lg:grid-cols-12 gap-6 hidden">
+      <div class="lg:col-span-7 xl:col-span-8 space-y-4">
+        <div class="bg-white dark:bg-neutral-900 rounded-2xl shadow-soft border border-neutral-100 dark:border-neutral-800 p-5">
+          <h2 class="text-lg font-semibold mb-1">Adicional Noturno</h2>
+          <p class="text-neutral-500 dark:text-neutral-400 text-sm mb-4">Urbano 20% com hora ficta (52m30s) • Rural 25% (sem hora ficta).</p>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label class="text-sm font-medium text-neutral-700 dark:text-neutral-200">Salário mensal (R$)</label>
+              <input id="n-salario" type="number" min="0" step="0.01" class="w-full px-3 py-2 rounded-xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 text-neutral-900 dark:text-neutral-50">
+            </div>
+            <div>
+              <label class="text-sm font-medium text-neutral-700 dark:text-neutral-200">Horas noturnas</label>
+              <input id="n-horas" type="number" min="0" step="0.01" class="w-full px-3 py-2 rounded-xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 text-neutral-900 dark:text-neutral-50">
+            </div>
+            <div>
+              <label class="text-sm font-medium text-neutral-700 dark:text-neutral-200">Percentual</label>
+              <select id="n-perc" class="w-full px-3 py-2 rounded-xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 text-neutral-900 dark:text-neutral-50">
+                <option value="0.20" selected>20% (urbano)</option>
+                <option value="0.25">25% (rural)</option>
+              </select>
+            </div>
+            <div class="md:col-span-1 flex items-end"><button id="btnCalcularNoturno" class="inline-flex items-center justify-center gap-2 px-3.5 py-2 rounded-xl text-sm font-medium shadow-sm bg-accent-600 text-white hover:bg-accent-700 w-full">Calcular</button></div>
+          </div>
+        </div>
+      </div>
+      <aside class="lg:col-span-5 xl:col-span-4">
+        <div class="bg-white dark:bg-neutral-900 rounded-2xl shadow-soft border border-neutral-100 dark:border-neutral-800 p-5 sticky top-[128px] space-y-3">
+          <div class="text-sm font-semibold uppercase tracking-wide text-neutral-500 dark:text-neutral-400">Painel • Noturno</div>
+          <div class="flex items-center justify-between"><span class="text-neutral-500 dark:text-neutral-400">Hora ficta aplicada</span><strong class="mono" id="n-ficta">—</strong></div>
+          <div class="flex items-center justify-between"><span class="text-neutral-500 dark:text-neutral-400">Valor hora</span><strong class="mono" id="n-valor">—</strong></div>
+          <div class="flex items-center justify-between text-xl"><span class="font-semibold">Total</span><strong class="mono" id="n-total">—</strong></div>
+        </div>
+      </aside>
+    </section>
+
+    <!-- RESCISÃO -->
+    <section id="tab-rescisao" class="grid grid-cols-1 lg:grid-cols-12 gap-6 hidden">
+      <div class="lg:col-span-7 xl:col-span-8 space-y-4">
+        <div class="bg-white dark:bg-neutral-900 rounded-2xl shadow-soft border border-neutral-100 dark:border-neutral-800 p-5">
+          <h2 class="text-lg font-semibold mb-1">Rescisão (sem justa causa)</h2>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+  <!-- Salário / tempo / saldo do mês -->
+  <div>
+    <label class="text-sm font-medium text-neutral-700 dark:text-neutral-200">Salário base (R$)</label>
+    <input id="r-salario" type="number" min="0" step="0.01"
+           class="w-full px-3 py-2 rounded-xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 text-neutral-900 dark:text-neutral-50">
+  </div>
+  <div>
+    <label class="text-sm font-medium text-neutral-700 dark:text-neutral-200">Meses trabalhados no ano</label>
+    <input id="r-meses" type="number" min="0" max="12" value="12"
+           class="w-full px-3 py-2 rounded-xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 text-neutral-900 dark:text-neutral-50">
+  </div>
+  <div>
+    <label class="text-sm font-medium text-neutral-700 dark:text-neutral-200">Saldo de dias (mês)</label>
+    <input id="r-saldo-dias" type="number" min="0" max="30" value="0"
+           class="w-full px-3 py-2 rounded-xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 text-neutral-900 dark:text-neutral-50">
+  </div>
+
+  <!-- FGTS histórico e férias vencidas -->
+  <div>
+    <label class="text-sm font-medium text-neutral-700 dark:text-neutral-200">Saldo FGTS (histórico) R$</label>
+    <input id="r-fgts-saldo" type="number" min="0" step="0.01" placeholder="Para multa de 40%"
+           class="w-full px-3 py-2 rounded-xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 text-neutral-900 dark:text-neutral-50">
+  </div>
+  <div>
+    <label class="text-sm font-medium text-neutral-700 dark:text-neutral-200">Férias vencidas?</label>
+    <select id="r-ferias-vencidas"
+            class="w-full px-3 py-2 rounded-xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 text-neutral-900 dark:text-neutral-50">
+      <option value="nao" selected>Não</option>
+      <option value="sim">Sim (30 dias + 1/3)</option>
+    </select>
+  </div>
+
+  <!-- NOVOS CAMPOS: motivo/aviso -->
+  <div>
+    <label class="text-sm font-medium text-neutral-700 dark:text-neutral-200">Motivo</label>
+    <select id="r-motivo"
+            class="w-full px-3 py-2 rounded-xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 text-neutral-900 dark:text-neutral-50">
+      <option value="sem-justa" selected>Sem justa causa</option>
+      <option value="pedido">Pedido de demissão</option>
+      <option value="termino">Término de contrato (prazo)</option>
+      <option value="justa">Justa causa</option>
+    </select>
+  </div>
+  <div>
+    <label class="text-sm font-medium text-neutral-700 dark:text-neutral-200">Aviso prévio</label>
+    <select id="r-aviso"
+            class="w-full px-3 py-2 rounded-xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 text-neutral-900 dark:text-neutral-50">
+      <option value="indenizado" selected>Indenizado</option>
+      <option value="trabalhado">Trabalhado</option>
+      <option value="dispensado">Dispensado</option>
+    </select>
+  </div>
+  <div>
+    <label class="text-sm font-medium text-neutral-700 dark:text-neutral-200">Dias de aviso</label>
+    <input id="r-aviso-dias" type="number" min="0" max="90" value="30"
+           class="w-full px-3 py-2 rounded-xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 text-neutral-900 dark:text-neutral-50">
+  </div>
+
+  <!-- Botão -->
+  <div class="md:col-span-1 flex items-end">
+    <button id="btnCalcularRescisao"
+            class="inline-flex items-center justify-center gap-2 px-3.5 py-2 rounded-xl text-sm font-medium shadow-sm bg-accent-600 text-white hover:bg-accent-700 w-full">
+      Calcular
+    </button>
+  </div>
+</div>
+      </div>
+      <aside class="lg:col-span-5 xl:col-span-4">
+        <div class="bg-white dark:bg-neutral-900 rounded-2xl shadow-soft border border-neutral-100 dark:border-neutral-800 p-5 sticky top-[128px] space-y-3">
+          <div class="text-sm font-semibold uppercase tracking-wide text-neutral-500 dark:text-neutral-400">Painel • Rescisão</div>
+          <div class="flex items-center justify-between"><span class="text-neutral-500 dark:text-neutral-400">Saldo de salário</span><strong class="mono" id="r-out-saldo">—</strong></div>
+          <div class="flex items-center justify-between"><span class="text-neutral-500 dark:text-neutral-400">13º proporcional</span><strong class="mono" id="r-out-13">—</strong></div>
+          <div class="flex items-center justify-between"><span class="text-neutral-500 dark:text-neutral-400">Férias proporcionais</span><strong class="mono" id="r-out-fer-prop">—</strong></div>
+          <div class="flex items-center justify-between"><span class="text-neutral-500 dark:text-neutral-400">Férias vencidas</span><strong class="mono" id="r-out-fer-venc">—</strong></div>
+          <hr class="border-neutral-200 dark:border-neutral-800"/>
+          <div class="flex items-center justify-between"><span class="text-neutral-500 dark:text-neutral-400">Multa FGTS 40%</span><strong class="mono" id="r-out-multa">—</strong></div>
+          <div class="flex items-center justify-between"><span class="text-neutral-500 dark:text-neutral-400">INSS</span><strong class="mono" id="r-out-inss">—</strong></div>
+          <div class="flex items-center justify-between"><span class="text-neutral-500 dark:text-neutral-400">IRRF</span><strong class="mono" id="r-out-irrf">—</strong></div>
+          <div class="flex items-center justify-between text-xl"><span class="font-semibold">Líquido rescisão</span><strong class="mono" id="r-out-liquido">—</strong></div>
+        </div>
+      </aside>
+    </section>
+
+    <!-- PARÂMETROS -->
+    <section id="tab-tabelas" class="hidden">
+      <div class="bg-white dark:bg-neutral-900 rounded-2xl shadow-soft border border-neutral-100 dark:border-neutral-800 p-5">
+        <h2 class="text-lg font-semibold mb-1">Parâmetros oficiais — 2025</h2>
+        <p class="text-neutral-500 dark:text-neutral-400 text-sm mb-4">Alterações podem ocorrer por lei/portaria/CCT. Edite no código-fonte (objeto <code>PARAMS</code>) se necessário.</p>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="bg-white dark:bg-neutral-900 rounded-xl border border-neutral-100 dark:border-neutral-800 p-4">
+            <h3 class="font-semibold mb-2">INSS (empregado) — desde 01/01/2025</h3>
+            <ul class="text-sm leading-6">
+              <li>Até R$ 1.518,00 → 7,5%</li>
+              <li>R$ 1.518,01 a R$ 2.793,88 → 9%</li>
+              <li>R$ 2.793,89 a R$ 4.190,83 → 12%</li>
+              <li>R$ 4.190,84 a R$ 8.157,41 → 14%</li>
+            </ul>
+            <p class="text-neutral-500 dark:text-neutral-400 text-xs">Teto: R$ 8.157,41 • Salário‑mínimo: R$ 1.518,00</p>
+          </div>
+          <div class="bg-white dark:bg-neutral-900 rounded-xl border border-neutral-100 dark:border-neutral-800 p-4">
+            <h3 class="font-semibold mb-2">IRRF mensal — desde 05/2025</h3>
+            <ul class="text-sm leading-6">
+              <li>Até R$ 2.428,80 → isento</li>
+              <li>R$ 2.428,81 a R$ 2.826,65 → 7,5% (deduz R$ 182,16)</li>
+              <li>R$ 2.826,66 a R$ 3.751,05 → 15% (deduz R$ 394,16)</li>
+              <li>R$ 3.751,06 a R$ 4.664,68 → 22,5% (deduz R$ 675,49)</li>
+              <li>Acima de R$ 4.664,68 → 27,5% (deduz R$ 908,73)</li>
+            </ul>
+            <p class="text-neutral-500 dark:text-neutral-400 text-xs">Dependente: R$ 189,59 • Simplificado: 25% até R$ 607,20/mês</p>
+          </div>
+          <div class="bg-white dark:bg-neutral-900 rounded-xl border border-neutral-100 dark:border-neutral-800 p-4">
+            <h3 class="font-semibold mb-2">FGTS</h3>
+            <p class="text-sm">Depósito mensal: 8% (regra geral). Multa rescisória: 40% do saldo em demissão sem justa causa.</p>
+          </div>
+          <div class="card p-4">
+            <h3 class="font-semibold mb-2">Salário‑família — desde 01/01/2025</h3>
+            <p class="text-sm">R$ 65,00 por dependente até a remuneração de R$ 1.906,04.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TOTAIS -->
+    <section id="tab-resumo" class="hidden">
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <div class="card p-5">
+          <div class="flex items-center justify-between">
+            <h3 class="font-semibold">Folha</h3>
+            <label class="text-sm flex items-center gap-2"><input id="include-folha" type="checkbox" class="accent-accent-600" checked> Incluir</label>
+          </div>
+          <div class="mt-2 space-y-1">
+            <div class="flex justify-between"><span class="muted">Líquido</span><strong id="sum-folha-liq" class="mono">—</strong></div>
+            <div class="flex justify-between"><span class="muted">Descontos</span><strong id="sum-folha-desc" class="mono">—</strong></div>
+            <div class="flex justify-between"><span class="muted">Proventos</span><strong id="sum-folha-prov" class="mono">—</strong></div>
+            <div class="flex justify-between"><span class="muted">FGTS (8%)</span><strong id="sum-folha-fgts" class="mono">—</strong></div>
+          </div>
+        </div>
+        <div class="card p-5">
+          <div class="flex items-center justify-between">
+            <h3 class="font-semibold">Férias</h3>
+            <label class="text-sm flex items-center gap-2"><input id="include-ferias" type="checkbox" class="accent-accent-600"> Incluir</label>
+          </div>
+          <div class="mt-2 space-y-1">
+            <div class="flex justify-between"><span class="muted">Líquido</span><strong id="sum-ferias-liq" class="mono">—</strong></div>
+          </div>
+        </div>
+        <div class="card p-5">
+          <div class="flex items-center justify-between">
+            <h3 class="font-semibold">13º</h3>
+            <label class="text-sm flex items-center gap-2"><input id="include-decimo" type="checkbox" class="accent-accent-600"> Incluir</label>
+          </div>
+          <div class="mt-2 space-y-1">
+            <div class="flex justify-between"><span class="muted">Líquido</span><strong id="sum-decimo-liq" class="mono">—</strong></div>
+          </div>
+        </div>
+        <div class="card p-5">
+          <div class="flex items-center justify-between">
+            <h3 class="font-semibold">Horas Extras</h3>
+            <label class="text-sm flex items-center gap-2"><input id="include-horas" type="checkbox" class="accent-accent-600" checked> Incluir</label>
+          </div>
+          <div class="mt-2 space-y-1">
+            <div class="flex justify-between"><span class="muted">Total</span><strong id="sum-horas" class="mono">—</strong></div>
+          </div>
+        </div>
+        <div class="card p-5">
+          <div class="flex items-center justify-between">
+            <h3 class="font-semibold">Adic. Noturno</h3>
+            <label class="text-sm flex items-center gap-2"><input id="include-noturno" type="checkbox" class="accent-accent-600" checked> Incluir</label>
+          </div>
+          <div class="mt-2 space-y-1">
+            <div class="flex justify-between"><span class="muted">Total</span><strong id="sum-noturno" class="mono">—</strong></div>
+          </div>
+        </div>
+        <div class="card p-5">
+          <div class="flex items-center justify-between">
+            <h3 class="font-semibold">Rescisão</h3>
+            <label class="text-sm flex items-center gap-2"><input id="include-rescisao" type="checkbox" class="accent-accent-600"> Incluir</label>
+          </div>
+          <div class="mt-2 space-y-1">
+            <div class="flex justify-between"><span class="muted">Líquido</span><strong id="sum-rescisao-liq" class="mono">—</strong></div>
+            <div class="flex justify-between"><span class="muted">Multa FGTS 40%</span><strong id="sum-rescisao-multa" class="mono">—</strong></div>
+          </div>
+        </div>
+      </div>
+      <div class="card p-5 mt-4 flex items-center justify-between">
+        <div>
+          <h3 class="text-lg font-semibold">Total geral líquido</h3>
+          <p class="muted text-sm">Soma dos módulos selecionados acima.</p>
+        </div>
+        <div class="text-3xl font-extrabold mono text-accent-600" id="sum-total">—</div>
+      </div>
+    </section>
+
+    <footer class="mt-8 text-center muted text-xs">
+      ADM SOFT‑ATA • Assistente de Cálculos • v2.0 (09/2025)
+    </footer>
+  </main>
+
+  <script>
+  // ======= Parâmetros oficiais 2025 =======
+  const PARAMS = {
+    salarioMin: 1518.00,
+    tetoINSS: 8157.41,
+    fgts: 0.08,
+    salarioFamilia: { teto: 1906.04, valor: 65.00 },
+    irrf: {
+      // desde maio/2025
+      posMai2025: [
+        { ate: 2428.80, aliq: 0.00, deduzir: 0.00 },
+        { ate: 2826.65, aliq: 0.075, deduzir: 182.16 },
+        { ate: 3751.05, aliq: 0.15,  deduzir: 394.16 },
+        { ate: 4664.68, aliq: 0.225, deduzir: 675.49 },
+        { ate: Infinity, aliq: 0.275, deduzir: 908.73 }
+      ],
+      // jan–abr/2025 (adicione aqui a tabela que você já usa)
+      janAbr2025: [
+        // preencha quando formos calcular essa competência
+      ],
+      deducaoDependente: 189.59,
+      simplificadoPerc: 0.25,
+      simplificadoTeto: 607.20
+    },
+    inssEmpregado: [
+      { ate: 1518.00,  aliq: 0.075 },
+      { ate: 2793.88, aliq: 0.09  },
+      { ate: 4190.83, aliq: 0.12  },
+      { ate: 8157.41, aliq: 0.14  }
+    ]
+  };
+
+  // ======= Utils =======
+  const $ = (sel, root=document) => root.querySelector(sel);
+  const $$ = (sel, root=document) => [...root.querySelectorAll(sel)];
+  const brl = v => isFinite(v) ? v.toLocaleString('pt-BR', { style:'currency', currency:'BRL' }) : '—';
+  const num = v => { const n = Number(v); return isFinite(n) ? n : 0; };
+
+  // ======= Tabs =======
+  const sections = {
+    folha:   $('#tab-folha'),
+    ferias:  $('#tab-ferias'),
+    decimo:  $('#tab-decimo'),
+    horas:   $('#tab-horas'),
+    noturno: $('#tab-noturno'),
+    rescisao:$('#tab-rescisao'),
+    tabelas: $('#tab-tabelas'),
+    resumo:  $('#tab-resumo')
+  };
+  $$( '[data-tab]' ).forEach(btn => {
+    btn.addEventListener('click', () => {
+      const alvo = btn.getAttribute('data-tab');
+      Object.values(sections).forEach(sec => sec.classList.add('hidden'));
+      sections[alvo]?.classList.remove('hidden');
+      // estado visual do tab
+      $$( '[data-tab]' ).forEach(b => b.classList.remove('bg-accent-600','text-white'));
+      btn.classList.add('bg-accent-600','text-white');
+    });
+  });
+
+  // ======= Tema =======
+  const applyTheme = t => {
+    document.documentElement.classList.toggle('dark', t === 'dark');
+    localStorage.setItem('theme', t);
+  };
+  applyTheme(localStorage.getItem('theme') || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'));
+  $('#toggleTheme')?.addEventListener('click', () => {
+    const cur = document.documentElement.classList.contains('dark') ? 'dark' : 'light';
+    applyTheme(cur === 'dark' ? 'light' : 'dark');
+  });
+
+  // ======= Cálculos (stubs iniciais) =======
+  function calcINSS(base){
+    // progressivo simples
+    let restante = Math.min(base, PARAMS.tetoINSS), total = 0, ini = 0, prev = 0;
+    for (const faixa of PARAMS.inssEmpregado){
+      const teto = faixa.ate;
+      const faixaBase = Math.max(0, Math.min(restante, teto) - prev);
+      total += faixaBase * faixa.aliq;
+      prev = teto;
+      if (restante <= teto) break;
+    }
+    return { base: base, inss: Math.min(total, /* teto de desconto */ Infinity) };
+  }
+
+  function calcFGTS(base){ return base * PARAMS.fgts; }
+
+  function tabelaIR(competencia){
+    return competencia === '2025-04' || competencia === 'jan-abr-2025'
+      ? PARAMS.irrf.janAbr2025
+      : PARAMS.irrf.posMai2025;
+  }
+
+  function calcIRRF(base, dependentes, competencia, usaSimplificado){
+    // base = (salário + outras verbas) - INSS - deduções (dep)
+    const dedDep = dependentes * PARAMS.irrf.deducaoDependente;
+    let baseCalc = Math.max(0, base - dedDep);
+    let descontoSimpl = 0;
+    if (usaSimplificado){
+      descontoSimpl = Math.min(baseCalc * PARAMS.irrf.simplificadoPerc, PARAMS.irrf.simplificadoTeto);
+      baseCalc = Math.max(0, baseCalc - descontoSimpl);
+    }
+    const tabela = tabelaIR(competencia);
+    if (!tabela.length) return { irrf: 0, base: baseCalc, deduzir: 0 };
+    const faixa = tabela.find(f => baseCalc <= f.ate) || tabela[tabela.length-1];
+    const ir = Math.max(0, baseCalc * faixa.aliq - faixa.deduzir);
+    return { irrf: ir, base: baseCalc };
+  }
+
+  // ======= Botões – ligando ações (por enquanto, demoes) =======
+  $('#btnCalcularFolha')?.addEventListener('click', () => {
+    const salario = num($('#f-salario')?.value);
+    const outras  = num($('#f-outras')?.value);
+    const dep     = num($('#f-dependentes')?.value);
+    const comp    = $('#f-competencia')?.value || '2025-09';
+    const simp    = ($('#f-simplificado')?.value === 'sim');
+
+    const baseINSS = salario + outras;
+    const resINSS  = calcINSS(baseINSS);
+    const fgts     = calcFGTS(salario + outras);
+
+    const baseIR   = (salario + outras) - resINSS.inss;
+    const resIR    = calcIRRF(baseIR, dep, comp, simp);
+
+    const descontos = resINSS.inss + resIR.irrf;
+    const proventos = salario + outras; // ajuste se houver verbas específicas
+    const liquido   = proventos - descontos;
+
+    // Preenche painel
+    $('#r-base-inss').textContent = brl(baseINSS);
+    $('#r-inss').textContent      = brl(resINSS.inss);
+    $('#r-base-fgts').textContent = brl(salario + outras);
+    $('#r-fgts').textContent      = brl(fgts);
+    $('#r-base-irrf').textContent = brl(resIR.base);
+    $('#r-irrf').textContent      = brl(resIR.irrf);
+    // salário-família (demonstração simples)
+    const fam = (salario <= PARAMS.salarioFamilia.teto) ? (PARAMS.salarioFamilia.valor * dep) : 0;
+    $('#r-salario-familia').textContent = brl(fam);
+
+    $('#r-descontos').textContent = brl(descontos);
+    $('#r-proventos').textContent = brl(proventos + fam);
+    $('#r-liquido').textContent   = brl(liquido + fam);
+  });
+  updateTotals();
+  
+  // Placeholders para demais botões (evita erros no console)
+  $('#btnAuto')?.addEventListener('click', ()=> $('#btnCalcularFolha')?.click());
+  $('#btnLimpar')?.addEventListener('click', ()=> location.reload());
+  $('#btnImprimir')?.addEventListener('click', ()=> window.print());
+  $('#btnCopiar')?.addEventListener('click', ()=> {
+    const txt = `Folha líquida: ${$('#r-liquido')?.textContent || '—'}`;
+    navigator.clipboard.writeText(txt);
+  });
+  $('#btnExportar')?.addEventListener('click', ()=> {
+    const data = { folha:{
+      salario: num($('#f-salario')?.value),
+      outras: num($('#f-outras')?.value),
+      dep: num($('#f-dependentes')?.value),
+      comp: $('#f-competencia')?.value,
+      simplificado: $('#f-simplificado')?.value
+    }};
+    const blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json'});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'assistente_adm_softata.json';
+    a.click();
+  });
+
+  // ---- helpers extra ----
+const unbrl = s => Number(String(s||'').replace(/[^\d,-]/g,'').replace(/\./g,'').replace(',','.'))||0;
+
+function updateTotals(){
+  const get = sel => unbrl($(sel)?.textContent);
+  let total = 0;
+  if ($('#include-folha')?.checked)   total += get('#r-liquido');
+  if ($('#include-ferias')?.checked)   total += get('#fer-liquido');
+  if ($('#include-decimo')?.checked)   total += get('#d-liquido');
+  if ($('#include-horas')?.checked)    total += get('#h-total');
+  if ($('#include-noturno')?.checked)  total += get('#n-total');
+  if ($('#include-rescisao')?.checked) total += get('#r-out-liquido');
+  $('#sum-total').textContent = brl(total);
+}
+
+// ---- RESCISÃO (simplificado para teste de tela) ----
+function calcRescisao(){
+  const sal        = num($('#r-salario')?.value);
+  const meses      = num($('#r-meses')?.value);
+  const saldoDias  = num($('#r-saldo-dias')?.value);
+  const fgtsSaldo  = num($('#r-fgts-saldo')?.value);
+  const ferVenc    = $('#r-ferias-vencidas')?.value === 'sim';
+  const motivo     = $('#r-motivo')?.value || 'sem-justa';
+  const aviso      = $('#r-aviso')?.value || 'indenizado';
+  const avisoDias  = num($('#r-aviso-dias')?.value);
+  const dep        = num($('#f-dependentes')?.value) || 0;
+  const simp       = ($('#f-simplificado')?.value === 'sim');
+  const comp       = $('#f-competencia')?.value || '2025-09';
+
+  // Verbas
+  const saldoSal = sal * (saldoDias/30);   // remuneração de dias do mês
+  let decimoProp = sal * (meses/12);       // 13º proporcional
+  let feriasProp = sal * (meses/12);       // férias proporcionais
+  let tercoProp  = feriasProp/3;           // 1/3 sobre as proporcionais
+  let feriasVenc = ferVenc ? (sal + sal/3) : 0; // 30d + 1/3, se houver
+  let avisoValor = (aviso === 'indenizado') ? sal * (avisoDias/30) : 0;
+  let multa40    = 0.40 * fgtsSaldo;
+
+  // Regras rápidas por motivo (protótipo)
+  if (motivo === 'pedido'){ avisoValor = 0; multa40 = 0; }
+  if (motivo === 'termino'){ multa40 = 0; }
+  if (motivo === 'justa'){ decimoProp = 0; feriasProp = 0; tercoProp = 0; avisoValor = 0; multa40 = 0; }
+
+  // Proventos brutos
+  const proventos = saldoSal + decimoProp + feriasProp + tercoProp + feriasVenc + avisoValor;
+
+  // ===== Bases tributárias conforme prática =====
+  // INSS: incide sobre remuneração (saldo) e 13º, NÃO sobre aviso indenizado nem férias indenizadas
+  const inssSal = calcINSS(saldoSal).inss;
+  const inss13  = calcINSS(decimoProp).inss;
+  const totalINSS = inssSal + inss13;
+
+  // IRRF:
+  // - Saldo (remuneração) tem IR com base = saldo - INSS do saldo - deduções/simplificado
+  // - 13º tem IR exclusivo, calculado separadamente (base = 13º - INSS do 13º - deduções/simplificado)
+  // - Férias indenizadas e aviso indenizado: sem IR
+  const irSal = calcIRRF(Math.max(0, saldoSal - inssSal), dep, comp, simp).irrf;
+  const ir13  = decimoProp > 0 ? calcIRRF(Math.max(0, decimoProp - inss13), dep, comp, simp).irrf : 0;
+  const totalIR = irSal + ir13;
+
+  const liquido = proventos - totalINSS - totalIR;
+
+  // Painel
+  $('#r-out-saldo').textContent    = brl(saldoSal);
+  $('#r-out-13').textContent       = brl(decimoProp);
+  $('#r-out-fer-prop').textContent = brl(feriasProp + tercoProp);
+  $('#r-out-fer-venc').textContent = brl(feriasVenc);
+  $('#r-out-multa').textContent    = brl(multa40);
+  $('#r-out-inss').textContent     = brl(totalINSS);
+  $('#r-out-irrf').textContent     = brl(totalIR);
+  $('#r-out-liquido').textContent  = brl(liquido);
+
+  // Resumo + totais
+  $('#sum-rescisao-liq')?.textContent   = brl(liquido);
+  $('#sum-rescisao-multa')?.textContent = brl(multa40);
+  updateTotals();
+}
+$('#btnCalcularRescisao')?.addEventListener('click', calcRescisao);
+
+// ---- FÉRIAS (simplificado) ----
+$('#btnCalcularFerias')?.addEventListener('click', ()=>{
+  const sal   = num($('#fer-salario')?.value);
+  const dias  = num($('#fer-dias')?.value);
+  const abonoDias = num($('#fer-abono')?.value);
+  const dep   = num($('#fer-dependentes')?.value) || 0;
+  const comp  = $('#fer-competencia')?.value || 'maio-2025';
+  const simp  = ($('#f-simplificado')?.value === 'sim');
+
+  const rem     = sal * (dias/30);
+  const umTerco = rem/3;
+  const abono   = sal * (abonoDias/30);
+  const bruto   = rem + umTerco + abono;
+
+  const inss = calcINSS(bruto).inss;
+  const irrf = calcIRRF(bruto - inss, dep, comp, simp).irrf;
+
+  $('#fer-remuneracao').textContent = brl(rem);
+  $('#fer-terco').textContent       = brl(umTerco);
+  $('#fer-abono-out').textContent   = brl(abono);
+  $('#fer-inss').textContent        = brl(inss);
+  $('#fer-irrf').textContent        = brl(irrf);
+  $('#fer-liquido').textContent     = brl(bruto - inss - irrf);
+  updateTotals();
+});
+
+// ---- 13º (simplificado) ----
+$('#btnCalcular13')?.addEventListener('click', ()=>{
+  const sal   = num($('#d-salario')?.value);
+  const meses = num($('#d-meses')?.value);
+  const dep   = num($('#d-dependentes')?.value) || 0;
+  const comp  = $('#d-competencia')?.value || 'maio-2025'; // usa o select da aba 13º
+  const simp  = ($('#f-simplificado')?.value === 'sim');
+
+  const bruto = sal * (meses/12);
+  const inss  = calcINSS(bruto).inss;
+  const irrf  = calcIRRF(Math.max(0, bruto - inss), dep, comp, simp).irrf;
+
+  $('#d-bruto').textContent   = brl(bruto);
+  $('#d-inss').textContent    = brl(inss);
+  $('#d-irrf').textContent    = brl(irrf);
+  $('#d-liquido').textContent = brl(bruto - inss - irrf);
+  updateTotals();
+});
+
+// ---- Horas Extras ----
+$('#btnCalcularHoras')?.addEventListener('click', ()=>{
+  const sal   = num($('#h-salario')?.value);
+  const horas = num($('#h-horas')?.value);
+  const adic  = num($('#h-adic')?.value); // 0.5, 1.0, 0.7
+  const valorHora = sal/220;
+  const total = horas * valorHora * (1 + adic);
+  $('#h-valor').textContent    = brl(valorHora);
+  $('#h-adic-out').textContent = `${(adic*100).toFixed(0)}%`;
+  $('#h-total').textContent    = brl(total);
+  updateTotals();
+});
+
+// ---- Adicional Noturno ----
+$('#btnCalcularNoturno')?.addEventListener('click', ()=>{
+  const sal   = num($('#n-salario')?.value);
+  const horas = num($('#n-horas')?.value);
+  const perc  = num($('#n-perc')?.value); // 0.20 / 0.25
+  const valorHora = sal/220;
+  const fatorFicta = 60/52.5; // ≈ 1.142857
+  const horasFictas = horas * fatorFicta;
+  const adicional = horasFictas * valorHora * perc; // somente o adicional
+  $('#n-ficta').textContent = `${horas}h → ${horasFictas.toFixed(2)}h`;
+  $('#n-valor').textContent = brl(valorHora);
+  $('#n-total').textContent = brl(adicional);
+  updateTotals();
+});
+
+// reagrega quando marca/desmarca no Resumo
+['#include-folha','#include-ferias','#include-decimo','#include-horas','#include-noturno','#include-rescisao']
+  .forEach(id => $(id)?.addEventListener('change', updateTotals));
+
+  // TODO: ligar cálculos dos outros módulos e o "Totais"
+</script>

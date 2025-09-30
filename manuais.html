@@ -1,0 +1,1987 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HelpCenter - Sistema de Manuais</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #4361ee;
+            --primary-dark: #3a56d4;
+            --secondary: #7209b7;
+            --accent: #f72585;
+            --light: #f8f9fa;
+            --dark: #212529;
+            --gray: #6c757d;
+            --gray-light: #e9ecef;
+            --success: #4cc9f0;
+            --warning: #f8961e;
+            --danger: #f94144;
+            --border-radius: 12px;
+            --box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            --transition: all 0.3s ease;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4e8f0 100%);
+            color: var(--dark);
+            line-height: 1.6;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            padding: 25px 30px;
+            margin-bottom: 30px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 100%;
+            height: 200%;
+            background: rgba(255, 255, 255, 0.1);
+            transform: rotate(30deg);
+        }
+        
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .logo i {
+            font-size: 32px;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 15px;
+            border-radius: 50%;
+        }
+        
+        .logo h1 {
+            font-size: 28px;
+            font-weight: 700;
+        }
+        
+        .logo span {
+            font-weight: 300;
+            opacity: 0.9;
+        }
+        
+        .search-bar {
+            display: flex;
+            width: 400px;
+            margin-bottom: 0;
+        }
+        
+        .search-bar input {
+            flex: 1;
+            padding: 14px 20px;
+            border: none;
+            border-radius: var(--border-radius) 0 0 var(--border-radius);
+            font-size: 16px;
+            background: rgba(255, 255, 255, 0.9);
+            transition: var(--transition);
+        }
+        
+        .search-bar input:focus {
+            outline: none;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.3);
+        }
+        
+        .search-bar button {
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 0 25px;
+            border-radius: 0 var(--border-radius) var(--border-radius) 0;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .search-bar button:hover {
+            background: #e11574;
+        }
+        
+        .main-content {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            gap: 30px;
+        }
+        
+        .sidebar {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 25px;
+            box-shadow: var(--box-shadow);
+            height: fit-content;
+            position: sticky;
+            top: 20px;
+        }
+        
+        .sidebar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .sidebar h3 {
+            padding-bottom: 15px;
+            border-bottom: 2px solid var(--gray-light);
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .sidebar-menu {
+            list-style: none;
+            margin-bottom: 25px;
+        }
+        
+        .sidebar-menu li {
+            margin-bottom: 10px;
+            position: relative;
+        }
+        
+        .sidebar-menu a {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 15px;
+            text-decoration: none;
+            color: var(--dark);
+            border-radius: 8px;
+            transition: var(--transition);
+        }
+        
+        .sidebar-menu a:hover, .sidebar-menu a.active {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .sidebar-menu i {
+            width: 20px;
+            text-align: center;
+        }
+        
+        .module-actions {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            display: none;
+        }
+        
+        .sidebar-menu li:hover .module-actions {
+            display: flex;
+            gap: 5px;
+        }
+        
+        .module-action-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            width: 25px;
+            height: 25px;
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 12px;
+            transition: var(--transition);
+        }
+        
+        .module-action-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+        
+        .content-area {
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            overflow: hidden;
+        }
+        
+        .tabs {
+            display: flex;
+            background: white;
+            border-bottom: 1px solid var(--gray-light);
+        }
+        
+        .tab {
+            flex: 1;
+            text-align: center;
+            padding: 20px;
+            cursor: pointer;
+            transition: var(--transition);
+            font-weight: 600;
+            border-bottom: 3px solid transparent;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .tab.active {
+            background: rgba(67, 97, 238, 0.05);
+            border-bottom: 3px solid var(--primary);
+            color: var(--primary);
+        }
+        
+        .tab:hover:not(.active) {
+            background: var(--gray-light);
+        }
+        
+        .content {
+            display: none;
+            padding: 30px;
+            min-height: 600px;
+        }
+        
+        .content.active {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .modules-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+        
+        .module-card {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 25px;
+            cursor: pointer;
+            transition: var(--transition);
+            border-left: 5px solid var(--primary);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .module-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary) 0%, var(--secondary) 100%);
+        }
+        
+        .module-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+        }
+        
+        .module-icon {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+            color: white;
+            font-size: 24px;
+        }
+        
+        .module-card h3 {
+            margin-bottom: 10px;
+            color: var(--dark);
+            font-size: 20px;
+        }
+        
+        .module-card p {
+            color: var(--gray);
+            font-size: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .module-stats {
+            display: flex;
+            justify-content: space-between;
+            color: var(--gray);
+            font-size: 14px;
+        }
+        
+        .module-content {
+            display: none;
+        }
+        
+        .module-content.active {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        .module-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--gray-light);
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: var(--transition);
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: var(--primary-dark);
+        }
+        
+        .btn-warning {
+            background: var(--warning);
+            color: white;
+        }
+        
+        .btn-warning:hover {
+            background: #e6891a;
+        }
+        
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background: #d32f2f;
+        }
+        
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background: #3ab0d6;
+        }
+        
+        .btn-small {
+            padding: 5px 10px;
+            font-size: 12px;
+        }
+        
+        .back-button {
+            background: var(--gray-light);
+            border: none;
+            padding: 10px 20px;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: var(--transition);
+            font-weight: 600;
+            color: var(--dark);
+        }
+        
+        .back-button:hover {
+            background: #dde4e6;
+            transform: translateX(-3px);
+        }
+        
+        .manual-content, .note-content {
+            line-height: 1.8;
+        }
+        
+        .manual-content h2, .note-content h2 {
+            margin: 25px 0 15px;
+            color: var(--primary);
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--gray-light);
+        }
+        
+        .manual-content p, .note-content p {
+            margin-bottom: 20px;
+            font-size: 16px;
+        }
+        
+        .manual-content ol, .note-content ol, 
+        .manual-content ul, .note-content ul {
+            margin-left: 25px;
+            margin-bottom: 20px;
+        }
+        
+        .manual-content li, .note-content li {
+            margin-bottom: 10px;
+        }
+        
+        .note-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .note-item {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 20px;
+            cursor: pointer;
+            transition: var(--transition);
+            border-left: 4px solid var(--warning);
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .note-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .note-icon {
+            width: 50px;
+            height: 50px;
+            background: var(--warning);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 20px;
+            flex-shrink: 0;
+        }
+        
+        .note-text h4 {
+            margin-bottom: 5px;
+            color: var(--dark);
+        }
+        
+        .note-text p {
+            color: var(--gray);
+            font-size: 14px;
+            margin-bottom: 0;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--gray);
+        }
+        
+        .empty-state i {
+            font-size: 60px;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+        
+        .empty-state h3 {
+            margin-bottom: 10px;
+            font-weight: 500;
+        }
+        
+        .save-indicator {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: var(--success);
+            color: white;
+            padding: 10px 15px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            display: none;
+            align-items: center;
+            gap: 8px;
+            z-index: 1000;
+        }
+        
+        .save-indicator.show {
+            display: flex;
+            animation: slideIn 0.3s ease;
+        }
+        
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .modal.active {
+            display: flex;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        .modal-content {
+            background: white;
+            border-radius: var(--border-radius);
+            width: 90%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+        
+        .modal-header {
+            padding: 20px 25px;
+            border-bottom: 1px solid var(--gray-light);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .modal-header h2 {
+            color: var(--primary);
+            margin: 0;
+        }
+        
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: var(--gray);
+            transition: var(--transition);
+        }
+        
+        .close-modal:hover {
+            color: var(--dark);
+        }
+        
+        .modal-body {
+            padding: 25px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--dark);
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid var(--gray-light);
+            border-radius: var(--border-radius);
+            font-size: 16px;
+            transition: var(--transition);
+        }
+        
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.1);
+        }
+        
+        textarea.form-control {
+            min-height: 150px;
+            resize: vertical;
+        }
+        
+        .form-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 25px;
+            padding-top: 20px;
+            border-top: 1px solid var(--gray-light);
+        }
+        
+        .add-button {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 60px;
+            height: 60px;
+            background: var(--accent);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            font-size: 24px;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            transition: var(--transition);
+            z-index: 100;
+        }
+        
+        .add-button:hover {
+            background: #e11574;
+            transform: scale(1.1);
+        }
+        
+        .add-module-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            transition: var(--transition);
+        }
+        
+        .add-module-btn:hover {
+            background: var(--primary-dark);
+            transform: scale(1.1);
+        }
+        
+        @media (max-width: 1100px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .sidebar {
+                position: static;
+                margin-bottom: 20px;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                gap: 20px;
+            }
+            
+            .search-bar {
+                width: 100%;
+            }
+            
+            .modules-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .tabs {
+                flex-direction: column;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+                width: 100%;
+            }
+            
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+            
+            .module-actions {
+                position: static;
+                transform: none;
+                display: flex;
+                margin-top: 10px;
+            }
+            
+            .sidebar-menu li:hover .module-actions {
+                display: flex;
+            }
+            
+            .save-indicator {
+                top: 10px;
+                right: 10px;
+                left: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Indicador de salvamento -->
+        <div class="save-indicator" id="saveIndicator">
+            <i class="fas fa-check-circle"></i>
+            <span>Dados salvos com sucesso!</span>
+        </div>
+        
+        <header>
+            <div class="header-content">
+                <div class="logo">
+                    <i class="fas fa-life-ring"></i>
+                    <div>
+                        <h1>Help<span>Center</span></h1>
+                        <p>Sistema de Manuais de Usabilidade</p>
+                    </div>
+                </div>
+                <div class="search-bar">
+                    <input type="text" id="searchInput" placeholder="Pesquisar em manuais e notas...">
+                    <button id="searchButton">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </div>
+            </div>
+        </header>
+        
+        <div class="main-content">
+            <div class="sidebar">
+                <div class="sidebar-header">
+                    <h3><i class="fas fa-th-large"></i> Módulos do Sistema</h3>
+                    <button class="add-module-btn" id="addModuleBtn" title="Adicionar Módulo">
+                        <i class="fas fa-plus"></i>
+                    </button>
+                </div>
+                <ul class="sidebar-menu" id="sidebar-menu">
+                    <!-- Menu será gerado automaticamente -->
+                </ul>
+            </div>
+            
+            <div class="content-area">
+                <div class="tabs">
+                    <div class="tab active" data-tab="manuais">
+                        <i class="fas fa-book"></i> Manuais de Usabilidade
+                    </div>
+                    <div class="tab" data-tab="notas">
+                        <i class="fas fa-sticky-note"></i> Notas de Ajuda/Dúvidas
+                    </div>
+                </div>
+                
+                <div class="content active" id="manuais-content">
+                    <div class="modules-grid" id="manuais-modules">
+                        <!-- Módulos serão carregados aqui via JavaScript -->
+                    </div>
+                    
+                    <div class="module-content" id="manual-detail">
+                        <!-- Conteúdo do manual será carregado aqui via JavaScript -->
+                    </div>
+                </div>
+                
+                <div class="content" id="notas-content">
+                    <div class="modules-grid" id="notas-modules">
+                        <!-- Módulos serão carregados aqui via JavaScript -->
+                    </div>
+                    
+                    <div class="module-content" id="note-detail">
+                        <!-- Conteúdo da nota será carregado aqui via JavaScript -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Botão Flutuante para Adicionar Conteúdo -->
+    <button class="add-button" id="addButton">
+        <i class="fas fa-plus"></i>
+    </button>
+    
+    <!-- Modal para Criar/Editar Módulo -->
+    <div class="modal" id="moduleModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="moduleModalTitle">Adicionar Novo Módulo</h2>
+                <button class="close-modal" id="closeModuleModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="moduleForm">
+                    <input type="hidden" id="moduleId">
+                    <div class="form-group">
+                        <label for="moduleName">Nome do Módulo</label>
+                        <input type="text" class="form-control" id="moduleName" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="moduleIcon">Ícone (Font Awesome)</label>
+                        <input type="text" class="form-control" id="moduleIcon" placeholder="Ex: fas fa-user" required>
+                        <small>Exemplos: fas fa-user, fas fa-shopping-cart, fas fa-chart-line</small>
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-danger" id="cancelModule">Cancelar</button>
+                        <button type="submit" class="btn btn-success">Salvar Módulo</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal para Criar/Editar Manual -->
+    <div class="modal" id="manualModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="manualModalTitle">Adicionar Novo Manual</h2>
+                <button class="close-modal" id="closeManualModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="manualForm">
+                    <input type="hidden" id="manualId">
+                    <div class="form-group">
+                        <label for="manualModule">Módulo</label>
+                        <select class="form-control" id="manualModule" required>
+                            <option value="">Selecione um módulo</option>
+                            <!-- Opções serão preenchidas via JavaScript -->
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="manualTitle">Título</label>
+                        <input type="text" class="form-control" id="manualTitle" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="manualDescription">Descrição</label>
+                        <textarea class="form-control" id="manualDescription" required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="manualIcon">Ícone (Font Awesome)</label>
+                        <input type="text" class="form-control" id="manualIcon" placeholder="Ex: fas fa-user" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="manualStats">Estatísticas (ex: "12 tópicos")</label>
+                        <input type="text" class="form-control" id="manualStats" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="manualContent">Conteúdo (HTML)</label>
+                        <textarea class="form-control" id="manualContent" rows="10" required></textarea>
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-danger" id="cancelManual">Cancelar</button>
+                        <button type="submit" class="btn btn-success">Salvar Manual</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal para Criar/Editar Nota -->
+    <div class="modal" id="noteModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="noteModalTitle">Adicionar Nova Nota</h2>
+                <button class="close-modal" id="closeNoteModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="noteForm">
+                    <input type="hidden" id="noteId">
+                    <div class="form-group">
+                        <label for="noteModule">Módulo</label>
+                        <select class="form-control" id="noteModule" required>
+                            <option value="">Selecione um módulo</option>
+                            <!-- Opções serão preenchidas via JavaScript -->
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="noteTitle">Título</label>
+                        <input type="text" class="form-control" id="noteTitle" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="noteDescription">Descrição</label>
+                        <textarea class="form-control" id="noteDescription" required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="noteContent">Conteúdo (HTML)</label>
+                        <textarea class="form-control" id="noteContent" rows="10" required></textarea>
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-danger" id="cancelNote">Cancelar</button>
+                        <button type="submit" class="btn btn-success">Salvar Nota</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal de Confirmação de Exclusão -->
+    <div class="modal" id="confirmModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Confirmar Exclusão</h2>
+                <button class="close-modal" id="closeConfirmModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p id="confirmMessage">Tem certeza que deseja excluir este item?</p>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-danger" id="cancelDelete">Cancelar</button>
+                    <button type="button" class="btn btn-success" id="confirmDelete">Confirmar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // =============================================
+        // SISTEMA DE ARMAZENAMENTO LOCAL
+        // =============================================
+        
+        // Chaves para armazenamento no localStorage
+        const STORAGE_KEYS = {
+            MODULES: 'helpcenter_modules',
+            MANUAIS: 'helpcenter_manuais',
+            NOTAS: 'helpcenter_notas'
+        };
+        
+        // Funções para gerenciar o localStorage
+        const StorageManager = {
+            // Salvar dados no localStorage
+            save(key, data) {
+                try {
+                    localStorage.setItem(key, JSON.stringify(data));
+                    return true;
+                } catch (error) {
+                    console.error('Erro ao salvar dados:', error);
+                    return false;
+                }
+            },
+            
+            // Carregar dados do localStorage
+            load(key) {
+                try {
+                    const data = localStorage.getItem(key);
+                    return data ? JSON.parse(data) : null;
+                } catch (error) {
+                    console.error('Erro ao carregar dados:', error);
+                    return null;
+                }
+            },
+            
+            // Limpar dados do localStorage
+            clear(key) {
+                try {
+                    localStorage.removeItem(key);
+                    return true;
+                } catch (error) {
+                    console.error('Erro ao limpar dados:', error);
+                    return false;
+                }
+            }
+        };
+        
+        // =============================================
+        // CARREGAMENTO INICIAL DOS DADOS
+        // =============================================
+        
+        // 1. MÓDULOS DO SISTEMA - Carregar do localStorage ou iniciar vazio
+        let systemModules = StorageManager.load(STORAGE_KEYS.MODULES) || [];
+        
+        // 2. MANUAIS DE USABILIDADE - Carregar do localStorage ou iniciar vazio
+        let manuais = StorageManager.load(STORAGE_KEYS.MANUAIS) || [];
+        
+        // 3. NOTAS DE AJUDA/DÚVIDAS - Carregar do localStorage ou iniciar vazio
+        let notas = StorageManager.load(STORAGE_KEYS.NOTAS) || [];
+        
+        // =============================================
+        // FUNÇÕES DE SALVAMENTO AUTOMÁTICO
+        // =============================================
+        
+        // Função para salvar todos os dados
+        function saveAllData() {
+            const success = 
+                StorageManager.save(STORAGE_KEYS.MODULES, systemModules) &&
+                StorageManager.save(STORAGE_KEYS.MANUAIS, manuais) &&
+                StorageManager.save(STORAGE_KEYS.NOTAS, notas);
+            
+            if (success) {
+                showSaveIndicator();
+            } else {
+                alert('Erro ao salvar dados. Verifique o console para mais detalhes.');
+            }
+            
+            return success;
+        }
+        
+        // Mostrar indicador de salvamento
+        function showSaveIndicator() {
+            const indicator = document.getElementById('saveIndicator');
+            indicator.classList.add('show');
+            
+            setTimeout(() => {
+                indicator.classList.remove('show');
+            }, 3000);
+        }
+        
+        // =============================================
+        // CÓDIGO DO SISTEMA - NÃO PRECISA ALTERAR
+        // =============================================
+        
+        // Elementos DOM
+        const tabs = document.querySelectorAll('.tab');
+        const contents = document.querySelectorAll('.content');
+        const searchInput = document.getElementById('searchInput');
+        const searchButton = document.getElementById('searchButton');
+        const sidebarMenu = document.getElementById('sidebar-menu');
+        const addButton = document.getElementById('addButton');
+        const addModuleBtn = document.getElementById('addModuleBtn');
+        
+        const manuaisModules = document.getElementById('manuais-modules');
+        const notasModules = document.getElementById('notas-modules');
+        const manualDetail = document.getElementById('manual-detail');
+        const noteDetail = document.getElementById('note-detail');
+        
+        // Modais
+        const moduleModal = document.getElementById('moduleModal');
+        const manualModal = document.getElementById('manualModal');
+        const noteModal = document.getElementById('noteModal');
+        const confirmModal = document.getElementById('confirmModal');
+        
+        // Formulários
+        const moduleForm = document.getElementById('moduleForm');
+        const manualForm = document.getElementById('manualForm');
+        const noteForm = document.getElementById('noteForm');
+        
+        // Variáveis de controle
+        let currentContentType = 'manuais'; // 'manuais' ou 'notas'
+        let itemToDelete = null;
+        let deleteType = null; // 'module', 'manual' ou 'note'
+
+        // Inicialização
+        document.addEventListener('DOMContentLoaded', function() {
+            loadSidebarMenu();
+            loadModules('manuais');
+            loadModules('notas');
+            populateModuleSelects();
+            
+            // Event listeners para abas
+            tabs.forEach(tab => {
+                tab.addEventListener('click', function() {
+                    const tabName = this.getAttribute('data-tab');
+                    currentContentType = tabName;
+                    
+                    // Ativar aba clicada e desativar outras
+                    tabs.forEach(t => t.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    // Mostrar conteúdo correspondente e esconder outros
+                    contents.forEach(content => content.classList.remove('active'));
+                    document.getElementById(`${tabName}-content`).classList.add('active');
+                });
+            });
+            
+            // Event listener para busca
+            searchButton.addEventListener('click', performSearch);
+            searchInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    performSearch();
+                }
+            });
+            
+            // Event listeners para menu lateral
+            document.querySelectorAll('.sidebar-menu a').forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    document.querySelectorAll('.sidebar-menu a').forEach(a => a.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    const moduleId = this.getAttribute('data-module');
+                    filterByModule(moduleId);
+                });
+            });
+            
+            // Event listeners para botão adicionar
+            addButton.addEventListener('click', function() {
+                if (systemModules.length === 0) {
+                    alert('Primeiro adicione pelo menos um módulo!');
+                    openModuleModal();
+                    return;
+                }
+                
+                if (currentContentType === 'manuais') {
+                    openManualModal();
+                } else {
+                    openNoteModal();
+                }
+            });
+            
+            // Event listener para adicionar módulo
+            addModuleBtn.addEventListener('click', openModuleModal);
+            
+            // Event listeners para fechar modais
+            document.getElementById('closeModuleModal').addEventListener('click', closeModuleModal);
+            document.getElementById('closeManualModal').addEventListener('click', closeManualModal);
+            document.getElementById('closeNoteModal').addEventListener('click', closeNoteModal);
+            document.getElementById('closeConfirmModal').addEventListener('click', closeConfirmModal);
+            
+            document.getElementById('cancelModule').addEventListener('click', closeModuleModal);
+            document.getElementById('cancelManual').addEventListener('click', closeManualModal);
+            document.getElementById('cancelNote').addEventListener('click', closeNoteModal);
+            document.getElementById('cancelDelete').addEventListener('click', closeConfirmModal);
+            
+            // Event listeners para formulários
+            moduleForm.addEventListener('submit', saveModule);
+            manualForm.addEventListener('submit', saveManual);
+            noteForm.addEventListener('submit', saveNote);
+            
+            // Event listener para confirmação de exclusão
+            document.getElementById('confirmDelete').addEventListener('click', confirmDelete);
+            
+            // Fechar modal ao clicar fora
+            window.addEventListener('click', function(e) {
+                if (e.target === moduleModal) closeModuleModal();
+                if (e.target === manualModal) closeManualModal();
+                if (e.target === noteModal) closeNoteModal();
+                if (e.target === confirmModal) closeConfirmModal();
+            });
+            
+            // Salvar dados automaticamente antes de fechar a página
+            window.addEventListener('beforeunload', function() {
+                saveAllData();
+            });
+        });
+
+        // Carregar menu lateral
+        function loadSidebarMenu() {
+            sidebarMenu.innerHTML = '';
+            
+            if (systemModules.length === 0) {
+                sidebarMenu.innerHTML = `
+                    <li style="text-align: center; padding: 20px; color: var(--gray);">
+                        <i class="fas fa-inbox" style="font-size: 24px; margin-bottom: 10px; display: block;"></i>
+                        <p>Nenhum módulo cadastrado</p>
+                        <button class="btn btn-primary btn-small" onclick="openModuleModal()" style="margin-top: 10px;">
+                            <i class="fas fa-plus"></i> Adicionar Módulo
+                        </button>
+                    </li>
+                `;
+                return;
+            }
+            
+            systemModules.forEach(module => {
+                const menuItem = document.createElement('li');
+                menuItem.innerHTML = `
+                    <a href="#" data-module="${module.id}">
+                        <i class="${module.icon}"></i> ${module.name}
+                    </a>
+                    <div class="module-actions">
+                        <button class="module-action-btn" onclick="editModule('${module.id}')" title="Editar Módulo">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="module-action-btn" onclick="deleteModule('${module.id}')" title="Excluir Módulo">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                `;
+                sidebarMenu.appendChild(menuItem);
+            });
+        }
+
+        // Preencher selects de módulo nos modais
+        function populateModuleSelects() {
+            const manualModuleSelect = document.getElementById('manualModule');
+            const noteModuleSelect = document.getElementById('noteModule');
+            
+            manualModuleSelect.innerHTML = '<option value="">Selecione um módulo</option>';
+            noteModuleSelect.innerHTML = '<option value="">Selecione um módulo</option>';
+            
+            systemModules.forEach(module => {
+                manualModuleSelect.innerHTML += `<option value="${module.id}">${module.name}</option>`;
+                noteModuleSelect.innerHTML += `<option value="${module.id}">${module.name}</option>`;
+            });
+        }
+
+        // Carregar módulos
+        function loadModules(type) {
+            const container = type === 'manuais' ? manuaisModules : notasModules;
+            container.innerHTML = '';
+            
+            if (systemModules.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-${type === 'manuais' ? 'book' : 'sticky-note'}"></i>
+                        <h3>Nenhum ${type === 'manuais' ? 'manual' : 'nota'} disponível</h3>
+                        <p>Adicione primeiro um módulo e depois ${type === 'manuais' ? 'manuais' : 'notas'} para este módulo.</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            if (type === 'manuais') {
+                if (manuais.length === 0) {
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <i class="fas fa-book-open"></i>
+                            <h3>Nenhum manual disponível</h3>
+                            <p>Clique no botão "+" para adicionar seu primeiro manual.</p>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                // Agrupar manuais por módulo
+                const modulesWithManuais = [...new Set(manuais.map(manual => manual.module))];
+                
+                modulesWithManuais.forEach(moduleId => {
+                    const module = systemModules.find(m => m.id === moduleId);
+                    if (!module) return;
+                    
+                    const moduleManuais = manuais.filter(manual => manual.module === moduleId);
+                    
+                    const moduleElement = document.createElement('div');
+                    moduleElement.className = 'module-card';
+                    moduleElement.innerHTML = `
+                        <div class="module-icon">
+                            <i class="${module.icon}"></i>
+                        </div>
+                        <h3>${module.name}</h3>
+                        <p>Manuais completos para este módulo</p>
+                        <div class="module-stats">
+                            <span><i class="fas fa-list-ul"></i> ${moduleManuais.length} manuais</span>
+                            <span><i class="fas fa-clock"></i> ${calculateTotalReadingTime(moduleManuais)} min</span>
+                        </div>
+                    `;
+                    moduleElement.addEventListener('click', function() {
+                        showManuaisByModule(moduleId);
+                    });
+                    container.appendChild(moduleElement);
+                });
+            } else {
+                if (notas.length === 0) {
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <i class="fas fa-sticky-note"></i>
+                            <h3>Nenhuma nota de ajuda disponível</h3>
+                            <p>Clique no botão "+" para adicionar sua primeira nota.</p>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                // Agrupar notas por módulo
+                const modulesWithNotas = [...new Set(notas.map(note => note.module))];
+                
+                modulesWithNotas.forEach(moduleId => {
+                    const module = systemModules.find(m => m.id === moduleId);
+                    if (!module) return;
+                    
+                    const moduleNotas = notas.filter(note => note.module === moduleId);
+                    
+                    const moduleElement = document.createElement('div');
+                    moduleElement.className = 'module-card';
+                    moduleElement.innerHTML = `
+                        <div class="module-icon">
+                            <i class="${module.icon}"></i>
+                        </div>
+                        <h3>${module.name}</h3>
+                        <p>Notas de ajuda relacionadas a este módulo</p>
+                        <div class="module-stats">
+                            <span><i class="fas fa-sticky-note"></i> ${moduleNotas.length} notas</span>
+                            <span><i class="fas fa-clock"></i> Dúvidas frequentes</span>
+                        </div>
+                    `;
+                    moduleElement.addEventListener('click', function() {
+                        showNotesByModule(moduleId);
+                    });
+                    container.appendChild(moduleElement);
+                });
+            }
+        }
+
+        // Calcular tempo total de leitura
+        function calculateTotalReadingTime(manuaisList) {
+            // Estimativa: 2 minutos por tópico
+            return manuaisList.reduce((total, manual) => {
+                const topics = parseInt(manual.stats) || 5;
+                return total + topics * 2;
+            }, 0);
+        }
+
+        // Mostrar manuais por módulo
+        function showManuaisByModule(moduleId) {
+            manuaisModules.style.display = 'none';
+            const module = systemModules.find(m => m.id === moduleId);
+            const moduleManuais = manuais.filter(manual => manual.module === moduleId);
+            
+            manualDetail.innerHTML = `
+                <div class="module-header">
+                    <button class="back-button" onclick="backToModules('manuais')"><i class="fas fa-arrow-left"></i> Voltar para Manuais</button>
+                    <h2>${module.name} - Manuais de Usabilidade</h2>
+                </div>
+                <div class="note-list">
+                    ${moduleManuais.map(manual => `
+                        <div class="note-item">
+                            <div class="note-icon" style="background: var(--primary);">
+                                <i class="${manual.icon}"></i>
+                            </div>
+                            <div class="note-text" onclick="showManualDetail(${manual.id})" style="flex: 1; cursor: pointer;">
+                                <h4>${manual.title}</h4>
+                                <p>${manual.description}</p>
+                            </div>
+                            <div class="action-buttons">
+                                <button class="btn btn-warning" onclick="editManual(${manual.id})">
+                                    <i class="fas fa-edit"></i> Editar
+                                </button>
+                                <button class="btn btn-danger" onclick="deleteManual(${manual.id})">
+                                    <i class="fas fa-trash"></i> Excluir
+                                </button>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+            manualDetail.classList.add('active');
+        }
+
+        // Mostrar detalhes do manual
+        function showManualDetail(manualId) {
+            const manual = manuais.find(m => m.id === manualId);
+            const module = systemModules.find(m => m.id === manual.module);
+            
+            manualDetail.innerHTML = `
+                <div class="module-header">
+                    <button class="back-button" onclick="showManuaisByModule('${manual.module}')"><i class="fas fa-arrow-left"></i> Voltar para ${module.name}</button>
+                    <div>
+                        <h2>${manual.title}</h2>
+                        <p>${manual.description}</p>
+                    </div>
+                    <div class="action-buttons">
+                        <button class="btn btn-warning" onclick="editManual(${manual.id})">
+                            <i class="fas fa-edit"></i> Editar
+                        </button>
+                        <button class="btn btn-danger" onclick="deleteManual(${manual.id})">
+                            <i class="fas fa-trash"></i> Excluir
+                        </button>
+                    </div>
+                </div>
+                <div class="manual-content">
+                    ${manual.content}
+                </div>
+            `;
+        }
+
+        // Mostrar notas por módulo
+        function showNotesByModule(moduleId) {
+            notasModules.style.display = 'none';
+            const module = systemModules.find(m => m.id === moduleId);
+            const moduleNotes = notas.filter(note => note.module === moduleId);
+            
+            noteDetail.innerHTML = `
+                <div class="module-header">
+                    <button class="back-button" onclick="backToModules('notas')"><i class="fas fa-arrow-left"></i> Voltar para Notas</button>
+                    <h2>${module.name} - Notas de Ajuda</h2>
+                </div>
+                <div class="note-list">
+                    ${moduleNotes.map(note => `
+                        <div class="note-item">
+                            <div class="note-icon">
+                                <i class="fas fa-lightbulb"></i>
+                            </div>
+                            <div class="note-text" onclick="showNoteDetail(${note.id})" style="flex: 1; cursor: pointer;">
+                                <h4>${note.title}</h4>
+                                <p>${note.description}</p>
+                            </div>
+                            <div class="action-buttons">
+                                <button class="btn btn-warning" onclick="editNote(${note.id})">
+                                    <i class="fas fa-edit"></i> Editar
+                                </button>
+                                <button class="btn btn-danger" onclick="deleteNote(${note.id})">
+                                    <i class="fas fa-trash"></i> Excluir
+                                </button>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+            noteDetail.classList.add('active');
+        }
+
+        // Mostrar detalhes da nota
+        function showNoteDetail(noteId) {
+            const note = notas.find(n => n.id === noteId);
+            const module = systemModules.find(m => m.id === note.module);
+            
+            noteDetail.innerHTML = `
+                <div class="module-header">
+                    <button class="back-button" onclick="showNotesByModule('${note.module}')"><i class="fas fa-arrow-left"></i> Voltar para ${module.name}</button>
+                    <div>
+                        <h2>${note.title}</h2>
+                        <p>${note.description}</p>
+                    </div>
+                    <div class="action-buttons">
+                        <button class="btn btn-warning" onclick="editNote(${note.id})">
+                            <i class="fas fa-edit"></i> Editar
+                        </button>
+                        <button class="btn btn-danger" onclick="deleteNote(${note.id})">
+                            <i class="fas fa-trash"></i> Excluir
+                        </button>
+                    </div>
+                </div>
+                <div class="note-content">
+                    ${note.content}
+                </div>
+            `;
+        }
+
+        // Filtrar por módulo
+        function filterByModule(moduleId) {
+            const module = systemModules.find(m => m.id === moduleId);
+            
+            // Filtrar manuais
+            const filteredManuais = manuais.filter(manual => manual.module === moduleId);
+            updateModuleView('manuais', filteredManuais, module);
+            
+            // Filtrar notas
+            const filteredNotas = notas.filter(note => note.module === moduleId);
+            updateModuleView('notas', filteredNotas, module);
+        }
+
+        // Atualizar visualização do módulo
+        function updateModuleView(type, items, module) {
+            const container = type === 'manuais' ? manuaisModules : notasModules;
+            const contentType = type === 'manuais' ? 'manuais' : 'notas';
+            
+            container.innerHTML = '';
+            
+            if (items.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-${type === 'manuais' ? 'book' : 'sticky-note'}"></i>
+                        <h3>Nenhum ${contentType} para ${module.name}</h3>
+                        <p>Não há ${contentType} disponíveis para este módulo.</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            if (type === 'manuais') {
+                items.forEach(manual => {
+                    const moduleElement = document.createElement('div');
+                    moduleElement.className = 'module-card';
+                    moduleElement.innerHTML = `
+                        <div class="module-icon">
+                            <i class="${manual.icon}"></i>
+                        </div>
+                        <h3>${manual.title}</h3>
+                        <p>${manual.description}</p>
+                        <div class="module-stats">
+                            <span><i class="fas fa-list-ul"></i> ${manual.stats}</span>
+                            <span><i class="fas fa-clock"></i> ${parseInt(manual.stats) * 2} min leitura</span>
+                        </div>
+                    `;
+                    moduleElement.addEventListener('click', function() {
+                        showManualDetail(manual.id);
+                    });
+                    container.appendChild(moduleElement);
+                });
+            } else {
+                items.forEach(note => {
+                    const moduleElement = document.createElement('div');
+                    moduleElement.className = 'module-card';
+                    moduleElement.innerHTML = `
+                        <div class="module-icon">
+                            <i class="fas fa-question-circle"></i>
+                        </div>
+                        <h3>${note.title}</h3>
+                        <p>${note.description}</p>
+                        <div class="module-stats">
+                            <span><i class="fas fa-sticky-note"></i> Nota de ajuda</span>
+                            <span><i class="fas fa-clock"></i> 5 min leitura</span>
+                        </div>
+                    `;
+                    moduleElement.addEventListener('click', function() {
+                        showNoteDetail(note.id);
+                    });
+                    container.appendChild(moduleElement);
+                });
+            }
+        }
+
+        // Voltar para a lista de módulos
+        function backToModules(type) {
+            if (type === 'manuais') {
+                manualDetail.classList.remove('active');
+                manuaisModules.style.display = 'grid';
+            } else {
+                noteDetail.classList.remove('active');
+                notasModules.style.display = 'grid';
+            }
+        }
+
+        // Realizar busca
+        function performSearch() {
+            const searchTerm = searchInput.value.toLowerCase().trim();
+            
+            if (searchTerm === '') {
+                loadModules('manuais');
+                loadModules('notas');
+                return;
+            }
+            
+            // Buscar em manuais
+            const filteredManuais = manuais.filter(manual => 
+                manual.title.toLowerCase().includes(searchTerm) || 
+                manual.description.toLowerCase().includes(searchTerm) ||
+                manual.content.toLowerCase().includes(searchTerm)
+            );
+            
+            // Buscar em notas
+            const filteredNotas = notas.filter(note => 
+                note.title.toLowerCase().includes(searchTerm) || 
+                note.description.toLowerCase().includes(searchTerm) ||
+                note.content.toLowerCase().includes(searchTerm)
+            );
+            
+            // Atualizar exibição
+            updateSearchResults(filteredManuais, filteredNotas);
+        }
+
+        // Atualizar resultados da busca
+        function updateSearchResults(manuaisResults, notasResults) {
+            // Atualizar aba de manuais
+            manuaisModules.innerHTML = '';
+            if (manuaisResults.length > 0) {
+                manuaisResults.forEach(manual => {
+                    const module = systemModules.find(m => m.id === manual.module);
+                    const moduleElement = document.createElement('div');
+                    moduleElement.className = 'module-card';
+                    moduleElement.innerHTML = `
+                        <div class="module-icon">
+                            <i class="${manual.icon}"></i>
+                        </div>
+                        <h3>${manual.title}</h3>
+                        <p>${manual.description}</p>
+                        <div class="module-stats">
+                            <span><i class="fas fa-list-ul"></i> ${manual.stats}</span>
+                            <span><i class="fas fa-clock"></i> ${parseInt(manual.stats) * 2} min leitura</span>
+                        </div>
+                    `;
+                    moduleElement.addEventListener('click', function() {
+                        showManualDetail(manual.id);
+                    });
+                    manuaisModules.appendChild(moduleElement);
+                });
+            } else {
+                manuaisModules.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-search"></i>
+                        <h3>Nenhum manual encontrado</h3>
+                        <p>Tente usar termos de pesquisa diferentes.</p>
+                    </div>
+                `;
+            }
+            
+            // Atualizar aba de notas
+            notasModules.innerHTML = '';
+            if (notasResults.length > 0) {
+                notasResults.forEach(note => {
+                    const module = systemModules.find(m => m.id === note.module);
+                    const moduleElement = document.createElement('div');
+                    moduleElement.className = 'module-card';
+                    moduleElement.innerHTML = `
+                        <div class="module-icon">
+                            <i class="fas fa-question-circle"></i>
+                        </div>
+                        <h3>${note.title}</h3>
+                        <p>${note.description}</p>
+                        <div class="module-stats">
+                            <span><i class="fas fa-sticky-note"></i> Nota de ajuda</span>
+                            <span><i class="fas fa-clock"></i> 5 min leitura</span>
+                        </div>
+                    `;
+                    moduleElement.addEventListener('click', function() {
+                        showNoteDetail(note.id);
+                    });
+                    notasModules.appendChild(moduleElement);
+                });
+            } else {
+                notasModules.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-search"></i>
+                        <h3>Nenhuma nota encontrada</h3>
+                        <p>Tente usar termos de pesquisa diferentes.</p>
+                    </div>
+                `;
+            }
+        }
+
+        // =============================================
+        // FUNÇÕES CRUD PARA MÓDULOS
+        // =============================================
+
+        // Abrir modal para criar/editar módulo
+        function openModuleModal(moduleId = null) {
+            const title = document.getElementById('moduleModalTitle');
+            const form = document.getElementById('moduleForm');
+            
+            if (moduleId) {
+                // Modo edição
+                title.textContent = 'Editar Módulo';
+                const module = systemModules.find(m => m.id === moduleId);
+                
+                document.getElementById('moduleId').value = module.id;
+                document.getElementById('moduleName').value = module.name;
+                document.getElementById('moduleIcon').value = module.icon;
+            } else {
+                // Modo criação
+                title.textContent = 'Adicionar Novo Módulo';
+                form.reset();
+                document.getElementById('moduleId').value = '';
+            }
+            
+            moduleModal.classList.add('active');
+        }
+
+        // Fechar modal do módulo
+        function closeModuleModal() {
+            moduleModal.classList.remove('active');
+        }
+
+        // Salvar módulo (criar ou editar)
+        function saveModule(e) {
+            e.preventDefault();
+            
+            const moduleId = document.getElementById('moduleId').value;
+            const name = document.getElementById('moduleName').value;
+            const icon = document.getElementById('moduleIcon').value;
+            
+            if (moduleId) {
+                // Editar módulo existente
+                const index = systemModules.findIndex(m => m.id === moduleId);
+                systemModules[index] = {
+                    id: moduleId,
+                    name,
+                    icon
+                };
+            } else {
+                // Criar novo módulo
+                const newId = 'modulo_' + Date.now();
+                systemModules.push({
+                    id: newId,
+                    name,
+                    icon
+                });
+            }
+            
+            closeModuleModal();
+            saveAllData(); // Salvar no localStorage
+            loadSidebarMenu();
+            populateModuleSelects();
+            loadModules('manuais');
+            loadModules('notas');
+        }
+
+        // Editar módulo
+        function editModule(moduleId) {
+            openModuleModal(moduleId);
+        }
+
+        // Excluir módulo
+        function deleteModule(moduleId) {
+            // Verificar se existem manuais ou notas associados a este módulo
+            const manuaisNoModulo = manuais.filter(m => m.module === moduleId).length;
+            const notasNoModulo = notas.filter(n => n.module === moduleId).length;
+            
+            if (manuaisNoModulo > 0 || notasNoModulo > 0) {
+                alert(`Não é possível excluir este módulo pois existem ${manuaisNoModulo} manual(is) e ${notasNoModulo} nota(s) associados a ele.`);
+                return;
+            }
+            
+            itemToDelete = moduleId;
+            deleteType = 'module';
+            document.getElementById('confirmMessage').textContent = 'Tem certeza que deseja excluir este módulo? Esta ação não pode ser desfeita.';
+            confirmModal.classList.add('active');
+        }
+
+        // =============================================
+        // FUNÇÕES CRUD PARA MANUAIS E NOTAS
+        // =============================================
+
+        // Abrir modal para criar/editar manual
+        function openManualModal(manualId = null) {
+            if (systemModules.length === 0) {
+                alert('Primeiro adicione pelo menos um módulo!');
+                openModuleModal();
+                return;
+            }
+            
+            const title = document.getElementById('manualModalTitle');
+            const form = document.getElementById('manualForm');
+            
+            if (manualId) {
+                // Modo edição
+                title.textContent = 'Editar Manual';
+                const manual = manuais.find(m => m.id === manualId);
+                
+                document.getElementById('manualId').value = manual.id;
+                document.getElementById('manualModule').value = manual.module;
+                document.getElementById('manualTitle').value = manual.title;
+                document.getElementById('manualDescription').value = manual.description;
+                document.getElementById('manualIcon').value = manual.icon;
+                document.getElementById('manualStats').value = manual.stats;
+                document.getElementById('manualContent').value = manual.content;
+            } else {
+                // Modo criação
+                title.textContent = 'Adicionar Novo Manual';
+                form.reset();
+                document.getElementById('manualId').value = '';
+            }
+            
+            manualModal.classList.add('active');
+        }
+
+        // Fechar modal do manual
+        function closeManualModal() {
+            manualModal.classList.remove('active');
+        }
+
+        // Abrir modal para criar/editar nota
+        function openNoteModal(noteId = null) {
+            if (systemModules.length === 0) {
+                alert('Primeiro adicione pelo menos um módulo!');
+                openModuleModal();
+                return;
+            }
+            
+            const title = document.getElementById('noteModalTitle');
+            const form = document.getElementById('noteForm');
+            
+            if (noteId) {
+                // Modo edição
+                title.textContent = 'Editar Nota';
+                const note = notas.find(n => n.id === noteId);
+                
+                document.getElementById('noteId').value = note.id;
+                document.getElementById('noteModule').value = note.module;
+                document.getElementById('noteTitle').value = note.title;
+                document.getElementById('noteDescription').value = note.description;
+                document.getElementById('noteContent').value = note.content;
+            } else {
+                // Modo criação
+                title.textContent = 'Adicionar Nova Nota';
+                form.reset();
+                document.getElementById('noteId').value = '';
+            }
+            
+            noteModal.classList.add('active');
+        }
+
+        // Fechar modal da nota
+        function closeNoteModal() {
+            noteModal.classList.remove('active');
+        }
+
+        // Salvar manual (criar ou editar)
+        function saveManual(e) {
+            e.preventDefault();
+            
+            const manualId = document.getElementById('manualId').value;
+            const module = document.getElementById('manualModule').value;
+            const title = document.getElementById('manualTitle').value;
+            const description = document.getElementById('manualDescription').value;
+            const icon = document.getElementById('manualIcon').value;
+            const stats = document.getElementById('manualStats').value;
+            const content = document.getElementById('manualContent').value;
+            
+            if (manualId) {
+                // Editar manual existente
+                const index = manuais.findIndex(m => m.id == manualId);
+                manuais[index] = {
+                    id: parseInt(manualId),
+                    module,
+                    title,
+                    description,
+                    icon,
+                    stats,
+                    content
+                };
+            } else {
+                // Criar novo manual
+                const newId = manuais.length > 0 ? Math.max(...manuais.map(m => m.id)) + 1 : 1;
+                manuais.push({
+                    id: newId,
+                    module,
+                    title,
+                    description,
+                    icon,
+                    stats,
+                    content
+                });
+            }
+            
+            closeManualModal();
+            saveAllData(); // Salvar no localStorage
+            loadModules('manuais');
+            
+            // Se estiver na visualização de detalhes, atualizar
+            if (manualDetail.classList.contains('active')) {
+                if (manualId) {
+                    showManualDetail(parseInt(manualId));
+                } else {
+                    backToModules('manuais');
+                }
+            }
+        }
+
+        // Salvar nota (criar ou editar)
+        function saveNote(e) {
+            e.preventDefault();
+            
+            const noteId = document.getElementById('noteId').value;
+            const module = document.getElementById('noteModule').value;
+            const title = document.getElementById('noteTitle').value;
+            const description = document.getElementById('noteDescription').value;
+            const content = document.getElementById('noteContent').value;
+            
+            if (noteId) {
+                // Editar nota existente
+                const index = notas.findIndex(n => n.id == noteId);
+                notas[index] = {
+                    id: parseInt(noteId),
+                    module,
+                    title,
+                    description,
+                    content
+                };
+            } else {
+                // Criar nova nota
+                const newId = notas.length > 0 ? Math.max(...notas.map(n => n.id)) + 1 : 1;
+                notas.push({
+                    id: newId,
+                    module,
+                    title,
+                    description,
+                    content
+                });
+            }
+            
+            closeNoteModal();
+            saveAllData(); // Salvar no localStorage
+            loadModules('notas');
+            
+            // Se estiver na visualização de detalhes, atualizar
+            if (noteDetail.classList.contains('active')) {
+                if (noteId) {
+                    showNoteDetail(parseInt(noteId));
+                } else {
+                    backToModules('notas');
+                }
+            }
+        }
+
+        // Editar manual
+        function editManual(manualId) {
+            openManualModal(manualId);
+        }
+
+        // Editar nota
+        function editNote(noteId) {
+            openNoteModal(noteId);
+        }
+
+        // Excluir manual
+        function deleteManual(manualId) {
+            itemToDelete = manualId;
+            deleteType = 'manual';
+            document.getElementById('confirmMessage').textContent = 'Tem certeza que deseja excluir este manual? Esta ação não pode ser desfeita.';
+            confirmModal.classList.add('active');
+        }
+
+        // Excluir nota
+        function deleteNote(noteId) {
+            itemToDelete = noteId;
+            deleteType = 'note';
+            document.getElementById('confirmMessage').textContent = 'Tem certeza que deseja excluir esta nota? Esta ação não pode ser desfeita.';
+            confirmModal.classList.add('active');
+        }
+
+        // Fechar modal de confirmação
+        function closeConfirmModal() {
+            confirmModal.classList.remove('active');
+            itemToDelete = null;
+            deleteType = null;
+        }
+
+        // Confirmar exclusão
+        function confirmDelete() {
+            if (deleteType === 'module') {
+                systemModules = systemModules.filter(m => m.id !== itemToDelete);
+                saveAllData(); // Salvar no localStorage
+                loadSidebarMenu();
+                populateModuleSelects();
+                loadModules('manuais');
+                loadModules('notas');
+            } else if (deleteType === 'manual') {
+                manuais = manuais.filter(m => m.id !== itemToDelete);
+                saveAllData(); // Salvar no localStorage
+                loadModules('manuais');
+                backToModules('manuais');
+            } else if (deleteType === 'note') {
+                notas = notas.filter(n => n.id !== itemToDelete);
+                saveAllData(); // Salvar no localStorage
+                loadModules('notas');
+                backToModules('notas');
+            }
+            
+            closeConfirmModal();
+        }
+
+        // Tornar funções globais para uso nos eventos onclick
+        window.showManualDetail = showManualDetail;
+        window.showManuaisByModule = showManuaisByModule;
+        window.showNotesByModule = showNotesByModule;
+        window.showNoteDetail = showNoteDetail;
+        window.backToModules = backToModules;
+        window.editManual = editManual;
+        window.editNote = editNote;
+        window.deleteManual = deleteManual;
+        window.deleteNote = deleteNote;
+        window.openModuleModal = openModuleModal;
+        window.editModule = editModule;
+        window.deleteModule = deleteModule;
+    </script>
+</body>
+</html>

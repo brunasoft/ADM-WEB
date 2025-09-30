@@ -1,0 +1,1083 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Utilitários Elegantes</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --verde-principal: #0FA968;
+            --verde-escuro: #0A7A4D;
+            --verde-suave: #E8F5E9;
+            --verde-claro: #C8E6C9;
+            --branco: #FFFFFF;
+            --preto: #1A1A1A;
+            --cinza-50: #FAFAFA;
+            --cinza-100: #F5F5F5;
+            --cinza-200: #EEEEEE;
+            --cinza-300: #E0E0E0;
+            --cinza-600: #757575;
+            --cinza-800: #424242;
+            --sombra-suave: 0 4px 12px rgba(0, 0, 0, 0.05);
+            --sombra-media: 0 8px 24px rgba(0, 0, 0, 0.08);
+            --borda-radius: 12px;
+            --transicao: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            color: var(--preto);
+            line-height: 1.6;
+            min-height: 100vh;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Header Elegante */
+        header {
+            background: var(--branco);
+            box-shadow: var(--sombra-suave);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 0;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .logo-icon {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, var(--verde-principal) 0%, var(--verde-escuro) 100%);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--branco);
+            font-size: 1.5rem;
+            box-shadow: 0 4px 10px rgba(15, 169, 104, 0.3);
+        }
+
+        .logo-text h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--preto);
+            margin-bottom: 4px;
+        }
+
+        .logo-text p {
+            font-size: 0.9rem;
+            color: var(--cinza-600);
+            font-weight: 400;
+        }
+
+        .search-bar {
+            display: flex;
+            align-items: center;
+            background: var(--cinza-100);
+            border-radius: 50px;
+            padding: 10px 20px;
+            width: 350px;
+            transition: var(--transicao);
+        }
+
+        .search-bar:focus-within {
+            box-shadow: 0 0 0 2px var(--verde-claro);
+        }
+
+        .search-bar input {
+            background: transparent;
+            border: none;
+            color: var(--preto);
+            font-size: 0.95rem;
+            width: 100%;
+            outline: none;
+            padding: 5px;
+        }
+
+        .search-bar input::placeholder {
+            color: var(--cinza-600);
+        }
+
+        .search-bar button {
+            background: transparent;
+            border: none;
+            color: var(--cinza-600);
+            cursor: pointer;
+            font-size: 1rem;
+            transition: var(--transicao);
+        }
+
+        .search-bar button:hover {
+            color: var(--verde-principal);
+        }
+
+        /* Layout Principal */
+        .main-content {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            gap: 30px;
+            padding: 30px 0;
+        }
+
+        /* Sidebar Elegante */
+        .sidebar {
+            background: var(--branco);
+            border-radius: var(--borda-radius);
+            box-shadow: var(--sombra-suave);
+            padding: 25px;
+            height: fit-content;
+            position: sticky;
+            top: 100px;
+        }
+
+        .sidebar h2 {
+            color: var(--preto);
+            margin-bottom: 20px;
+            font-weight: 600;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .sidebar h2 i {
+            color: var(--verde-principal);
+        }
+
+        .categorias {
+            list-style: none;
+        }
+
+        .categoria {
+            padding: 12px 16px;
+            margin-bottom: 6px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: var(--transicao);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 500;
+            color: var(--cinza-800);
+            font-size: 0.95rem;
+        }
+
+        .categoria:hover {
+            background: var(--verde-suave);
+            color: var(--verde-escuro);
+        }
+
+        .categoria.ativa {
+            background: linear-gradient(135deg, var(--verde-principal) 0%, var(--verde-escuro) 100%);
+            color: var(--branco);
+            box-shadow: 0 4px 10px rgba(15, 169, 104, 0.3);
+        }
+
+        .categoria i {
+            font-size: 1rem;
+            width: 20px;
+            text-align: center;
+        }
+
+        .contador {
+            margin-left: auto;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 2px 8px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+        }
+
+        /* Conteúdo Principal */
+        .content {
+            background: var(--branco);
+            border-radius: var(--borda-radius);
+            box-shadow: var(--sombra-suave);
+            overflow: hidden;
+        }
+
+        .abas {
+            display: flex;
+            background: var(--cinza-50);
+            padding: 0 25px;
+            border-bottom: 1px solid var(--cinza-200);
+        }
+
+        .aba {
+            padding: 16px 25px;
+            cursor: pointer;
+            transition: var(--transicao);
+            font-weight: 500;
+            position: relative;
+            color: var(--cinza-600);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.95rem;
+        }
+
+        .aba:hover {
+            color: var(--verde-principal);
+        }
+
+        .aba.ativa {
+            color: var(--verde-principal);
+        }
+
+        .aba.ativa::after {
+            content: "";
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: var(--verde-principal);
+        }
+
+        .conteudo-aba {
+            display: none;
+            padding: 30px;
+        }
+
+        .conteudo-aba.ativa {
+            display: block;
+            animation: fadeIn 0.4s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .titulo-secao {
+            color: var(--preto);
+            margin-bottom: 25px;
+            font-size: 1.5rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .titulo-secao i {
+            background: var(--verde-suave);
+            padding: 10px;
+            border-radius: 10px;
+            color: var(--verde-principal);
+        }
+
+        .grid-utilitarios {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 25px;
+        }
+
+        /* Cards Elegantes */
+        .utilitario {
+            background: var(--branco);
+            border-radius: var(--borda-radius);
+            padding: 22px;
+            transition: var(--transicao);
+            box-shadow: var(--sombra-suave);
+            border: 1px solid var(--cinza-200);
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .utilitario::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, var(--verde-principal) 0%, var(--verde-escuro) 100%);
+        }
+
+        .utilitario:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--sombra-media);
+        }
+
+        .utilitario-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            margin-bottom: 15px;
+        }
+
+        .utilitario i {
+            font-size: 1.8rem;
+            color: var(--verde-principal);
+            background: var(--verde-suave);
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 10px;
+        }
+
+        .favorito-btn {
+            background: transparent;
+            border: none;
+            color: var(--cinza-300);
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: var(--transicao);
+            padding: 5px;
+        }
+
+        .favorito-btn.ativo {
+            color: #FFC107;
+        }
+
+        .favorito-btn:hover {
+            transform: scale(1.2);
+        }
+
+        .utilitario h3 {
+            margin-bottom: 10px;
+            color: var(--preto);
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        .utilitario p {
+            color: var(--cinza-600);
+            margin-bottom: 18px;
+            flex-grow: 1;
+            line-height: 1.5;
+            font-size: 0.9rem;
+        }
+
+        .btn-link {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            background: linear-gradient(135deg, var(--verde-principal) 0%, var(--verde-escuro) 100%);
+            color: var(--branco);
+            padding: 10px 16px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: var(--transicao);
+            border: none;
+            cursor: pointer;
+            width: 100%;
+            font-size: 0.9rem;
+            box-shadow: 0 4px 10px rgba(15, 169, 104, 0.2);
+        }
+
+        .btn-link:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(15, 169, 104, 0.3);
+        }
+
+        /* Formulário Elegante */
+        .form-adicionar {
+            background: var(--branco);
+            padding: 28px;
+            border-radius: var(--borda-radius);
+            box-shadow: var(--sombra-suave);
+            margin-bottom: 30px;
+            border: 1px solid var(--cinza-200);
+        }
+
+        .form-adicionar h2 {
+            color: var(--preto);
+            margin-bottom: 22px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 1.3rem;
+            font-weight: 600;
+        }
+
+        .form-adicionar h2 i {
+            background: var(--verde-suave);
+            padding: 10px;
+            border-radius: 10px;
+            color: var(--verde-principal);
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 18px;
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        .form-group.full-width {
+            grid-column: 1 / -1;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: var(--preto);
+            font-size: 0.9rem;
+        }
+
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 12px 14px;
+            border: 1px solid var(--cinza-300);
+            border-radius: 8px;
+            font-size: 0.9rem;
+            transition: var(--transicao);
+            background: var(--branco);
+        }
+
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+            outline: none;
+            border-color: var(--verde-principal);
+            box-shadow: 0 0 0 3px rgba(15, 169, 104, 0.1);
+        }
+
+        .btn-adicionar {
+            background: linear-gradient(135deg, var(--verde-principal) 0%, var(--verde-escuro) 100%);
+            color: var(--branco);
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.95rem;
+            font-weight: 600;
+            transition: var(--transicao);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 10px rgba(15, 169, 104, 0.3);
+            margin-top: 10px;
+        }
+
+        .btn-adicionar:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(15, 169, 104, 0.4);
+        }
+
+        /* Estados Vazios */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--cinza-600);
+        }
+
+        .empty-state i {
+            font-size: 3.5rem;
+            color: var(--cinza-300);
+            margin-bottom: 18px;
+            opacity: 0.5;
+        }
+
+        .empty-state h3 {
+            font-size: 1.3rem;
+            margin-bottom: 10px;
+            color: var(--cinza-800);
+            font-weight: 500;
+        }
+
+        .empty-state p {
+            max-width: 400px;
+            margin: 0 auto;
+            font-size: 0.9rem;
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 25px;
+            color: var(--cinza-600);
+            margin-top: 30px;
+            font-size: 0.85rem;
+            border-top: 1px solid var(--cinza-200);
+            background: var(--branco);
+        }
+
+        /* Responsividade */
+        @media (max-width: 1100px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .sidebar {
+                position: static;
+                margin-bottom: 20px;
+            }
+            
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                gap: 20px;
+                text-align: center;
+            }
+            
+            .search-bar {
+                width: 100%;
+                max-width: 400px;
+            }
+            
+            .grid-utilitarios {
+                grid-template-columns: 1fr;
+            }
+            
+            .abas {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            
+            .aba {
+                padding: 14px 18px;
+                font-size: 0.9rem;
+            }
+            
+            .conteudo-aba {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <div class="logo-icon">
+                        <i class="fas fa-tools"></i>
+                    </div>
+                    <div class="logo-text">
+                        <h1>Utilitários</h1>
+                        <p>Ferramentas para otimizar seu dia</p>
+                    </div>
+                </div>
+                <div class="search-bar">
+                    <input type="text" placeholder="Pesquisar utilitários...">
+                    <button><i class="fas fa-search"></i></button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="form-adicionar">
+            <h2><i class="fas fa-plus-circle"></i> Adicionar Novo Utilitário</h2>
+            <form id="formUtilitario">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="nome">Nome do Utilitário</label>
+                        <input type="text" id="nome" required placeholder="Ex: GitHub">
+                    </div>
+                    <div class="form-group">
+                        <label for="url">URL/Link</label>
+                        <input type="url" id="url" required placeholder="https://exemplo.com">
+                    </div>
+                    <div class="form-group">
+                        <label for="categoria">Categoria</label>
+                        <select id="categoria" required>
+                            <option value="">Selecione uma categoria</option>
+                            <option value="desenvolvimento">Desenvolvimento</option>
+                            <option value="design">Design</option>
+                            <option value="produtividade">Produtividade</option>
+                            <option value="comunicacao">Comunicação</option>
+                            <option value="pesquisa">Pesquisa</option>
+                            <option value="outros">Outros</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="icone">Ícone (Font Awesome)</label>
+                        <input type="text" id="icone" placeholder="Ex: fas fa-code" value="fas fa-link">
+                    </div>
+                    <div class="form-group full-width">
+                        <label for="descricao">Descrição</label>
+                        <textarea id="descricao" rows="3" required placeholder="Descreva brevemente este utilitário..."></textarea>
+                    </div>
+                </div>
+                <button type="submit" class="btn-adicionar"><i class="fas fa-plus"></i> Adicionar Utilitário</button>
+            </form>
+        </div>
+
+        <div class="main-content">
+            <div class="sidebar">
+                <h2><i class="fas fa-folder"></i> Categorias</h2>
+                <ul class="categorias">
+                    <li class="categoria ativa" data-categoria="todos">
+                        <i class="fas fa-th-large"></i>
+                        <span>Todos os Utilitários</span>
+                        <span class="contador" id="contador-todos">6</span>
+                    </li>
+                    <li class="categoria" data-categoria="desenvolvimento">
+                        <i class="fas fa-code"></i>
+                        <span>Desenvolvimento</span>
+                        <span class="contador" id="contador-dev">2</span>
+                    </li>
+                    <li class="categoria" data-categoria="design">
+                        <i class="fas fa-palette"></i>
+                        <span>Design</span>
+                        <span class="contador" id="contador-design">1</span>
+                    </li>
+                    <li class="categoria" data-categoria="produtividade">
+                        <i class="fas fa-tasks"></i>
+                        <span>Produtividade</span>
+                        <span class="contador" id="contador-prod">2</span>
+                    </li>
+                    <li class="categoria" data-categoria="comunicacao">
+                        <i class="fas fa-comments"></i>
+                        <span>Comunicação</span>
+                        <span class="contador" id="contador-com">1</span>
+                    </li>
+                    <li class="categoria" data-categoria="pesquisa">
+                        <i class="fas fa-search"></i>
+                        <span>Pesquisa</span>
+                        <span class="contador" id="contador-pesq">0</span>
+                    </li>
+                    <li class="categoria" data-categoria="outros">
+                        <i class="fas fa-ellipsis-h"></i>
+                        <span>Outros</span>
+                        <span class="contador" id="contador-outros">0</span>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="content">
+                <div class="abas">
+                    <div class="aba ativa" data-aba="todos">
+                        <i class="fas fa-th-large"></i>
+                        <span>Todos</span>
+                    </div>
+                    <div class="aba" data-aba="favoritos">
+                        <i class="fas fa-star"></i>
+                        <span>Favoritos</span>
+                    </div>
+                    <div class="aba" data-aba="recentes">
+                        <i class="fas fa-clock"></i>
+                        <span>Recentes</span>
+                    </div>
+                </div>
+
+                <div class="conteudo-aba ativa" id="aba-todos">
+                    <h2 class="titulo-secao"><i class="fas fa-th-large"></i> Todos os Utilitários</h2>
+                    <div class="grid-utilitarios" id="utilitarios-todos">
+                        <!-- Utilitários serão carregados aqui -->
+                    </div>
+                </div>
+
+                <div class="conteudo-aba" id="aba-favoritos">
+                    <h2 class="titulo-secao"><i class="fas fa-star"></i> Favoritos</h2>
+                    <div class="grid-utilitarios" id="utilitarios-favoritos">
+                        <!-- Utilitários favoritos serão carregados aqui -->
+                    </div>
+                </div>
+
+                <div class="conteudo-aba" id="aba-recentes">
+                    <h2 class="titulo-secao"><i class="fas fa-clock"></i> Recentes</h2>
+                    <div class="grid-utilitarios" id="utilitarios-recentes">
+                        <!-- Utilitários recentes serão carregados aqui -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <p>Utilitários Elegantes - Organize suas ferramentas do dia a dia &copy; 2023</p>
+        </footer>
+    </div>
+
+    <script>
+        // Dados iniciais de exemplo
+        let utilitarios = [
+            {
+                id: 1,
+                nome: "GitHub",
+                url: "https://github.com",
+                descricao: "Plataforma de hospedagem de código para controle de versão e colaboração",
+                categoria: "desenvolvimento",
+                icone: "fab fa-github",
+                favorito: true,
+                dataAdicao: new Date('2023-01-15').getTime(),
+                ultimoAcesso: new Date('2023-10-20').getTime()
+            },
+            {
+                id: 2,
+                nome: "Figma",
+                url: "https://figma.com",
+                descricao: "Ferramenta de design de interface colaborativa baseada na web",
+                categoria: "design",
+                icone: "fab fa-figma",
+                favorito: true,
+                dataAdicao: new Date('2023-02-10').getTime(),
+                ultimoAcesso: new Date('2023-10-18').getTime()
+            },
+            {
+                id: 3,
+                nome: "Trello",
+                url: "https://trello.com",
+                descricao: "Aplicativo de gerenciamento de projetos baseado em quadros Kanban",
+                categoria: "produtividade",
+                icone: "fab fa-trello",
+                favorito: false,
+                dataAdicao: new Date('2023-03-05').getTime(),
+                ultimoAcesso: new Date('2023-10-15').getTime()
+            },
+            {
+                id: 4,
+                nome: "Slack",
+                url: "https://slack.com",
+                descricao: "Plataforma de comunicação para equipes com canais organizados",
+                categoria: "comunicacao",
+                icone: "fab fa-slack",
+                favorito: true,
+                dataAdicao: new Date('2023-04-20').getTime(),
+                ultimoAcesso: new Date('2023-10-22').getTime()
+            },
+            {
+                id: 5,
+                nome: "Google Docs",
+                url: "https://docs.google.com",
+                descricao: "Editor de texto online com colaboração em tempo real",
+                categoria: "produtividade",
+                icone: "fas fa-file-word",
+                favorito: false,
+                dataAdicao: new Date('2023-05-12').getTime(),
+                ultimoAcesso: new Date('2023-10-19').getTime()
+            },
+            {
+                id: 6,
+                nome: "MDN Web Docs",
+                url: "https://developer.mozilla.org",
+                descricao: "Documentação completa para tecnologias web",
+                categoria: "desenvolvimento",
+                icone: "fas fa-book",
+                favorito: false,
+                dataAdicao: new Date('2023-06-08').getTime(),
+                ultimoAcesso: new Date('2023-10-21').getTime()
+            }
+        ];
+
+        // Carregar utilitários do localStorage se existirem
+        document.addEventListener('DOMContentLoaded', function() {
+            const utilitariosSalvos = localStorage.getItem('utilitarios');
+            if (utilitariosSalvos) {
+                utilitarios = JSON.parse(utilitariosSalvos);
+            }
+            
+            renderizarUtilitarios();
+            configurarNavegacao();
+            configurarFormulario();
+            configurarPesquisa();
+            atualizarContadores();
+        });
+
+        // Função para renderizar os utilitários
+        function renderizarUtilitarios() {
+            // Limpar todas as seções
+            const todasSecoes = document.querySelectorAll('.grid-utilitarios');
+            todasSecoes.forEach(secao => {
+                secao.innerHTML = '';
+            });
+
+            // Adicionar utilitários às seções correspondentes
+            utilitarios.forEach(utilitario => {
+                const utilitarioHTML = criarUtilitarioHTML(utilitario);
+                
+                // Adicionar à seção "Todos"
+                document.getElementById('utilitarios-todos').innerHTML += utilitarioHTML;
+                
+                // Adicionar à seção "Favoritos" se for favorito
+                if (utilitario.favorito) {
+                    document.getElementById('utilitarios-favoritos').innerHTML += utilitarioHTML;
+                }
+            });
+
+            // Ordenar e adicionar à seção "Recentes"
+            const recentes = [...utilitarios].sort((a, b) => b.ultimoAcesso - a.ultimoAcesso).slice(0, 6);
+            recentes.forEach(utilitario => {
+                document.getElementById('utilitarios-recentes').innerHTML += criarUtilitarioHTML(utilitario);
+            });
+
+            // Verificar se há conteúdo vazio
+            verificarConteudoVazio();
+            atualizarContadores();
+        }
+
+        // Função para criar o HTML de um utilitário
+        function criarUtilitarioHTML(utilitario) {
+            return `
+                <div class="utilitario" data-id="${utilitario.id}">
+                    <div class="utilitario-header">
+                        <i class="${utilitario.icone}"></i>
+                        <button class="favorito-btn ${utilitario.favorito ? 'ativo' : ''}" data-id="${utilitario.id}">
+                            <i class="fas fa-star"></i>
+                        </button>
+                    </div>
+                    <h3>${utilitario.nome}</h3>
+                    <p>${utilitario.descricao}</p>
+                    <a href="${utilitario.url}" target="_blank" class="btn-link">
+                        <i class="fas fa-external-link-alt"></i> Acessar
+                    </a>
+                </div>
+            `;
+        }
+
+        // Configurar a navegação (abas e categorias)
+        function configurarNavegacao() {
+            // Configurar abas
+            const abas = document.querySelectorAll('.aba');
+            abas.forEach(aba => {
+                aba.addEventListener('click', function() {
+                    abas.forEach(a => a.classList.remove('ativa'));
+                    this.classList.add('ativa');
+                    
+                    const conteudosAbas = document.querySelectorAll('.conteudo-aba');
+                    conteudosAbas.forEach(conteudo => conteudo.classList.remove('ativa'));
+                    
+                    const abaId = this.getAttribute('data-aba');
+                    document.getElementById(`aba-${abaId}`).classList.add('ativa');
+                });
+            });
+
+            // Configurar categorias na sidebar
+            const categorias = document.querySelectorAll('.categoria');
+            categorias.forEach(categoria => {
+                categoria.addEventListener('click', function() {
+                    categorias.forEach(c => c.classList.remove('ativa'));
+                    this.classList.add('ativa');
+                    
+                    const cat = this.getAttribute('data-categoria');
+                    if (cat === 'todos') {
+                        document.getElementById('aba-todos').classList.add('ativa');
+                        document.querySelector('[data-aba="todos"]').classList.add('ativa');
+                        document.querySelector('#aba-todos .titulo-secao').innerHTML = '<i class="fas fa-th-large"></i> Todos os Utilitários';
+                        renderizarUtilitarios();
+                    } else {
+                        // Filtrar utilitários por categoria
+                        filtrarPorCategoria(cat);
+                    }
+                });
+            });
+
+            // Configurar botões de favorito
+            document.addEventListener('click', function(e) {
+                if (e.target.closest('.favorito-btn')) {
+                    const btn = e.target.closest('.favorito-btn');
+                    const id = parseInt(btn.getAttribute('data-id'));
+                    toggleFavorito(id);
+                }
+            });
+        }
+
+        // Filtrar utilitários por categoria
+        function filtrarPorCategoria(categoria) {
+            const utilitariosFiltrados = utilitarios.filter(u => u.categoria === categoria);
+            
+            // Limpar a seção de todos
+            document.getElementById('utilitarios-todos').innerHTML = '';
+            
+            // Adicionar apenas os utilitários da categoria selecionada
+            utilitariosFiltrados.forEach(utilitario => {
+                document.getElementById('utilitarios-todos').innerHTML += criarUtilitarioHTML(utilitario);
+            });
+            
+            // Ativar a aba "Todos"
+            document.querySelectorAll('.aba').forEach(aba => aba.classList.remove('ativa'));
+            document.querySelector('[data-aba="todos"]').classList.add('ativa');
+            
+            document.querySelectorAll('.conteudo-aba').forEach(aba => aba.classList.remove('ativa'));
+            document.getElementById('aba-todos').classList.add('ativa');
+            
+            // Atualizar título
+            const titulo = document.querySelector('#aba-todos .titulo-secao');
+            const nomesCategorias = {
+                'desenvolvimento': 'Desenvolvimento',
+                'design': 'Design',
+                'produtividade': 'Produtividade',
+                'comunicacao': 'Comunicação',
+                'pesquisa': 'Pesquisa',
+                'outros': 'Outros'
+            };
+            
+            titulo.innerHTML = `<i class="fas fa-${categoria === 'desenvolvimento' ? 'code' : categoria === 'design' ? 'palette' : categoria === 'produtividade' ? 'tasks' : categoria === 'comunicacao' ? 'comments' : categoria === 'pesquisa' ? 'search' : 'ellipsis-h'}"></i> ${nomesCategorias[categoria]}`;
+            
+            verificarConteudoVazio();
+        }
+
+        // Alternar favorito
+        function toggleFavorito(id) {
+            const utilitario = utilitarios.find(u => u.id === id);
+            if (utilitario) {
+                utilitario.favorito = !utilitario.favorito;
+                localStorage.setItem('utilitarios', JSON.stringify(utilitarios));
+                renderizarUtilitarios();
+            }
+        }
+
+        // Configurar o formulário de adição
+        function configurarFormulario() {
+            const form = document.getElementById('formUtilitario');
+            
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                // Obter valores do formulário
+                const nome = document.getElementById('nome').value;
+                const url = document.getElementById('url').value;
+                const descricao = document.getElementById('descricao').value;
+                const categoria = document.getElementById('categoria').value;
+                const icone = document.getElementById('icone').value || 'fas fa-link';
+                
+                // Criar novo utilitário
+                const novoUtilitario = {
+                    id: Date.now(),
+                    nome,
+                    url,
+                    descricao,
+                    categoria,
+                    icone,
+                    favorito: false,
+                    dataAdicao: Date.now(),
+                    ultimoAcesso: Date.now()
+                };
+                
+                // Adicionar ao array
+                utilitarios.push(novoUtilitario);
+                
+                // Salvar no localStorage
+                localStorage.setItem('utilitarios', JSON.stringify(utilitarios));
+                
+                // Renderizar novamente
+                renderizarUtilitarios();
+                
+                // Limpar formulário
+                form.reset();
+                document.getElementById('icone').value = 'fas fa-link';
+                
+                // Mostrar feedback visual
+                const btn = document.querySelector('.btn-adicionar');
+                const textoOriginal = btn.innerHTML;
+                btn.innerHTML = '<i class="fas fa-check"></i> Adicionado com Sucesso!';
+                btn.style.background = 'linear-gradient(135deg, #0FA968 0%, #0A7A4D 100%)';
+                
+                setTimeout(() => {
+                    btn.innerHTML = textoOriginal;
+                }, 2000);
+                
+                // Atualizar contadores
+                atualizarContadores();
+            });
+        }
+
+        // Configurar a funcionalidade de pesquisa
+        function configurarPesquisa() {
+            const searchInput = document.querySelector('.search-bar input');
+            
+            searchInput.addEventListener('input', function() {
+                const termo = this.value.toLowerCase();
+                
+                if (termo.length > 0) {
+                    const resultados = utilitarios.filter(u => 
+                        u.nome.toLowerCase().includes(termo) || 
+                        u.descricao.toLowerCase().includes(termo) ||
+                        u.categoria.toLowerCase().includes(termo)
+                    );
+                    
+                    // Limpar a seção de todos
+                    document.getElementById('utilitarios-todos').innerHTML = '';
+                    
+                    // Adicionar apenas os utilitários que correspondem à pesquisa
+                    resultados.forEach(utilitario => {
+                        document.getElementById('utilitarios-todos').innerHTML += criarUtilitarioHTML(utilitario);
+                    });
+                    
+                    // Ativar a aba "Todos"
+                    document.querySelectorAll('.aba').forEach(aba => aba.classList.remove('ativa'));
+                    document.querySelector('[data-aba="todos"]').classList.add('ativa');
+                    
+                    document.querySelectorAll('.conteudo-aba').forEach(aba => aba.classList.remove('ativa'));
+                    document.getElementById('aba-todos').classList.add('ativa');
+                    
+                    // Atualizar título
+                    const titulo = document.querySelector('#aba-todos .titulo-secao');
+                    titulo.innerHTML = `<i class="fas fa-search"></i> Resultados para "${termo}"`;
+                    
+                    verificarConteudoVazio();
+                } else {
+                    // Se a pesquisa estiver vazia, restaurar a visualização normal
+                    renderizarUtilitarios();
+                    const titulo = document.querySelector('#aba-todos .titulo-secao');
+                    titulo.innerHTML = `<i class="fas fa-th-large"></i> Todos os Utilitários`;
+                }
+            });
+        }
+
+        // Atualizar contadores de categorias
+        function atualizarContadores() {
+            const categorias = ['todos', 'desenvolvimento', 'design', 'produtividade', 'comunicacao', 'pesquisa', 'outros'];
+            
+            categorias.forEach(cat => {
+                const contador = document.getElementById(`contador-${cat === 'todos' ? 'todos' : cat === 'desenvolvimento' ? 'dev' : cat === 'design' ? 'design' : cat === 'produtividade' ? 'prod' : cat === 'comunicacao' ? 'com' : cat === 'pesquisa' ? 'pesq' : 'outros'}`);
+                
+                if (cat === 'todos') {
+                    contador.textContent = utilitarios.length;
+                } else {
+                    const count = utilitarios.filter(u => u.categoria === cat).length;
+                    contador.textContent = count;
+                }
+            });
+        }
+
+        // Verificar se há conteúdo vazio e exibir mensagem
+        function verificarConteudoVazio() {
+            const secoes = document.querySelectorAll('.grid-utilitarios');
+            
+            secoes.forEach(secao => {
+                if (secao.children.length === 0) {
+                    secao.innerHTML = `
+                        <div class="empty-state">
+                            <i class="fas fa-inbox"></i>
+                            <h3>Nenhum utilitário encontrado</h3>
+                            <p>Adicione alguns utilitários para começar</p>
+                        </div>
+                    `;
+                }
+            });
+        }
+    </script>
+</body>
+</html>
