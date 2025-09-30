@@ -5,18 +5,16 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>SOFT-ATA TECNOLOGIA EM SOFTWARES - CENTRAL</title>
 
-  <!--
-    ✔ Mantido: CSS/JS externos
-    ✔ Observação: o script usa "defer" para garantir que o DOM esteja parseado
-  -->
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+  <!-- CSS e JS do sistema -->
   <link rel="stylesheet" href="style.css" />
   <script src="script.js" defer></script>
 </head>
 <body>
   <!-- ================================================================
        HEADER — topo fixo
-       Ajuste: avatar de perfil foi movido PARA DENTRO do header (à direita),
-       conforme pedido (ficar ao lado do relógio/tema).
        ================================================================ -->
   <header>
     <div class="wrap">
@@ -30,7 +28,6 @@
         </div>
 
         <!-- Lado direito: relógio + switch de tema + avatar de perfil -->
-        <!-- Dica: este bloco tem margin-left:auto via .theme-toggle, empurrando-o para a direita -->
         <div class="theme-toggle" title="Alternar claro/escuro">
           <span id="clock" class="clock" aria-live="polite">00:00:00</span>
           <span class="chip">Tema</span>
@@ -38,7 +35,7 @@
             <span class="knob"></span>
           </button>
 
-          <!-- Perfil (avatar clicável) — NOVO: movido do body para o header -->
+          <!-- Perfil (avatar clicável) -->
           <div class="profile-box">
             <button id="btnProfile" class="profile-btn" aria-label="Abrir perfil">
               <img id="profileAvatar" class="avatar" src="" alt="Foto do perfil" />
@@ -55,11 +52,8 @@
 
   <!-- ================================================================
        SIDEBAR — navegação por abas
-       Acessibilidade: adicionados IDs nos botões (role=tab) e
-       painéis referenciando esses IDs via aria-labelledby.
        ================================================================ -->
-  <!-- GRUPO COLAPSÁVEL: Contatos -->
-       <nav class="sidebar" id="sidebar" aria-label="Navegação principal">
+  <nav class="sidebar" id="sidebar" aria-label="Navegação principal">
     <h2>Painel</h2>
     <div class="nav" id="navList" role="tablist" aria-orientation="vertical">
       <button id="tabbtn-home"      data-go="home"      role="tab" aria-controls="tab-home"      aria-selected="false">Home</button>
@@ -72,7 +66,6 @@
       <button id="tabbtn-ideias"    data-go="ideias"    role="tab" aria-controls="tab-ideias"    aria-selected="false">Ideias & Melhorias</button>
       <button id="tabbtn-atualiz"   data-go="atualiz"   role="tab" aria-controls="tab-atualiz"   aria-selected="false">Atualizações</button>
       <button id="tabbtn-holerite"  data-go="holerite"  role="tab" aria-controls="tab-holerite"  aria-selected="false">Holerite</button>
-      <!-- SUBSTITUIR no navList -->
       <button id="tabbtn-assistente" data-go="assistente" role="tab" aria-controls="tab-assistente" aria-selected="false">Assistente</button>
       <button id="tabbtn-config"    data-go="config"    role="tab" aria-controls="tab-config"    aria-selected="false">Configurações</button>
     </div>
@@ -80,8 +73,6 @@
 
   <!-- ================================================================
        MAIN — painéis (um por aba)
-       Ajuste: deixamos SOMENTE a HOME visível inicialmente; os demais com hidden.
-       O JS controla visibilidade via setTab().
        ================================================================ -->
   <main>
     <!-- ============================ HOME ============================= -->
@@ -159,167 +150,240 @@
     </section>
 
     <!-- ======================== ATENDIMENTO ========================= -->
-<section id="tab-fila" class="panel" role="tabpanel" aria-labelledby="tabbtn-fila" hidden>
-  <h3>Atendimento</h3>
+    <section id="tab-fila" class="panel" role="tabpanel" aria-labelledby="tabbtn-fila" hidden>
+      <div class="v-fila">
+        <!-- Cabeçalho -->
+        <div class="panel">
+          <h2 class="panel-title">
+            <i class="fas fa-headset"></i>
+            SOFT-ATA TECNOLOGIA EM SOFTWARES - SISTEMA DE ATENDIMENTOS
+          </h2>
+          <div class="chip primary">
+            <i class="fas fa-sync-alt"></i>
+            <span id="last-update">Atualizado agora</span>
+          </div>
+        </div>
 
-  <!-- (1+2) Cliente, Solicitante e demais campos -->
-<div class="grid cols-6" style="gap:12px; margin-top:10px">
-  <div>
-    <label for="t_cliente">Cliente (obrigatório)</label>
-    <select id="t_cliente" required aria-required="true">
-      <option value="">Selecione um cliente…</option>
-    </select>
-  </div>
-  <div>
-    <label>Cliente selecionado</label>
-    <div id="t_cliente_info" class="chip" aria-live="polite">Nenhum cliente selecionado</div>
-  </div>
-  <div>
-    <label for="t_solicitante">Solicitante</label>
-    <input id="t_solicitante" placeholder="Nome do solicitante">
-  </div>
-  <div>
-    <label for="t_modulo">Módulo</label>
-    <select id="t_modulo" aria-label="Módulo">
-      <option value="">Módulo</option>
-    </select>
-  </div>
-  <div>
-    <label for="t_motivo">Motivo</label>
-    <select id="t_motivo" aria-label="Motivo">
-      <option value="">Motivo</option>
-    </select>
-  </div>
-  <div>
-    <label for="t_data">Data</label>
-    <input id="t_data" type="date" title="Data do atendimento" aria-label="Data do atendimento">
-  </div>
-</div>
+        <!-- Formulário de novo atendimento -->
+        <div class="panel">
+          <h3 class="panel-title">
+            <i class="fas fa-plus-circle"></i>
+            Novo Atendimento
+          </h3>
+          
+          <div class="grid cols-6">
+            <div>
+              <label for="t_cliente"><i class="fas fa-user"></i> CLIENTE *</label>
+              <select id="t_cliente" required>
+                <option value="">Selecione um cliente…</option>
+              </select>
+            </div>
+            <div>
+              <label>Cliente selecionado</label>
+              <div id="t_cliente_info" class="chip">
+                <i class="fas fa-info-circle"></i>
+                Nenhum cliente selecionado
+              </div>
+            </div>
+            <div>
+              <label for="t_solicitante"><i class="fas fa-user-tag"></i> SOLICITANTE</label>
+              <input id="t_solicitante" placeholder="Nome do solicitante">
+            </div>
+            <div>
+              <label for="t_modulo"><i class="fas fa-cube"></i> MÓDULO</label>
+              <select id="t_modulo">
+                <option value="">Selecione o módulo</option>
+              </select>
+            </div>
+            <div>
+              <label for="t_motivo"><i class="fas fa-question-circle"></i> MOTIVO</label>
+              <select id="t_motivo">
+                <option value="">Selecione o motivo</option>
+              </select>
+            </div>
+            <div>
+              <label for="t_data"><i class="fas fa-calendar"></i> DATA</label>
+              <input id="t_data" type="date">
+            </div>
+          </div>
 
-  <!-- (3) Ações do formulário -->
-  <div class="row" style="margin-top:10px">
-    <button class="btn success" id="t_add">Adicionar</button>
-  </div>
+          <div class="row mt-2">
+            <button class="btn success rounded" id="t_add">
+              <i class="fas fa-plus"></i>
+              Adicionar Atendimento
+            </button>
+          </div>
+        </div>
 
-  <!-- (4) Quadro Kanban -->
-  <!-- Cards devem exibir: "Código do cliente e Nome / Módulo / Motivo / Data / (botões de status abaixo)".
-       O JS vai montar os cards dinamicamente e ocultar o botão do status atual.
-       Quando o status for "Concluído", o botão "Aberto" vira "Reabrir" ao lado do "Editar". -->
-  <div class="kanban" style="margin-top:12px">
-    <div class="col" data-col="aberto">
-      <h4>Aberto</h4>
-      <div class="tlist" id="col-aberto"></div>
-    </div>
-    <div class="col" data-col="atendimento">
-      <h4>Em atendimento</h4>
-      <div class="tlist" id="col-atendimento"></div>
-    </div>
-    <div class="col" data-col="aguardando">
-      <h4>Aguardando retorno</h4>
-      <div class="tlist" id="col-aguardando"></div>
-    </div>
-    <div class="col" data-col="programacao">
-      <h4>Programação</h4>
-      <div class="tlist" id="col-programacao"></div>
-    </div>
-    <div class="col" data-col="concluido">
-      <h4>Concluído</h4>
-      <div class="tlist" id="col-concluido"></div>
-    </div>
-  </div>
-</section>
+        <!-- Quadro Kanban -->
+        <div class="panel">
+          <h3 class="panel-title">
+            <i class="fas fa-columns"></i>
+            Quadro de Atendimentos
+          </h3>
+          
+          <div class="kanban">
+            <div class="col" data-col="aberto">
+              <h4>ABERTO <span class="col-count" id="count-aberto">0</span></h4>
+              <div class="tlist" id="col-aberto">
+                <div class="empty-state">
+                  <i class="fas fa-inbox"></i>
+                  <p>Nenhum atendimento em aberto</p>
+                </div>
+              </div>
+            </div>
+            <div class="col" data-col="atendimento">
+              <h4>EM ATENDIMENTO <span class="col-count" id="count-atendimento">0</span></h4>
+              <div class="tlist" id="col-atendimento">
+                <div class="empty-state">
+                  <i class="fas fa-user-clock"></i>
+                  <p>Nenhum atendimento em andamento</p>
+                </div>
+              </div>
+            </div>
+            <div class="col" data-col="aguardando">
+              <h4>AGUARDANDO RETORNO <span class="col-count" id="count-aguardando">0</span></h4>
+              <div class="tlist" id="col-aguardando">
+                <div class="empty-state">
+                  <i class="fas fa-clock"></i>
+                  <p>Nenhum atendimento aguardando</p>
+                </div>
+              </div>
+            </div>
+            <div class="col" data-col="programacao">
+              <h4>PROGRAMAÇÃO <span class="col-count" id="count-programacao">0</span></h4>
+              <div class="tlist" id="col-programacao">
+                <div class="empty-state">
+                  <i class="fas fa-calendar-check"></i>
+                  <p>Nenhum atendimento programado</p>
+                </div>
+              </div>
+            </div>
+            <div class="col" data-col="concluido">
+              <h4>CONCLUÍDO <span class="col-count" id="count-concluido">0</span></h4>
+              <div class="tlist" id="col-concluido">
+                <div class="empty-state">
+                  <i class="fas fa-check-circle"></i>
+                  <p>Nenhum atendimento concluído</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
 
-<!-- ===== Templates de Atendimento (usados pelo JS) ===== -->
-
-<!-- Template do CARD de atendimento (estrutura padrão que o JS vai clonar) -->
-<template id="ticketCardTpl">
-  <div class="ticket" data-id="">
-    <!-- Cabeçalho do card -->
-    <div class="head">
-      <!-- Título do card: "COD — Nome do Cliente" -->
-      <div class="title" data-bind="clienteTitulo">COD — Nome</div>
-      <!-- Pill com o status atual -->
-      
-    </div>
-
-    <!-- Metadados principais -->
-<div class="meta">
-  <div class="meta-line"><b>Módulo:</b> <span data-bind="modulo">—</span></div>
-  <div class="meta-line"><b>Motivo:</b> <span data-bind="motivo">—</span></div>
-  <div class="meta-line"><b>Data:</b>   <span data-bind="data">—</span></div>
-  <div class="meta-line"><b>Solicitante:</b> <span data-bind="solicitante">—</span></div>
-</div>
-
-<!-- Usuário -->
-<div class="assignee row" style="margin-top:8px">
-  <img class="avatar" data-bind="assigneeAvatar" alt="Foto do usuário">
-  <span class="assignee-name" data-bind="assigneeName">Sem usuário</span>
-</div>
-
-    <!-- Problema / Solução -->
-    <div class="ps grid cols-2" style="gap:8px">
-      <div>
-        <label class="muted">Problema</label>
-        <div class="ps-text" data-bind="problem">—</div>
-      </div>
-      <div>
-        <label class="muted">Solução</label>
-        <div class="ps-text" data-bind="solution">—</div>
-      </div>
-    </div>
-
-    <!-- Área dos botões de status (o JS vai ocultar o botão do status atual) -->
-    <div class="actions" data-bind="actions">
-      <!-- Os botões serão inseridos via JS respeitando as cores:
-           Aberto (Azul), Aguardando (Amarelo), Em atendimento (Laranja),
-           Programação (Roxo), Concluído (Verde) -->
-    </div>
-  </div>
-</template>
-
-<!-- ========== TELINHA (POPOVER) DO ATENDIMENTO ========== -->
-<template id="ticketActionsTpl">
-  <div class="popover" role="dialog" aria-modal="true" aria-label="Ações do atendimento">
-    <button class="popover__close" data-close aria-label="Fechar" type="button">✖</button>
-
-    <div class="popover__content">
-      <h4 style="margin:0 0 6px">Atendimento</h4>
-
-      <!-- Campo de Solicitante (novo) -->
-      <div class="grid cols-1" style="gap:8px; margin:8px 0">
-        <div>
-          <label class="muted" for="po_solicitante">Solicitante</label>
-          <input id="po_solicitante" placeholder="Quem solicitou o atendimento?">
+        <!-- Modal de Detalhes do Atendimento -->
+        <div id="ticketModal" class="modal" hidden aria-hidden="true" aria-labelledby="ticketModalTitle" role="dialog">
+          <div class="modal__backdrop" data-close aria-label="Fechar"></div>
+          <div class="modal__card">
+            <div class="modal__header">
+              <h3 class="modal__title" id="ticketModalTitle">
+                <i class="fas fa-ticket-alt"></i>
+                <span id="modalTitle">Detalhes do Atendimento</span>
+              </h3>
+              <button class="modal__close" id="modalClose" aria-label="Fechar">&times;</button>
+            </div>
+            
+            <div class="modal__body">
+              <div class="form-section">
+                <h4 class="form-section-title">Informações Básicas</h4>
+                <div class="grid cols-3">
+                  <div>
+                    <label for="tm_cliente">Cliente</label>
+                    <select id="tm_cliente" disabled>
+                      <option value="">Selecione um cliente</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label for="tm_solicitante">Solicitante</label>
+                    <input id="tm_solicitante" type="text" placeholder="Nome do solicitante">
+                  </div>
+                  <div>
+                    <label for="tm_data">Data</label>
+                    <input id="tm_data" type="date">
+                  </div>
+                </div>
+                
+                <div class="grid cols-2 mt-2">
+                  <div>
+                    <label for="tm_modulo">Módulo</label>
+                    <select id="tm_modulo">
+                      <option value="">Selecione o módulo</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label for="tm_motivo">Motivo</label>
+                    <select id="tm_motivo">
+                      <option value="">Selecione o motivo</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="form-section">
+                <h4 class="form-section-title">Detalhes do Atendimento</h4>
+                <div class="grid cols-2">
+                  <div>
+                    <label for="tm_problem">
+                      <i class="fas fa-exclamation-circle"></i>
+                      Problema
+                    </label>
+                    <textarea id="tm_problem" rows="6" placeholder="Descreva o problema encontrado"></textarea>
+                  </div>
+                  <div>
+                    <label for="tm_solution">
+                      <i class="fas fa-check-circle"></i>
+                      Solução
+                    </label>
+                    <textarea id="tm_solution" rows="6" placeholder="Descreva a solução aplicada"></textarea>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="form-section">
+                <h4 class="form-section-title">Ações</h4>
+                <div class="grid cols-3">
+                  <div>
+                    <label>Status Atual</label>
+                    <div id="currentStatus" class="status-indicator status-aberto">Aberto</div>
+                  </div>
+                  <div>
+                    <label>Alterar Status</label>
+                    <select id="tm_status">
+                      <option value="aberto">Aberto</option>
+                      <option value="atendimento">Em Atendimento</option>
+                      <option value="aguardando">Aguardando Retorno</option>
+                      <option value="programacao">Programação</option>
+                      <option value="concluido">Concluído</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label>Responsável</label>
+                    <input id="tm_responsavel" type="text" placeholder="Nome do responsável">
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div class="modal__actions">
+              <button class="btn danger" id="tm_delete">
+                <i class="fas fa-trash"></i>
+                Excluir
+              </button>
+              <button class="btn accent" id="tm_cancel">
+                <i class="fas fa-times"></i>
+                Cancelar
+              </button>
+              <button class="btn success" id="tm_save">
+                <i class="fas fa-save"></i>
+                Salvar Alterações
+              </button>
+            </div>
+          </div>
         </div>
       </div>
-
-      <!-- Problema / Solução dentro da telinha (já existia) -->
-      <div class="grid cols-2" style="gap:8px">
-        <div>
-          <label class="muted" for="po_problem">Problema</label>
-          <textarea id="po_problem" rows="5" placeholder="Descreva o problema"></textarea>
-        </div>
-        <div>
-          <label class="muted" for="po_solution">Solução</label>
-          <textarea id="po_solution" rows="5" placeholder="Descreva a solução"></textarea>
-        </div>
-      </div>
-
-      <div class="row" style="justify-content:flex-end;gap:8px;margin-top:10px">
-        <button class="btn success editar" data-act="edit"   type="button">Editar</button>
-        <button class="btn danger  excluir" data-act="delete" type="button">Excluir</button>
-        <button class="btn success"         data-act="save"   type="button">Salvar</button>
-        <button class="btn lancar pink" data-act="launch" data-visible-for="concluido" type="button">Lançar</button>
-      </div>
-    </div>
-  </div>
-</template>
-
-<!-- Container fixo onde a telinha será renderizada -->
-<div id="popoverRoot" class="popover-root" hidden></div>
+    </section>
 
     <!-- ========================== ORDENS ============================ -->
-    <!-- Ajuste: deixamos hidden para evitar "piscar" antes do JS esconder -->
     <section id="tab-ordens" class="panel" role="tabpanel" aria-labelledby="tabbtn-ordens" hidden>
       <h3>Ordens</h3>
       <table class="table">
@@ -353,491 +417,491 @@
     </section>
 
     <!-- ======================= ASSISTENTE ======================= -->
-<section id="tab-assistente" class="panel assist-wrap" role="tabpanel" aria-labelledby="tabbtn-assistente" hidden>
-  <div class="v-assistente">
-    <!-- Cabeçalho -->
-    <section class="assist-hero">
-      <div>
-        <h2>Assistente de Cálculos Trabalhistas</h2>
-        <p class="muted">Folha, Férias, 13º, Horas Extras, Adicional Noturno, Rescisão, Parâmetros e Totais.</p>
-      </div>
-      <div class="chips">
-        <span class="chip badge">SOFT‑ATA</span>
-        <span class="chip">Set/2025</span>
-        <span class="chip">v2.0</span>
+    <section id="tab-assistente" class="panel assist-wrap" role="tabpanel" aria-labelledby="tabbtn-assistente" hidden>
+      <div class="v-assistente">
+        <!-- Cabeçalho -->
+        <section class="assist-hero">
+          <div>
+            <h2>Assistente de Cálculos Trabalhistas</h2>
+            <p class="muted">Folha, Férias, 13º, Horas Extras, Adicional Noturno, Rescisão, Parâmetros e Totais.</p>
+          </div>
+          <div class="chips">
+            <span class="chip badge">SOFT‑ATA</span>
+            <span class="chip">Set/2025</span>
+            <span class="chip">v2.0</span>
+          </div>
+        </section>
+
+        <!-- Abas -->
+        <nav class="assist-tabs" role="tablist" aria-label="Assistente de Cálculos">
+          <button class="assist-tab active" data-tab="folha" role="tab" aria-selected="true">🧾 Folha</button>
+          <button class="assist-tab" data-tab="ferias" role="tab">🌴 Férias</button>
+          <button class="assist-tab" data-tab="decimo" role="tab">🎁 13º</button>
+          <button class="assist-tab" data-tab="horas" role="tab">⏱️ Horas Extras</button>
+          <button class="assist-tab" data-tab="noturno" role="tab">🌙 Adic. Noturno</button>
+          <button class="assist-tab" data-tab="rescisao" role="tab">📄 Rescisão</button>
+          <button class="assist-tab" data-tab="tabelas" role="tab">⚙️ Parâmetros</button>
+          <button class="assist-tab" data-tab="resumo" role="tab">📊 Totais</button>
+        </nav>
+
+        <div class="assist-grid">
+          <!-- Coluna principal: formulários -->
+          <div class="assist-col">
+            <!-- Folha -->
+            <section id="pane-folha" class="assist-pane" role="tabpanel">
+              <div class="panel">
+                <h3 class="panel-title">Cálculo da Folha Mensal (CLT)</h3>
+                <p class="muted">INSS progressivo, FGTS 8%, IRRF (tabelas jan–abr/25 e desde mai/25), dependentes, desconto simplificado e salário‑família.</p>
+                
+                <div class="form-grid">
+                  <div>
+                    <label for="f-salario">Remuneração base (R$)</label>
+                    <input id="f-salario" class="input" type="number" min="0" step="0.01" placeholder="Ex.: 3500,00">
+                  </div>
+                  <div>
+                    <label for="f-dependentes">Dependentes (IRRF)</label>
+                    <input id="f-dependentes" class="input" type="number" min="0" step="1" value="0">
+                  </div>
+                  <div>
+                    <label for="f-competencia">Competência</label>
+                    <select id="f-competencia" class="input">
+                      <option value="2025-09" selected>Set/2025 (pós-maio)</option>
+                      <option value="2025-04">Abr/2025 (jan–abr)</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label for="f-simplificado">Desconto simplificado IRRF</label>
+                    <select id="f-simplificado" class="input">
+                      <option value="nao" selected>Não (tradicional)</option>
+                      <option value="sim">Sim (25% até teto)</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label for="f-outras">Outras verbas (R$)</label>
+                    <input id="f-outras" class="input" type="number" min="0" step="0.01" value="0">
+                  </div>
+                </div>
+                
+                <div class="action-buttons">
+                  <button id="btnCalcularFolha" class="btn primary">Calcular</button>
+                  <button id="btnLimparFolha" class="btn ghost">Limpar</button>
+                </div>
+              </div>
+            </section>
+
+            <!-- Férias -->
+            <section id="pane-ferias" class="assist-pane" role="tabpanel" hidden>
+              <div class="panel">
+                <h3 class="panel-title">Férias (1/3 constitucional)</h3>
+                <p class="muted">Com opção de abono (venda) de até 10 dias e cálculo de IRRF/INSS.</p>
+                
+                <div class="form-grid">
+                  <div>
+                    <label for="fer-salario">Remuneração base (R$)</label>
+                    <input id="fer-salario" class="input" type="number" min="0" step="0.01">
+                  </div>
+                  <div>
+                    <label for="fer-dias">Dias de férias</label>
+                    <input id="fer-dias" class="input" type="number" min="0" max="30" value="30">
+                  </div>
+                  <div>
+                    <label for="fer-abono">Abono (dias vendidos)</label>
+                    <select id="fer-abono" class="input">
+                      <option value="0" selected>Não</option>
+                      <option value="10">10 dias</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label for="fer-dependentes">Dependentes (IRRF)</label>
+                    <input id="fer-dependentes" class="input" type="number" min="0" step="1" value="0">
+                  </div>
+                  <div>
+                    <label for="fer-competencia">Competência IRRF</label>
+                    <select id="fer-competencia" class="input">
+                      <option value="maio-2025" selected>Mai/2025 em diante</option>
+                      <option value="jan-abr-2025">Jan–Abr/2025</option>
+                    </select>
+                  </div>
+                </div>
+                
+                <div class="action-buttons">
+                  <button id="btnCalcularFerias" class="btn primary">Calcular</button>
+                  <button id="btnLimparFerias" class="btn ghost">Limpar</button>
+                </div>
+              </div>
+            </section>
+
+            <!-- 13º -->
+            <section id="pane-decimo" class="assist-pane" role="tabpanel" hidden>
+              <div class="panel">
+                <h3 class="panel-title">13º Salário</h3>
+                <p class="muted">Cálculo proporcional por meses no ano, com INSS e IRRF na 2ª parcela.</p>
+                
+                <div class="form-grid">
+                  <div>
+                    <label for="d-salario">Salário base (R$)</label>
+                    <input id="d-salario" class="input" type="number" min="0" step="0.01">
+                  </div>
+                  <div>
+                    <label for="d-meses">Meses trabalhados</label>
+                    <input id="d-meses" class="input" type="number" min="0" max="12" value="12">
+                  </div>
+                  <div>
+                    <label for="d-dependentes">Dependentes (IRRF)</label>
+                    <input id="d-dependentes" class="input" type="number" min="0" step="1" value="0">
+                  </div>
+                  <div>
+                    <label for="d-adiant">Adiantamento</label>
+                    <select id="d-adiant" class="input">
+                      <option value="0">Não</option>
+                      <option value="1" selected>Sim (50%)</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label for="d-competencia">Competência IRRF (2ª parcela)</label>
+                    <select id="d-competencia" class="input">
+                      <option value="maio-2025" selected>Mai/2025 em diante</option>
+                      <option value="jan-abr-2025">Jan–Abr/2025</option>
+                    </select>
+                  </div>
+                </div>
+                
+                <div class="action-buttons">
+                  <button id="btnCalcular13" class="btn primary">Calcular</button>
+                  <button id="btnLimpar13" class="btn ghost">Limpar</button>
+                </div>
+              </div>
+            </section>
+
+            <!-- Horas Extras -->
+            <section id="pane-horas" class="assist-pane" role="tabpanel" hidden>
+              <div class="panel">
+                <h3 class="panel-title">Horas Extras</h3>
+                <p class="muted">Cálculo pelo valor hora (220h/mês) com percentuais de 50%, 70% ou 100%.</p>
+                
+                <div class="form-grid">
+                  <div>
+                    <label for="h-salario">Salário mensal (R$)</label>
+                    <input id="h-salario" class="input" type="number" min="0" step="0.01">
+                  </div>
+                  <div>
+                    <label for="h-horas">Horas extras (mês)</label>
+                    <input id="h-horas" class="input" type="number" min="0" step="0.01">
+                  </div>
+                  <div>
+                    <label for="h-adic">Adicional</label>
+                    <select id="h-adic" class="input">
+                      <option value="0.5" selected>50% (dias úteis)</option>
+                      <option value="1.0">100% (dom./fer.)</option>
+                      <option value="0.7">70%</option>
+                    </select>
+                  </div>
+                </div>
+                
+                <div class="action-buttons">
+                  <button id="btnCalcularHoras" class="btn primary">Calcular</button>
+                  <button id="btnLimparHoras" class="btn ghost">Limpar</button>
+                </div>
+              </div>
+            </section>
+
+            <!-- Adicional Noturno -->
+            <section id="pane-noturno" class="assist-pane" role="tabpanel" hidden>
+              <div class="panel">
+                <h3 class="panel-title">Adicional Noturno</h3>
+                <p class="muted">Urbano 20% com hora ficta (52m30s) • Rural 25% (sem hora ficta).</p>
+                
+                <div class="form-grid">
+                  <div>
+                    <label for="n-salario">Salário mensal (R$)</label>
+                    <input id="n-salario" class="input" type="number" min="0" step="0.01">
+                  </div>
+                  <div>
+                    <label for="n-horas">Horas noturnas</label>
+                    <input id="n-horas" class="input" type="number" min="0" step="0.01">
+                  </div>
+                  <div>
+                    <label for="n-perc">Percentual</label>
+                    <select id="n-perc" class="input">
+                      <option value="0.20" selected>20% (urbano)</option>
+                      <option value="0.25">25% (rural)</option>
+                    </select>
+                  </div>
+                </div>
+                
+                <div class="action-buttons">
+                  <button id="btnCalcularNoturno" class="btn primary">Calcular</button>
+                  <button id="btnLimparNoturno" class="btn ghost">Limpar</button>
+                </div>
+              </div>
+            </section>
+
+            <!-- Rescisão -->
+            <section id="pane-rescisao" class="assist-pane" role="tabpanel" hidden>
+              <div class="panel">
+                <h3 class="panel-title">Rescisão (sem justa causa)</h3>
+                
+                <div class="form-grid">
+                  <div>
+                    <label for="r-salario">Salário base (R$)</label>
+                    <input id="r-salario" class="input" type="number" min="0" step="0.01">
+                  </div>
+                  <div>
+                    <label for="r-meses">Meses trabalhados no ano</label>
+                    <input id="r-meses" class="input" type="number" min="0" max="12" value="12">
+                  </div>
+                  <div>
+                    <label for="r-saldo-dias">Saldo de dias (mês)</label>
+                    <input id="r-saldo-dias" class="input" type="number" min="0" max="30" value="0">
+                  </div>
+                  <div>
+                    <label for="r-fgts-saldo">Saldo FGTS (histórico) R$</label>
+                    <input id="r-fgts-saldo" class="input" type="number" min="0" step="0.01" placeholder="Para multa de 40%">
+                  </div>
+                  <div>
+                    <label for="r-ferias-vencidas">Férias vencidas?</label>
+                    <select id="r-ferias-vencidas" class="input">
+                      <option value="nao" selected>Não</option>
+                      <option value="sim">Sim (30 dias + 1/3)</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label for="r-motivo">Motivo</label>
+                    <select id="r-motivo" class="input">
+                      <option value="sem-justa" selected>Sem justa causa</option>
+                      <option value="pedido">Pedido de demissão</option>
+                      <option value="termino">Término de contrato (prazo)</option>
+                      <option value="justa">Justa causa</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label for="r-aviso">Aviso prévio</label>
+                    <select id="r-aviso" class="input">
+                      <option value="indenizado" selected>Indenizado</option>
+                      <option value="trabalhado">Trabalhado</option>
+                      <option value="dispensado">Dispensado</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label for="r-aviso-dias">Dias de aviso</label>
+                    <input id="r-aviso-dias" class="input" type="number" min="0" max="90" value="30">
+                  </div>
+                </div>
+                
+                <div class="action-buttons">
+                  <button id="btnCalcularRescisao" class="btn primary">Calcular</button>
+                  <button id="btnLimparRescisao" class="btn ghost">Limpar</button>
+                </div>
+              </div>
+            </section>
+
+            <!-- Parâmetros -->
+            <section id="pane-tabelas" class="assist-pane" role="tabpanel" hidden>
+              <div class="panel">
+                <h3 class="panel-title">Parâmetros oficiais — 2025</h3>
+                <p class="muted">Alterações podem ocorrer por lei/portaria/CCT. Edite no código-fonte (objeto <code>PARAMS</code>) se necessário.</p>
+                
+                <div class="grid cols-2">
+                  <div class="panel">
+                    <h4>INSS (empregado) — desde 01/01/2025</h4>
+                    <ul class="muted" style="padding-left: 20px; margin-top: 10px;">
+                      <li>Até R$ 1.518,00 → 7,5%</li>
+                      <li>R$ 1.518,01 a R$ 2.793,88 → 9%</li>
+                      <li>R$ 2.793,89 a R$ 4.190,83 → 12%</li>
+                      <li>R$ 4.190,84 a R$ 8.157,41 → 14%</li>
+                    </ul>
+                    <p class="muted" style="margin-top: 10px; font-size: 12px;">Teto: R$ 8.157,41 • Salário‑mínimo: R$ 1.518,00</p>
+                  </div>
+                  <div class="panel">
+                    <h4>IRRF mensal — desde 05/2025</h4>
+                    <ul class="muted" style="padding-left: 20px; margin-top: 10px;">
+                      <li>Até R$ 2.428,80 → isento</li>
+                      <li>R$ 2.428,81 a R$ 2.826,65 → 7,5% (deduz R$ 182,16)</li>
+                      <li>R$ 2.826,66 a R$ 3.751,05 → 15% (deduz R$ 394,16)</li>
+                      <li>R$ 3.751,06 a R$ 4.664,68 → 22,5% (deduz R$ 675,49)</li>
+                      <li>Acima de R$ 4.664,68 → 27,5% (deduz R$ 908,73)</li>
+                    </ul>
+                    <p class="muted" style="margin-top: 10px; font-size: 12px;">Dependente: R$ 189,59 • Simplificado: 25% até R$ 607,20/mês</p>
+                  </div>
+                  <div class="panel">
+                    <h4>FGTS</h4>
+                    <p class="muted" style="margin-top: 10px;">Depósito mensal: 8% (regra geral). Multa rescisória: 40% do saldo em demissão sem justa causa.</p>
+                  </div>
+                  <div class="panel">
+                    <h4>Salário‑família — desde 01/01/2025</h4>
+                    <p class="muted" style="margin-top: 10px;">R$ 65,00 por dependente até a remuneração de R$ 1.906,04.</p>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <!-- Totais -->
+            <section id="pane-resumo" class="assist-pane" role="tabpanel" hidden>
+              <div class="grid cols-2">
+                <div class="panel">
+                  <div class="row" style="justify-content: space-between; margin-bottom: 10px;">
+                    <h4>Folha</h4>
+                    <label class="text-sm flex items-center gap-2">
+                      <input id="include-folha" type="checkbox" checked> Incluir
+                    </label>
+                  </div>
+                  <div class="space-y-2">
+                    <div class="kv"><span class="muted">Líquido</span><span id="sum-folha-liq">—</span></div>
+                    <div class="kv"><span class="muted">Descontos</span><span id="sum-folha-desc">—</span></div>
+                    <div class="kv"><span class="muted">Proventos</span><span id="sum-folha-prov">—</span></div>
+                    <div class="kv"><span class="muted">FGTS (8%)</span><span id="sum-folha-fgts">—</span></div>
+                  </div>
+                </div>
+                <div class="panel">
+                  <div class="row" style="justify-content: space-between; margin-bottom: 10px;">
+                    <h4>Férias</h4>
+                    <label class="text-sm flex items-center gap-2">
+                      <input id="include-ferias" type="checkbox"> Incluir
+                    </label>
+                  </div>
+                  <div class="space-y-2">
+                    <div class="kv"><span class="muted">Líquido</span><span id="sum-ferias-liq">—</span></div>
+                  </div>
+                </div>
+                <div class="panel">
+                  <div class="row" style="justify-content: space-between; margin-bottom: 10px;">
+                    <h4>13º</h4>
+                    <label class="text-sm flex items-center gap-2">
+                      <input id="include-decimo" type="checkbox"> Incluir
+                    </label>
+                  </div>
+                  <div class="space-y-2">
+                    <div class="kv"><span class="muted">Líquido</span><span id="sum-decimo-liq">—</span></div>
+                  </div>
+                </div>
+                <div class="panel">
+                  <div class="row" style="justify-content: space-between; margin-bottom: 10px;">
+                    <h4>Horas Extras</h4>
+                    <label class="text-sm flex items-center gap-2">
+                      <input id="include-horas" type="checkbox" checked> Incluir
+                    </label>
+                  </div>
+                  <div class="space-y-2">
+                    <div class="kv"><span class="muted">Total</span><span id="sum-horas">—</span></div>
+                  </div>
+                </div>
+                <div class="panel">
+                  <div class="row" style="justify-content: space-between; margin-bottom: 10px;">
+                    <h4>Adic. Noturno</h4>
+                    <label class="text-sm flex items-center gap-2">
+                      <input id="include-noturno" type="checkbox" checked> Incluir
+                    </label>
+                  </div>
+                  <div class="space-y-2">
+                    <div class="kv"><span class="muted">Total</span><span id="sum-noturno">—</span></div>
+                  </div>
+                </div>
+                <div class="panel">
+                  <div class="row" style="justify-content: space-between; margin-bottom: 10px;">
+                    <h4>Rescisão</h4>
+                    <label class="text-sm flex items-center gap-2">
+                      <input id="include-rescisao" type="checkbox"> Incluir
+                    </label>
+                  </div>
+                  <div class="space-y-2">
+                    <div class="kv"><span class="muted">Líquido</span><span id="sum-rescisao-liq">—</span></div>
+                    <div class="kv"><span class="muted">Multa FGTS 40%</span><span id="sum-rescisao-multa">—</span></div>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="panel" style="margin-top: 20px;">
+                <div class="row" style="justify-content: space-between; align-items: center;">
+                  <div>
+                    <h3 class="panel-title">Total geral líquido</h3>
+                    <p class="muted">Soma dos módulos selecionados acima.</p>
+                  </div>
+                  <div id="sum-total" style="font-size: 28px; font-weight: 800; color: var(--accent);">—</div>
+                </div>
+              </div>
+            </section>
+          </div>
+
+          <!-- Coluna lateral: resultados (sticky) -->
+          <aside class="assist-col">
+            <div class="sticky-box">
+              <div class="panel">
+                <h3 class="panel-title">Resultados</h3>
+
+                <div id="result-folha" class="result-box space-y-2">
+                  <h4>Folha</h4>
+                  <div class="kv"><span class="muted">Base INSS</span><span id="r-base-inss">—</span></div>
+                  <div class="kv"><span class="muted">INSS</span><span id="r-inss">—</span></div>
+                  <div class="kv"><span class="muted">Base FGTS</span><span id="r-base-fgts">—</span></div>
+                  <div class="kv"><span class="muted">FGTS (8%)</span><span id="r-fgts">—</span></div>
+                  <div class="kv"><span class="muted">Base IRRF</span><span id="r-base-irrf">—</span></div>
+                  <div class="kv"><span class="muted">IRRF</span><span id="r-irrf">—</span></div>
+                  <div class="kv"><span class="muted">Salário‑família</span><span id="r-salario-familia">—</span></div>
+                  <hr class="sep"/>
+                  <div class="kv"><span class="muted">Descontos</span><span id="r-descontos">—</span></div>
+                  <div class="kv"><span class="muted">Proventos</span><span id="r-proventos">—</span></div>
+                  <div class="kv big"><span class="muted">Líquido</span><span id="r-liquido">—</span></div>
+                </div>
+
+                <div id="result-ferias" class="result-box space-y-2" hidden>
+                  <h4>Férias</h4>
+                  <div class="kv"><span class="muted">Valor férias</span><span id="r-ferias-valor">—</span></div>
+                  <div class="kv"><span class="muted">1/3 constitucional</span><span id="r-ferias-terco">—</span></div>
+                  <div class="kv"><span class="muted">Abono pecuniário</span><span id="r-ferias-abono">—</span></div>
+                  <div class="kv"><span class="muted">INSS</span><span id="r-ferias-inss">—</span></div>
+                  <div class="kv"><span class="muted">IRRF</span><span id="r-ferias-irrf">—</span></div>
+                  <hr class="sep"/>
+                  <div class="kv big"><span class="muted">Líquido</span><span id="r-ferias-liquido">—</span></div>
+                </div>
+
+                <div id="result-decimo" class="result-box space-y-2" hidden>
+                  <h4>13º Salário</h4>
+                  <div class="kv"><span class="muted">Valor bruto</span><span id="r-decimo-bruto">—</span></div>
+                  <div class="kv"><span class="muted">Adiantamento (50%)</span><span id="r-decimo-adiant">—</span></div>
+                  <div class="kv"><span class="muted">INSS</span><span id="r-decimo-inss">—</span></div>
+                  <div class="kv"><span class="muted">IRRF</span><span id="r-decimo-irrf">—</span></div>
+                  <hr class="sep"/>
+                  <div class="kv big"><span class="muted">Líquido (2ª parcela)</span><span id="r-decimo-liquido">—</span></div>
+                </div>
+
+                <div id="result-horas" class="result-box space-y-2" hidden>
+                  <h4>Horas Extras</h4>
+                  <div class="kv"><span class="muted">Valor hora</span><span id="r-horas-valor">—</span></div>
+                  <div class="kv"><span class="muted">Adicional (%)</span><span id="r-horas-adicional">—</span></div>
+                  <div class="kv"><span class="muted">Total horas extras</span><span id="r-horas-total">—</span></div>
+                </div>
+
+                <div id="result-noturno" class="result-box space-y-2" hidden>
+                  <h4>Adicional Noturno</h4>
+                  <div class="kv"><span class="muted">Valor hora</span><span id="r-noturno-valor">—</span></div>
+                  <div class="kv"><span class="muted">Adicional (%)</span><span id="r-noturno-adicional">—</span></div>
+                  <div class="kv"><span class="muted">Total adicional</span><span id="r-noturno-total">—</span></div>
+                </div>
+
+                <div id="result-rescisao" class="result-box space-y-2" hidden>
+                  <h4>Rescisão</h4>
+                  <div class="kv"><span class="muted">Saldo salário</span><span id="r-rescisao-saldo">—</span></div>
+                  <div class="kv"><span class="muted">13º proporcional</span><span id="r-rescisao-decimo">—</span></div>
+                  <div class="kv"><span class="muted">Férias proporcionais</span><span id="r-rescisao-ferias">—</span></div>
+                  <div class="kv"><span class="muted">1/3 férias</span><span id="r-rescisao-terco">—</span></div>
+                  <div class="kv"><span class="muted">Aviso prévio</span><span id="r-rescisao-aviso">—</span></div>
+                  <div class="kv"><span class="muted">Multa FGTS 40%</span><span id="r-rescisao-multa">—</span></div>
+                  <div class="kv"><span class="muted">INSS</span><span id="r-rescisao-inss">—</span></div>
+                  <div class="kv"><span class="muted">IRRF</span><span id="r-rescisao-irrf">—</span></div>
+                  <hr class="sep"/>
+                  <div class="kv big"><span class="muted">Líquido</span><span id="r-rescisao-liquido">—</span></div>
+                </div>
+              </div>
+            </div>
+          </aside>
+        </div>
+
+        <footer>
+          <p>Assistente de Cálculos Trabalhistas — ADM SOFT‑ATA • Set/2025 • v2.0</p>
+          <p>Desenvolvido para fins educacionais e de apoio à gestão de pessoal.</p>
+        </footer>
       </div>
     </section>
-
-    <!-- Abas -->
-    <nav class="assist-tabs" role="tablist" aria-label="Assistente de Cálculos">
-      <button class="assist-tab active" data-tab="folha" role="tab" aria-selected="true">🧾 Folha</button>
-      <button class="assist-tab" data-tab="ferias" role="tab">🌴 Férias</button>
-      <button class="assist-tab" data-tab="decimo" role="tab">🎁 13º</button>
-      <button class="assist-tab" data-tab="horas" role="tab">⏱️ Horas Extras</button>
-      <button class="assist-tab" data-tab="noturno" role="tab">🌙 Adic. Noturno</button>
-      <button class="assist-tab" data-tab="rescisao" role="tab">📄 Rescisão</button>
-      <button class="assist-tab" data-tab="tabelas" role="tab">⚙️ Parâmetros</button>
-      <button class="assist-tab" data-tab="resumo" role="tab">📊 Totais</button>
-    </nav>
-
-    <div class="assist-grid">
-      <!-- Coluna principal: formulários -->
-      <div class="assist-col">
-        <!-- Folha -->
-        <section id="pane-folha" class="assist-pane" role="tabpanel">
-          <div class="panel">
-            <h3 class="panel-title">Cálculo da Folha Mensal (CLT)</h3>
-            <p class="muted">INSS progressivo, FGTS 8%, IRRF (tabelas jan–abr/25 e desde mai/25), dependentes, desconto simplificado e salário‑família.</p>
-            
-            <div class="form-grid">
-              <div>
-                <label for="f-salario">Remuneração base (R$)</label>
-                <input id="f-salario" class="input" type="number" min="0" step="0.01" placeholder="Ex.: 3500,00">
-              </div>
-              <div>
-                <label for="f-dependentes">Dependentes (IRRF)</label>
-                <input id="f-dependentes" class="input" type="number" min="0" step="1" value="0">
-              </div>
-              <div>
-                <label for="f-competencia">Competência</label>
-                <select id="f-competencia" class="input">
-                  <option value="2025-09" selected>Set/2025 (pós-maio)</option>
-                  <option value="2025-04">Abr/2025 (jan–abr)</option>
-                </select>
-              </div>
-              <div>
-                <label for="f-simplificado">Desconto simplificado IRRF</label>
-                <select id="f-simplificado" class="input">
-                  <option value="nao" selected>Não (tradicional)</option>
-                  <option value="sim">Sim (25% até teto)</option>
-                </select>
-              </div>
-              <div>
-                <label for="f-outras">Outras verbas (R$)</label>
-                <input id="f-outras" class="input" type="number" min="0" step="0.01" value="0">
-              </div>
-            </div>
-            
-            <div class="action-buttons">
-              <button id="btnCalcularFolha" class="btn primary">Calcular</button>
-              <button id="btnLimparFolha" class="btn ghost">Limpar</button>
-            </div>
-          </div>
-        </section>
-
-        <!-- Férias -->
-        <section id="pane-ferias" class="assist-pane" role="tabpanel" hidden>
-          <div class="panel">
-            <h3 class="panel-title">Férias (1/3 constitucional)</h3>
-            <p class="muted">Com opção de abono (venda) de até 10 dias e cálculo de IRRF/INSS.</p>
-            
-            <div class="form-grid">
-              <div>
-                <label for="fer-salario">Remuneração base (R$)</label>
-                <input id="fer-salario" class="input" type="number" min="0" step="0.01">
-              </div>
-              <div>
-                <label for="fer-dias">Dias de férias</label>
-                <input id="fer-dias" class="input" type="number" min="0" max="30" value="30">
-              </div>
-              <div>
-                <label for="fer-abono">Abono (dias vendidos)</label>
-                <select id="fer-abono" class="input">
-                  <option value="0" selected>Não</option>
-                  <option value="10">10 dias</option>
-                </select>
-              </div>
-              <div>
-                <label for="fer-dependentes">Dependentes (IRRF)</label>
-                <input id="fer-dependentes" class="input" type="number" min="0" step="1" value="0">
-              </div>
-              <div>
-                <label for="fer-competencia">Competência IRRF</label>
-                <select id="fer-competencia" class="input">
-                  <option value="maio-2025" selected>Mai/2025 em diante</option>
-                  <option value="jan-abr-2025">Jan–Abr/2025</option>
-                </select>
-              </div>
-            </div>
-            
-            <div class="action-buttons">
-              <button id="btnCalcularFerias" class="btn primary">Calcular</button>
-              <button id="btnLimparFerias" class="btn ghost">Limpar</button>
-            </div>
-          </div>
-        </section>
-
-        <!-- 13º -->
-        <section id="pane-decimo" class="assist-pane" role="tabpanel" hidden>
-          <div class="panel">
-            <h3 class="panel-title">13º Salário</h3>
-            <p class="muted">Cálculo proporcional por meses no ano, com INSS e IRRF na 2ª parcela.</p>
-            
-            <div class="form-grid">
-              <div>
-                <label for="d-salario">Salário base (R$)</label>
-                <input id="d-salario" class="input" type="number" min="0" step="0.01">
-              </div>
-              <div>
-                <label for="d-meses">Meses trabalhados</label>
-                <input id="d-meses" class="input" type="number" min="0" max="12" value="12">
-              </div>
-              <div>
-                <label for="d-dependentes">Dependentes (IRRF)</label>
-                <input id="d-dependentes" class="input" type="number" min="0" step="1" value="0">
-              </div>
-              <div>
-                <label for="d-adiant">Adiantamento</label>
-                <select id="d-adiant" class="input">
-                  <option value="0">Não</option>
-                  <option value="1" selected>Sim (50%)</option>
-                </select>
-              </div>
-              <div>
-                <label for="d-competencia">Competência IRRF (2ª parcela)</label>
-                <select id="d-competencia" class="input">
-                  <option value="maio-2025" selected>Mai/2025 em diante</option>
-                  <option value="jan-abr-2025">Jan–Abr/2025</option>
-                </select>
-              </div>
-            </div>
-            
-            <div class="action-buttons">
-              <button id="btnCalcular13" class="btn primary">Calcular</button>
-              <button id="btnLimpar13" class="btn ghost">Limpar</button>
-            </div>
-          </div>
-        </section>
-
-        <!-- Horas Extras -->
-        <section id="pane-horas" class="assist-pane" role="tabpanel" hidden>
-          <div class="panel">
-            <h3 class="panel-title">Horas Extras</h3>
-            <p class="muted">Cálculo pelo valor hora (220h/mês) com percentuais de 50%, 70% ou 100%.</p>
-            
-            <div class="form-grid">
-              <div>
-                <label for="h-salario">Salário mensal (R$)</label>
-                <input id="h-salario" class="input" type="number" min="0" step="0.01">
-              </div>
-              <div>
-                <label for="h-horas">Horas extras (mês)</label>
-                <input id="h-horas" class="input" type="number" min="0" step="0.01">
-              </div>
-              <div>
-                <label for="h-adic">Adicional</label>
-                <select id="h-adic" class="input">
-                  <option value="0.5" selected>50% (dias úteis)</option>
-                  <option value="1.0">100% (dom./fer.)</option>
-                  <option value="0.7">70%</option>
-                </select>
-              </div>
-            </div>
-            
-            <div class="action-buttons">
-              <button id="btnCalcularHoras" class="btn primary">Calcular</button>
-              <button id="btnLimparHoras" class="btn ghost">Limpar</button>
-            </div>
-          </div>
-        </section>
-
-        <!-- Adicional Noturno -->
-        <section id="pane-noturno" class="assist-pane" role="tabpanel" hidden>
-          <div class="panel">
-            <h3 class="panel-title">Adicional Noturno</h3>
-            <p class="muted">Urbano 20% com hora ficta (52m30s) • Rural 25% (sem hora ficta).</p>
-            
-            <div class="form-grid">
-              <div>
-                <label for="n-salario">Salário mensal (R$)</label>
-                <input id="n-salario" class="input" type="number" min="0" step="0.01">
-              </div>
-              <div>
-                <label for="n-horas">Horas noturnas</label>
-                <input id="n-horas" class="input" type="number" min="0" step="0.01">
-              </div>
-              <div>
-                <label for="n-perc">Percentual</label>
-                <select id="n-perc" class="input">
-                  <option value="0.20" selected>20% (urbano)</option>
-                  <option value="0.25">25% (rural)</option>
-                </select>
-              </div>
-            </div>
-            
-            <div class="action-buttons">
-              <button id="btnCalcularNoturno" class="btn primary">Calcular</button>
-              <button id="btnLimparNoturno" class="btn ghost">Limpar</button>
-            </div>
-          </div>
-        </section>
-
-        <!-- Rescisão -->
-        <section id="pane-rescisao" class="assist-pane" role="tabpanel" hidden>
-          <div class="panel">
-            <h3 class="panel-title">Rescisão (sem justa causa)</h3>
-            
-            <div class="form-grid">
-              <div>
-                <label for="r-salario">Salário base (R$)</label>
-                <input id="r-salario" class="input" type="number" min="0" step="0.01">
-              </div>
-              <div>
-                <label for="r-meses">Meses trabalhados no ano</label>
-                <input id="r-meses" class="input" type="number" min="0" max="12" value="12">
-              </div>
-              <div>
-                <label for="r-saldo-dias">Saldo de dias (mês)</label>
-                <input id="r-saldo-dias" class="input" type="number" min="0" max="30" value="0">
-              </div>
-              <div>
-                <label for="r-fgts-saldo">Saldo FGTS (histórico) R$</label>
-                <input id="r-fgts-saldo" class="input" type="number" min="0" step="0.01" placeholder="Para multa de 40%">
-              </div>
-              <div>
-                <label for="r-ferias-vencidas">Férias vencidas?</label>
-                <select id="r-ferias-vencidas" class="input">
-                  <option value="nao" selected>Não</option>
-                  <option value="sim">Sim (30 dias + 1/3)</option>
-                </select>
-              </div>
-              <div>
-                <label for="r-motivo">Motivo</label>
-                <select id="r-motivo" class="input">
-                  <option value="sem-justa" selected>Sem justa causa</option>
-                  <option value="pedido">Pedido de demissão</option>
-                  <option value="termino">Término de contrato (prazo)</option>
-                  <option value="justa">Justa causa</option>
-                </select>
-              </div>
-              <div>
-                <label for="r-aviso">Aviso prévio</label>
-                <select id="r-aviso" class="input">
-                  <option value="indenizado" selected>Indenizado</option>
-                  <option value="trabalhado">Trabalhado</option>
-                  <option value="dispensado">Dispensado</option>
-                </select>
-              </div>
-              <div>
-                <label for="r-aviso-dias">Dias de aviso</label>
-                <input id="r-aviso-dias" class="input" type="number" min="0" max="90" value="30">
-              </div>
-            </div>
-            
-            <div class="action-buttons">
-              <button id="btnCalcularRescisao" class="btn primary">Calcular</button>
-              <button id="btnLimparRescisao" class="btn ghost">Limpar</button>
-            </div>
-          </div>
-        </section>
-
-        <!-- Parâmetros -->
-        <section id="pane-tabelas" class="assist-pane" role="tabpanel" hidden>
-          <div class="panel">
-            <h3 class="panel-title">Parâmetros oficiais — 2025</h3>
-            <p class="muted">Alterações podem ocorrer por lei/portaria/CCT. Edite no código-fonte (objeto <code>PARAMS</code>) se necessário.</p>
-            
-            <div class="grid cols-2">
-              <div class="panel">
-                <h4>INSS (empregado) — desde 01/01/2025</h4>
-                <ul class="muted" style="padding-left: 20px; margin-top: 10px;">
-                  <li>Até R$ 1.518,00 → 7,5%</li>
-                  <li>R$ 1.518,01 a R$ 2.793,88 → 9%</li>
-                  <li>R$ 2.793,89 a R$ 4.190,83 → 12%</li>
-                  <li>R$ 4.190,84 a R$ 8.157,41 → 14%</li>
-                </ul>
-                <p class="muted" style="margin-top: 10px; font-size: 12px;">Teto: R$ 8.157,41 • Salário‑mínimo: R$ 1.518,00</p>
-              </div>
-              <div class="panel">
-                <h4>IRRF mensal — desde 05/2025</h4>
-                <ul class="muted" style="padding-left: 20px; margin-top: 10px;">
-                  <li>Até R$ 2.428,80 → isento</li>
-                  <li>R$ 2.428,81 a R$ 2.826,65 → 7,5% (deduz R$ 182,16)</li>
-                  <li>R$ 2.826,66 a R$ 3.751,05 → 15% (deduz R$ 394,16)</li>
-                  <li>R$ 3.751,06 a R$ 4.664,68 → 22,5% (deduz R$ 675,49)</li>
-                  <li>Acima de R$ 4.664,68 → 27,5% (deduz R$ 908,73)</li>
-                </ul>
-                <p class="muted" style="margin-top: 10px; font-size: 12px;">Dependente: R$ 189,59 • Simplificado: 25% até R$ 607,20/mês</p>
-              </div>
-              <div class="panel">
-                <h4>FGTS</h4>
-                <p class="muted" style="margin-top: 10px;">Depósito mensal: 8% (regra geral). Multa rescisória: 40% do saldo em demissão sem justa causa.</p>
-              </div>
-              <div class="panel">
-                <h4>Salário‑família — desde 01/01/2025</h4>
-                <p class="muted" style="margin-top: 10px;">R$ 65,00 por dependente até a remuneração de R$ 1.906,04.</p>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <!-- Totais -->
-        <section id="pane-resumo" class="assist-pane" role="tabpanel" hidden>
-          <div class="grid cols-2">
-            <div class="panel">
-              <div class="row" style="justify-content: space-between; margin-bottom: 10px;">
-                <h4>Folha</h4>
-                <label class="text-sm flex items-center gap-2">
-                  <input id="include-folha" type="checkbox" checked> Incluir
-                </label>
-              </div>
-              <div class="space-y-2">
-                <div class="kv"><span class="muted">Líquido</span><span id="sum-folha-liq">—</span></div>
-                <div class="kv"><span class="muted">Descontos</span><span id="sum-folha-desc">—</span></div>
-                <div class="kv"><span class="muted">Proventos</span><span id="sum-folha-prov">—</span></div>
-                <div class="kv"><span class="muted">FGTS (8%)</span><span id="sum-folha-fgts">—</span></div>
-              </div>
-            </div>
-            <div class="panel">
-              <div class="row" style="justify-content: space-between; margin-bottom: 10px;">
-                <h4>Férias</h4>
-                <label class="text-sm flex items-center gap-2">
-                  <input id="include-ferias" type="checkbox"> Incluir
-                </label>
-              </div>
-              <div class="space-y-2">
-                <div class="kv"><span class="muted">Líquido</span><span id="sum-ferias-liq">—</span></div>
-              </div>
-            </div>
-            <div class="panel">
-              <div class="row" style="justify-content: space-between; margin-bottom: 10px;">
-                <h4>13º</h4>
-                <label class="text-sm flex items-center gap-2">
-                  <input id="include-decimo" type="checkbox"> Incluir
-                </label>
-              </div>
-              <div class="space-y-2">
-                <div class="kv"><span class="muted">Líquido</span><span id="sum-decimo-liq">—</span></div>
-              </div>
-            </div>
-            <div class="panel">
-              <div class="row" style="justify-content: space-between; margin-bottom: 10px;">
-                <h4>Horas Extras</h4>
-                <label class="text-sm flex items-center gap-2">
-                  <input id="include-horas" type="checkbox" checked> Incluir
-                </label>
-              </div>
-              <div class="space-y-2">
-                <div class="kv"><span class="muted">Total</span><span id="sum-horas">—</span></div>
-              </div>
-            </div>
-            <div class="panel">
-              <div class="row" style="justify-content: space-between; margin-bottom: 10px;">
-                <h4>Adic. Noturno</h4>
-                <label class="text-sm flex items-center gap-2">
-                  <input id="include-noturno" type="checkbox" checked> Incluir
-                </label>
-              </div>
-              <div class="space-y-2">
-                <div class="kv"><span class="muted">Total</span><span id="sum-noturno">—</span></div>
-              </div>
-            </div>
-            <div class="panel">
-              <div class="row" style="justify-content: space-between; margin-bottom: 10px;">
-                <h4>Rescisão</h4>
-                <label class="text-sm flex items-center gap-2">
-                  <input id="include-rescisao" type="checkbox"> Incluir
-                </label>
-              </div>
-              <div class="space-y-2">
-                <div class="kv"><span class="muted">Líquido</span><span id="sum-rescisao-liq">—</span></div>
-                <div class="kv"><span class="muted">Multa FGTS 40%</span><span id="sum-rescisao-multa">—</span></div>
-              </div>
-            </div>
-          </div>
-          
-          <div class="panel" style="margin-top: 20px;">
-            <div class="row" style="justify-content: space-between; align-items: center;">
-              <div>
-                <h3 class="panel-title">Total geral líquido</h3>
-                <p class="muted">Soma dos módulos selecionados acima.</p>
-              </div>
-              <div id="sum-total" style="font-size: 28px; font-weight: 800; color: var(--accent);">—</div>
-            </div>
-          </div>
-        </section>
-      </div>
-
-      <!-- Coluna lateral: resultados (sticky) -->
-      <aside class="assist-col">
-        <div class="sticky-box">
-          <div class="panel">
-            <h3 class="panel-title">Resultados</h3>
-
-            <div id="result-folha" class="result-box space-y-2">
-              <h4>Folha</h4>
-              <div class="kv"><span class="muted">Base INSS</span><span id="r-base-inss">—</span></div>
-              <div class="kv"><span class="muted">INSS</span><span id="r-inss">—</span></div>
-              <div class="kv"><span class="muted">Base FGTS</span><span id="r-base-fgts">—</span></div>
-              <div class="kv"><span class="muted">FGTS (8%)</span><span id="r-fgts">—</span></div>
-              <div class="kv"><span class="muted">Base IRRF</span><span id="r-base-irrf">—</span></div>
-              <div class="kv"><span class="muted">IRRF</span><span id="r-irrf">—</span></div>
-              <div class="kv"><span class="muted">Salário‑família</span><span id="r-salario-familia">—</span></div>
-              <hr class="sep"/>
-              <div class="kv"><span class="muted">Descontos</span><span id="r-descontos">—</span></div>
-              <div class="kv"><span class="muted">Proventos</span><span id="r-proventos">—</span></div>
-              <div class="kv big"><span class="muted">Líquido</span><span id="r-liquido">—</span></div>
-            </div>
-
-            <div id="result-ferias" class="result-box space-y-2" hidden>
-              <h4>Férias</h4>
-              <div class="kv"><span class="muted">Valor férias</span><span id="r-ferias-valor">—</span></div>
-              <div class="kv"><span class="muted">1/3 constitucional</span><span id="r-ferias-terco">—</span></div>
-              <div class="kv"><span class="muted">Abono pecuniário</span><span id="r-ferias-abono">—</span></div>
-              <div class="kv"><span class="muted">INSS</span><span id="r-ferias-inss">—</span></div>
-              <div class="kv"><span class="muted">IRRF</span><span id="r-ferias-irrf">—</span></div>
-              <hr class="sep"/>
-              <div class="kv big"><span class="muted">Líquido</span><span id="r-ferias-liquido">—</span></div>
-            </div>
-
-            <div id="result-decimo" class="result-box space-y-2" hidden>
-              <h4>13º Salário</h4>
-              <div class="kv"><span class="muted">Valor bruto</span><span id="r-decimo-bruto">—</span></div>
-              <div class="kv"><span class="muted">Adiantamento (50%)</span><span id="r-decimo-adiant">—</span></div>
-              <div class="kv"><span class="muted">INSS</span><span id="r-decimo-inss">—</span></div>
-              <div class="kv"><span class="muted">IRRF</span><span id="r-decimo-irrf">—</span></div>
-              <hr class="sep"/>
-              <div class="kv big"><span class="muted">Líquido (2ª parcela)</span><span id="r-decimo-liquido">—</span></div>
-            </div>
-
-            <div id="result-horas" class="result-box space-y-2" hidden>
-              <h4>Horas Extras</h4>
-              <div class="kv"><span class="muted">Valor hora</span><span id="r-horas-valor">—</span></div>
-              <div class="kv"><span class="muted">Adicional (%)</span><span id="r-horas-adicional">—</span></div>
-              <div class="kv"><span class="muted">Total horas extras</span><span id="r-horas-total">—</span></div>
-            </div>
-
-            <div id="result-noturno" class="result-box space-y-2" hidden>
-              <h4>Adicional Noturno</h4>
-              <div class="kv"><span class="muted">Valor hora</span><span id="r-noturno-valor">—</span></div>
-              <div class="kv"><span class="muted">Adicional (%)</span><span id="r-noturno-adicional">—</span></div>
-              <div class="kv"><span class="muted">Total adicional</span><span id="r-noturno-total">—</span></div>
-            </div>
-
-            <div id="result-rescisao" class="result-box space-y-2" hidden>
-              <h4>Rescisão</h4>
-              <div class="kv"><span class="muted">Saldo salário</span><span id="r-rescisao-saldo">—</span></div>
-              <div class="kv"><span class="muted">13º proporcional</span><span id="r-rescisao-decimo">—</span></div>
-              <div class="kv"><span class="muted">Férias proporcionais</span><span id="r-rescisao-ferias">—</span></div>
-              <div class="kv"><span class="muted">1/3 férias</span><span id="r-rescisao-terco">—</span></div>
-              <div class="kv"><span class="muted">Aviso prévio</span><span id="r-rescisao-aviso">—</span></div>
-              <div class="kv"><span class="muted">Multa FGTS 40%</span><span id="r-rescisao-multa">—</span></div>
-              <div class="kv"><span class="muted">INSS</span><span id="r-rescisao-inss">—</span></div>
-              <div class="kv"><span class="muted">IRRF</span><span id="r-rescisao-irrf">—</span></div>
-              <hr class="sep"/>
-              <div class="kv big"><span class="muted">Líquido</span><span id="r-rescisao-liquido">—</span></div>
-            </div>
-          </div>
-        </div>
-      </aside>
-    </div>
-
-    <footer>
-      <p>Assistente de Cálculos Trabalhistas — ADM SOFT‑ATA • Set/2025 • v2.0</p>
-      <p>Desenvolvido para fins educacionais e de apoio à gestão de pessoal.</p>
-    </footer>
-  </div>
-</section>
 
     <!-- ======================== UTILITÁRIOS ========================== -->
     <section id="tab-util" class="panel" role="tabpanel" aria-labelledby="tabbtn-util" hidden>
@@ -961,58 +1025,6 @@
       </div>
     </div>
 
-    <!-- MODAL: Detalhes do atendimento (Problema/Solução) -->
-    <div id="ticketModal" class="modal" hidden aria-hidden="true" aria-labelledby="ticketModalTitle" role="dialog">
-      <div class="modal__backdrop" data-close aria-label="Fechar"></div>
-      <div class="modal__card">
-        <div class="row" style="justify-content:space-between;align-items:center">
-          <h3 id="ticketModalTitle">Detalhes do atendimento</h3>
-          <button class="btn ghost" data-close style="padding:4px 10px;font-size:14px" aria-label="Fechar">✖</button>
-        </div>
-        <p class="muted" style="margin-top:-6px">Revise as informações, descreva o problema e a solução.</p>
-
-        <input type="hidden" id="tm_id">
-
-        <!-- Bloco 1: campos básicos -->
-        <div id="tm_block_basic" class="grid cols-2" style="margin-top:10px; gap:10px" data-ro="1">
-          <div>
-            <label for="tm_titulo">Título</label>
-            <input id="tm_titulo" placeholder="Título do chamado">
-          </div>
-          <div>
-            <label for="tm_modulo">Módulo</label>
-            <select id="tm_modulo"></select>
-          </div>
-          <div>
-            <label for="tm_motivo">Motivo</label>
-            <select id="tm_motivo"></select>
-          </div>
-          <div>
-            <label for="tm_data">Data</label>
-            <input id="tm_data" type="date">
-          </div>
-        </div>
-
-        <!-- Bloco 2: Problema/Solução -->
-        <div id="tm_block_ps" class="grid cols-2" style="margin-top:10px; gap:10px" data-ro="1">
-          <div>
-            <label for="tm_problem">Problema</label>
-            <textarea id="tm_problem" rows="6" placeholder="Descreva o problema encontrado"></textarea>
-          </div>
-          <div>
-            <label for="tm_solution">Solução</label>
-            <textarea id="tm_solution" rows="6" placeholder="Descreva a solução aplicada"></textarea>
-          </div>
-        </div>
-
-        <div class="modal__actions">
-          <button class="btn blue" id="tm_edit">Editar</button>
-          <button class="btn concluido" id="tm_save">Salvar</button>
-          <button class="btn excluir" id="tm_del">Excluir</button>
-        </div>
-      </div>
-    </div>
-
     <!-- MODAL: Lançar ordem a partir do atendimento -->
     <div id="launchModal" class="modal" hidden aria-hidden="true" aria-labelledby="launchModalTitle" role="dialog">
       <div class="modal__backdrop" data-close aria-label="Fechar"></div>
@@ -1040,64 +1052,64 @@
       </div>
     </div>
 
-<!-- CORRIJA o fechamento do modal de perfil (linhas finais do arquivo) -->
-<div id="profileModal" class="modal" hidden aria-hidden="true"
-     aria-labelledby="profileModalTitle" role="dialog">
-  <div class="modal__backdrop" data-close aria-label="Fechar"></div>
+    <!-- MODAL: Perfil -->
+    <div id="profileModal" class="modal" hidden aria-hidden="true"
+         aria-labelledby="profileModalTitle" role="dialog">
+      <div class="modal__backdrop" data-close aria-label="Fechar"></div>
 
-  <div class="modal__card">
-    <div class="row" style="justify-content:space-between;align-items:center">
-      <h3 id="profileModalTitle">Perfil</h3>
-      <button class="btn ghost" id="profileModalClose" style="padding:4px 10px;font-size:14px" aria-label="Fechar">✖</button>
-    </div>
-    <p class="muted" style="margin-top:-6px">Adicione sua foto e dados básicos.</p>
+      <div class="modal__card">
+        <div class="row" style="justify-content:space-between;align-items:center">
+          <h3 id="profileModalTitle">Perfil</h3>
+          <button class="btn ghost" id="profileModalClose" style="padding:4px 10px;font-size:14px" aria-label="Fechar">✖</button>
+        </div>
+        <p class="muted" style="margin-top:-6px">Adicione sua foto e dados básicos.</p>
 
-    <div class="grid cols-2" style="margin-top:10px; gap:12px">
-      <!-- Foto -->
-      <div>
-        <label for="pf_foto">Foto de perfil</label>
-        <input id="pf_foto" type="file" accept="image/*">
-        <div class="row" style="margin-top:8px">
-          <img id="pf_preview" class="avatar lg" src="" alt="Pré-visualização da foto">
+        <div class="grid cols-2" style="margin-top:10px; gap:12px">
+          <!-- Foto -->
+          <div>
+            <label for="pf_foto">Foto de perfil</label>
+            <input id="pf_foto" type="file" accept="image/*">
+            <div class="row" style="margin-top:8px">
+              <img id="pf_preview" class="avatar lg" src="" alt="Pré-visualização da foto">
+            </div>
+          </div>
+
+          <!-- Dados -->
+          <div class="grid cols-2" style="gap:10px">
+            <div style="grid-column:1 / -1">
+              <label for="pf_nome">Nome completo</label>
+              <input id="pf_nome" placeholder="Digite seu nome completo">
+            </div>
+            <div>
+              <label for="pf_nasc">Data de nascimento</label>
+              <input id="pf_nasc" type="date">
+            </div>
+            <div>
+              <label for="pf_setor">Setor</label>
+              <input id="pf_setor" placeholder="Ex.: Suporte, Fiscal, Comercial">
+            </div>
+
+            <div style="grid-column:1 / -1"><hr class="sep"></div>
+
+            <div>
+              <label for="pf_tel_setor">Telefone do setor</label>
+              <input id="pf_tel_setor" placeholder="(00) 0000-0000">
+            </div>
+            <div>
+              <label for="pf_email_corp">E-mail corporativo</label>
+              <input id="pf_email_corp" type="email" placeholder="voce@empresa.com.br">
+            </div>
+            <div>
+              <label for="pf_ramal">Ramal</label>
+              <input id="pf_ramal" placeholder="000">
+            </div>
+          </div>
+        </div>
+        <div class="modal__actions">
+          <button class="btn success" id="pf_save">Salvar</button>
         </div>
       </div>
-
-      <!-- Dados -->
-      <div class="grid cols-2" style="gap:10px">
-        <div style="grid-column:1 / -1">
-          <label for="pf_nome">Nome completo</label>
-          <input id="pf_nome" placeholder="Digite seu nome completo">
-        </div>
-        <div>
-          <label for="pf_nasc">Data de nascimento</label>
-          <input id="pf_nasc" type="date">
-        </div>
-        <div>
-          <label for="pf_setor">Setor</label>
-          <input id="pf_setor" placeholder="Ex.: Suporte, Fiscal, Comercial">
-        </div>
-
-        <div style="grid-column:1 / -1"><hr class="sep"></div>
-
-        <div>
-          <label for="pf_tel_setor">Telefone do setor</label>
-          <input id="pf_tel_setor" placeholder="(00) 0000-0000">
-        </div>
-        <div>
-          <label for="pf_email_corp">E-mail corporativo</label>
-          <input id="pf_email_corp" type="email" placeholder="voce@empresa.com.br">
-        </div>
-        <div>
-          <label for="pf_ramal">Ramal</label>
-          <input id="pf_ramal" placeholder="000">
-        </div>
-      </div>
     </div>
-    <div class="modal__actions">
-      <button class="btn success" id="pf_save">Salvar</button>
-    </div>
-    </div> <!-- /.modal__card -->
-  </div> <!-- /#profileModal -->
   </main>
 </body>
 </html>
