@@ -1,5 +1,5 @@
 // api/atendimentos.js
-// API REST para a tela de Atendimentos (Kanban)
+// API REST para a tela de Atendimentos (Kanban) — versão blindada contra "$1 entre aspas"
 
 import { neon, neonConfig } from '@neondatabase/serverless';
 neonConfig.fetchConnectionCache = true;
@@ -10,18 +10,16 @@ const DB_URL =
   process.env.POSTGRES_URL ||
   process.env.NEON_DATABASE_URL ||
   process.env.POSTGRES_URL_NON_POOLING ||
-  process.env.ARMAZENAR_URL; // se você usou prefixo custom
+  process.env.ARMAZENAR_URL; // se usou prefixo custom
 
-if (!DB_URL) {
-  throw new Error('Defina POSTGRES_URL/DATABASE_URL nas variáveis de ambiente do projeto (Vercel).');
-}
+if (!DB_URL) throw new Error('Defina POSTGRES_URL/DATABASE_URL nas variáveis do projeto (Vercel).');
 
 const sql = neon(DB_URL);
 
 const STATUS = ['aberto', 'atendimento', 'aguardando', 'programacao', 'concluido'];
-const normDate = d => (d ? new Date(d).toISOString().slice(0, 10) : null);
+const normDate = (d) => (d ? new Date(d).toISOString().slice(0, 10) : null);
 
-// cria a tabela se não existir (idempotente)
+// cria a tabela se não existir (idempotente e simples)
 async function ensureSchema() {
   await sql`
     CREATE TABLE IF NOT EXISTS atendimentos (
@@ -38,8 +36,6 @@ async function ensureSchema() {
       created_at  timestamptz NOT NULL DEFAULT now()
     )
   `;
-  await sql`CREATE INDEX IF NOT EXISTS idx_at_col  ON atendimentos(col)`;
-  await sql`CREATE INDEX IF NOT EXISTS idx_at_dt   ON atendimentos(data)`;
 }
 
 function bad(res, msg, code = 400) {
@@ -62,15 +58,19 @@ export default async function handler(req, res) {
       const q = (url.searchParams.get('q') || '').trim();
       const status = (url.searchParams.get('status') || '').trim();
 
-      const like = `%${q}%`;
       let rows;
 
       if (q && status && STATUS.includes(status)) {
+        // Busca + filtro de status (sem usar "${like}")
         rows = await sql`
           SELECT id, cliente_id, titulo, modulo, motivo, data, solicitante,
                  col, problem, solution, created_at
             FROM atendimentos
-           WHERE (titulo ILIKE ${like} OR motivo ILIKE ${like} OR solicitante ILIKE ${like})
+           WHERE (
+                  titulo      ILIKE '%' || ${q} || '%'
+               OR motivo      ILIKE '%' || ${q} || '%'
+               OR solicitante ILIKE '%' || ${q} || '%'
+                 )
              AND col = ${status}
            ORDER BY created_at DESC
            LIMIT 200
@@ -80,7 +80,9 @@ export default async function handler(req, res) {
           SELECT id, cliente_id, titulo, modulo, motivo, data, solicitante,
                  col, problem, solution, created_at
             FROM atendimentos
-           WHERE (titulo ILIKE ${like} OR motivo ILIKE ${like} OR solicitante ILIKE ${like})
+           WHERE  titulo      ILIKE '%' || ${q} || '%'
+               OR motivo      ILIKE '%' || ${q} || '%'
+               OR solicitante ILIKE '%' || ${q} || '%'
            ORDER BY created_at DESC
            LIMIT 200
         `;
