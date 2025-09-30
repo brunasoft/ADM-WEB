@@ -1,6 +1,4 @@
-// /api/migrate.js
-export const config = { runtime: 'edge' };
-import { sql, json } from './_db.js';
+import { sql } from './_db.js';
 
 const SQL = `
 create table if not exists clientes (
@@ -18,15 +16,15 @@ create index if not exists idx_clientes_nome on clientes (lower(nome));
 create index if not exists idx_clientes_codigo on clientes (codigo);
 `;
 
-export default async function handler(req) {
-  const url = new URL(req.url);
-  const token = url.searchParams.get('token') || req.headers.get('x-migrate-token');
-  if (!token || token !== process.env.MIGRATE_TOKEN) return json({ error: 'não autorizado' }, 401);
-
+export default async function handler(req, res) {
+  const token = req.query.token || req.headers['x-migrate-token'];
+  if (!token || token !== process.env.MIGRATE_TOKEN) {
+    return res.status(401).json({ error: 'não autorizado' });
+  }
   try {
     await sql.unsafe(SQL);
-    return json({ ok: true, ran: 1 });
+    res.json({ ok: true, ran: 1 });
   } catch (e) {
-    return json({ ok: false, error: String(e?.message || e) }, 500);
+    res.status(500).json({ ok: false, error: String(e?.message || e) });
   }
 }
