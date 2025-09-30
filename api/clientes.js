@@ -1,5 +1,4 @@
 import { sql } from './_db.js';
-
 function bad(res, msg, code = 400) { return res.status(code).json({ error: msg }); }
 
 export default async function handler(req, res) {
