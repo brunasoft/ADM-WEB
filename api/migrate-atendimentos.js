@@ -1,34 +1,43 @@
 // /api/migrate-atendimentos.js
-import { neon } from '@neondatabase/serverless';
-
-const SQL = `
-CREATE TABLE IF NOT EXISTS atendimentos (
-  id           text PRIMARY KEY,
-  cliente_id   text REFERENCES clientes(id) ON DELETE SET NULL,
-  titulo       text NOT NULL,
-  modulo       text,
-  motivo       text,
-  data         date,
-  solicitante  text,
-  status       text NOT NULL DEFAULT 'aberto',
-  problem      text,
-  solution     text,
-  created_at   timestamptz NOT NULL DEFAULT now()
-);
-CREATE INDEX IF NOT EXISTS idx_atendimentos_status     ON atendimentos(status);
-CREATE INDEX IF NOT EXISTS idx_atendimentos_created_at ON atendimentos(created_at DESC);
-`;
+import { sql } from './_db.js';
 
 export default async function handler(req, res) {
-  const token = req.query.token || req.headers['x-migrate-token'];
-  if (!token || token !== process.env.MIGRATE_TOKEN) {
-    return res.status(401).json({ error: 'não autorizado' });
-  }
   try {
-    const sql = neon(process.env.DATABASE_URL);
-    await sql(SQL);
-    res.json({ ok: true, applied: true });
+    const token =
+      req.query?.token ||
+      req.headers['x-migrate-token'] ||
+      req.headers['x-token'];
+
+    if (!token || token !== process.env.MIGRATE_TOKEN) {
+      return res.status(401).json({ error: 'não autorizado' });
+    }
+
+    // Tabela de clientes já deve existir (usada no left join)
+    // Tabela de atendimentos
+    await sql`
+      create table if not exists atendimentos (
+        id          text primary key,
+        cliente_id  text references clientes(id) on delete set null,
+        titulo      text not null,
+        modulo      text,
+        motivo      text,
+        data        date,
+        solicitante text,
+        col         text not null default 'aberto',
+        problem     text,
+        solution    text,
+        created_at  timestamptz not null default now()
+      );
+    `;
+
+    // Índices úteis
+    await sql`create index if not exists idx_atend_col on atendimentos(col);`;
+    await sql`create index if not exists idx_atend_cliente on atendimentos(cliente_id);`;
+    await sql`create index if not exists idx_atend_created on atendimentos(created_at desc);`;
+
+    res.json({ ok: true, created: 'atendimentos' });
   } catch (e) {
-    res.status(500).json({ ok: false, error: String(e?.message || e) });
+    console.error('[migrate-atendimentos] ', e);
+    res.status(500).json({ ok: false, error: e.message || String(e) });
   }
 }
