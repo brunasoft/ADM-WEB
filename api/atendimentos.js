@@ -1,11 +1,26 @@
 // api/atendimentos.js
 // API REST para a tela de Atendimentos (Kanban)
 
-import { sql } from './_db.js';
+import { neon, neonConfig } from '@neondatabase/serverless';
+neonConfig.fetchConnectionCache = true;
+
+// aceita vários nomes possíveis de env no Vercel/Neon
+const DB_URL =
+  process.env.DATABASE_URL ||
+  process.env.POSTGRES_URL ||
+  process.env.NEON_DATABASE_URL ||
+  process.env.POSTGRES_URL_NON_POOLING ||
+  process.env.ARMAZENAR_URL; // se você usou prefixo custom
+
+if (!DB_URL) {
+  throw new Error('Defina POSTGRES_URL (ou DATABASE_URL) nas variáveis do Vercel.');
+}
+
+const sql = neon(DB_URL);
 
 const STATUS = ['aberto', 'atendimento', 'aguardando', 'programacao', 'concluido'];
 
-// Garante que a tabela exista (idempotente)
+// cria a tabela se não existir (idempotente)
 async function ensureSchema() {
   await sql`
     CREATE TABLE IF NOT EXISTS atendimentos (
@@ -31,41 +46,50 @@ function bad(res, msg = 'Requisição inválida', code = 400) {
   return res.status(code).json({ ok: false, error: msg });
 }
 
+const normDate = (d) => (d ? new Date(d).toISOString().slice(0, 10) : null);
+
 export default async function handler(req, res) {
+  // CORS básico
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PATCH, DELETE, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  if (req.method === 'OPTIONS') return res.status(200).end();
+
   try {
     await ensureSchema();
 
-    // ====== GET /api/atendimentos[?q=texto&status=aberto]
+    // ========== GET ==========
+    // /api/atendimentos?q=texto&status=aberto
     if (req.method === 'GET') {
-      // Em ambiente Vercel/Node, req.url é relativo — normalizamos para ler searchParams
       const url = new URL(req.url, `http://${req.headers.host}`);
       const q = (url.searchParams.get('q') || '').trim();
       const status = (url.searchParams.get('status') || '').trim();
 
-      const where = [];
+      const filters = [];
       if (q) {
-        // busca em título/motivo/solicitante
         const like = `%${q}%`;
-        where.push(sql`(titulo ILIKE ${like} OR motivo ILIKE ${like} OR solicitante ILIKE ${like})`);
+        filters.push(sql`(titulo ILIKE ${like} OR motivo ILIKE ${like} OR solicitante ILIKE ${like})`);
       }
       if (status && STATUS.includes(status)) {
-        where.push(sql`col = ${status}`);
+        filters.push(sql`col = ${status}`);
       }
 
       const rows = await sql`
         SELECT id, cliente_id, titulo, modulo, motivo, data, solicitante,
                col, problem, solution, created_at
-        FROM atendimentos
-        ${where.length ? sql`WHERE ${sql.join(where, sql` AND `)}` : sql``}
-        ORDER BY created_at DESC
-        LIMIT 200
+          FROM atendimentos
+         ${filters.length ? sql`WHERE ${sql.join(filters, sql` AND `)}` : sql``}
+         ORDER BY created_at DESC
+         LIMIT 200
       `;
       return res.status(200).json(rows);
     }
 
-    // ====== POST /api/atendimentos  (upsert)
-    // Body JSON:
-    // { id, cliente_id, titulo, modulo, motivo, data, solicitante, col, problem, solution }
+    // Parse seguro do body (Vercel às vezes entrega string)
+    const body = typeof req.body === 'string' ? JSON.parse(req.body || '{}') : (req.body || {});
+
+    // ========== POST (UPSERT) ==========
+    // Body: { id, cliente_id, titulo, modulo, motivo, data, solicitante, col, problem, solution }
     if (req.method === 'POST') {
       const {
         id,
@@ -78,84 +102,69 @@ export default async function handler(req, res) {
         col = 'aberto',
         problem = null,
         solution = null
-      } = req.body || {};
+      } = body;
 
       if (!id || !titulo) return bad(res, 'Campos obrigatórios: id e titulo');
       if (!STATUS.includes(col)) return bad(res, 'Status inválido');
 
       const rows = await sql`
-        INSERT INTO atendimentos (id, cliente_id, titulo, modulo, motivo, data,
-                                  solicitante, col, problem, solution)
-        VALUES (${id}, ${cliente_id}, ${titulo}, ${modulo}, ${motivo}, ${data},
-                ${solicitante}, ${col}, ${problem}, ${solution})
-        ON CONFLICT (id) DO UPDATE
-          SET cliente_id  = EXCLUDED.cliente_id,
-              titulo      = EXCLUDED.titulo,
-              modulo      = EXCLUDED.modulo,
-              motivo      = EXCLUDED.motivo,
-              data        = EXCLUDED.data,
-              solicitante = EXCLUDED.solicitante,
-              col         = EXCLUDED.col,
-              problem     = EXCLUDED.problem,
-              solution    = EXCLUDED.solution
+        INSERT INTO atendimentos
+          (id, cliente_id, titulo, modulo, motivo, data, solicitante, col, problem, solution)
+        VALUES
+          (${id}, ${cliente_id}, ${titulo}, ${modulo}, ${motivo}, ${normDate(data)},
+           ${solicitante}, ${col}, ${problem}, ${solution})
+        ON CONFLICT (id) DO UPDATE SET
+          cliente_id  = EXCLUDED.cliente_id,
+          titulo      = EXCLUDED.titulo,
+          modulo      = EXCLUDED.modulo,
+          motivo      = EXCLUDED.motivo,
+          data        = EXCLUDED.data,
+          solicitante = EXCLUDED.solicitante,
+          col         = EXCLUDED.col,
+          problem     = EXCLUDED.problem,
+          solution    = EXCLUDED.solution
         RETURNING *
       `;
       return res.status(200).json(rows[0]);
     }
 
-    // ====== PATCH /api/atendimentos  (atualiza campos soltos por id)
-    // Body JSON: { id, ...campos }
+    // ========== PATCH (updates simples, 1 campo por vez) ==========
+    // Body: { id, qualquerCampo... }
     if (req.method === 'PATCH') {
-      const {
-        id,
-        titulo,
-        modulo,
-        motivo,
-        data,
-        solicitante,
-        col,
-        problem,
-        solution
-      } = req.body || {};
-
+      const { id } = body;
       if (!id) return bad(res, 'Informe o id');
 
-      const sets = [];
-      if (titulo !== undefined)      sets.push(sql`titulo = ${titulo}`);
-      if (modulo !== undefined)      sets.push(sql`modulo = ${modulo}`);
-      if (motivo !== undefined)      sets.push(sql`motivo = ${motivo}`);
-      if (data !== undefined)        sets.push(sql`data = ${data}`);
-      if (solicitante !== undefined) sets.push(sql`solicitante = ${solicitante}`);
-      if (problem !== undefined)     sets.push(sql`problem = ${problem}`);
-      if (solution !== undefined)    sets.push(sql`solution = ${solution}`);
-      if (col !== undefined) {
-        if (!STATUS.includes(col)) return bad(res, 'Status inválido');
-        sets.push(sql`col = ${col}`);
+      // Para evitar qualquer erro de “$1 entre aspas”, atualizamos campo a campo.
+      if ('cliente_id'  in body) await sql`UPDATE atendimentos SET cliente_id = ${body.cliente_id || null} WHERE id = ${id}`;
+      if ('titulo'      in body) await sql`UPDATE atendimentos SET titulo     = ${body.titulo}            WHERE id = ${id}`;
+      if ('modulo'      in body) await sql`UPDATE atendimentos SET modulo     = ${body.modulo || null}    WHERE id = ${id}`;
+      if ('motivo'      in body) await sql`UPDATE atendimentos SET motivo     = ${body.motivo || null}    WHERE id = ${id}`;
+      if ('data'        in body) await sql`UPDATE atendimentos SET data       = ${normDate(body.data)}     WHERE id = ${id}`;
+      if ('solicitante' in body) await sql`UPDATE atendimentos SET solicitante= ${body.solicitante || null}WHERE id = ${id}`;
+      if ('problem'     in body) await sql`UPDATE atendimentos SET problem    = ${body.problem || null}   WHERE id = ${id}`;
+      if ('solution'    in body) await sql`UPDATE atendimentos SET solution   = ${body.solution || null}  WHERE id = ${id}`;
+      if ('col'         in body) {
+        if (!STATUS.includes(body.col)) return bad(res, 'Status inválido');
+        await sql`UPDATE atendimentos SET col = ${body.col} WHERE id = ${id}`;
       }
-      if (!sets.length) return bad(res, 'Nada para atualizar');
 
-      const rows = await sql`
-        UPDATE atendimentos
-           SET ${sql.join(sets, sql`, `)}
-         WHERE id = ${id}
-        RETURNING *
-      `;
-      if (!rows.length) return bad(res, 'Registro não encontrado', 404);
-      return res.status(200).json(rows[0]);
+      const r = await sql`SELECT * FROM atendimentos WHERE id = ${id}`;
+      if (!r.length) return bad(res, 'Registro não encontrado', 404);
+      return res.status(200).json(r[0]);
     }
 
-    // ====== DELETE /api/atendimentos?id=...
+    // ========== DELETE ==========
     if (req.method === 'DELETE') {
       const url = new URL(req.url, `http://${req.headers.host}`);
       const id = (url.searchParams.get('id') || '').trim();
       if (!id) return bad(res, 'Informe o id');
 
-      const rows = await sql`DELETE FROM atendimentos WHERE id = ${id} RETURNING *`;
-      if (!rows.length) return bad(res, 'Registro não encontrado', 404);
+      const r = await sql`DELETE FROM atendimentos WHERE id = ${id} RETURNING *`;
+      if (!r.length) return bad(res, 'Registro não encontrado', 404);
       return res.status(200).json({ ok: true });
     }
 
-    res.setHeader('Allow', 'GET,POST,PATCH,DELETE');
+    res.setHeader('Allow', 'GET, POST, PATCH, DELETE, OPTIONS');
     return bad(res, 'Método não suportado', 405);
   } catch (err) {
     console.error('[api/atendimentos] ERRO:', err);
