@@ -2,7 +2,6 @@ import { sql } from './_db.js';
 
 function bad(res, msg, code = 400) { return res.status(code).json({ error: msg }); }
 
-// GET /api/clientes?q=texto
 export default async function handler(req, res) {
   if (req.method === 'GET') {
     const q = (req.query.q || '').toString().trim();
