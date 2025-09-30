@@ -1,20 +1,30 @@
-
-export const config = { runtime: 'edge' }; // roda como Edge Function
-
+// /api/migrate.js
+export const config = { runtime: 'edge' };
 import { sql, json } from './_db.js';
-import { SQL_CLIENTES } from './_sql_clientes.js';
 
-function authOK(req) {
-  const url = new URL(req.url);
-  const token = url.searchParams.get('token') || req.headers.get('x-migrate-token');
-  return token && process.env.MIGRATE_TOKEN && token === process.env.MIGRATE_TOKEN;
-}
+const SQL = `
+create table if not exists clientes (
+  id         text primary key,
+  codigo     text not null unique,
+  nome       text not null,
+  status     text not null default 'ativo' check (status in ('ativo','inativo')),
+  contato    text,
+  telefone   text,
+  email      text,
+  endereco   text,
+  created_at timestamptz not null default now()
+);
+create index if not exists idx_clientes_nome on clientes (lower(nome));
+create index if not exists idx_clientes_codigo on clientes (codigo);
+`;
 
 export default async function handler(req) {
-  if (!authOK(req)) return json({ error: 'não autorizado' }, 401);
+  const url = new URL(req.url);
+  const token = url.searchParams.get('token') || req.headers.get('x-migrate-token');
+  if (!token || token !== process.env.MIGRATE_TOKEN) return json({ error: 'não autorizado' }, 401);
 
   try {
-    await sql.unsafe(SQL_CLIENTES);
+    await sql.unsafe(SQL);
     return json({ ok: true, ran: 1 });
   } catch (e) {
     return json({ ok: false, error: String(e?.message || e) }, 500);
