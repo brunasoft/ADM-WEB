@@ -319,22 +319,67 @@
     </section>
 
     <!-- ======================== DASHBOARD =========================== -->
-    <section id="tab-dashboard" class="panel" role="tabpanel" aria-labelledby="tabbtn-dashboard" hidden>
-      <h3>Dashboard</h3>
-      <div class="dash-cards" id="kpiCards"></div>
-      <hr class="sep" />
-      
-      <div class="grid cols-2">
-        <div class="panel">
-          <h4>Atendimentos por Módulo</h4>
-          <canvas id="chartModulos" width="400" height="200"></canvas>
-        </div>
-        <div class="panel">
-          <h4>Ordens por Status</h4>
-          <canvas id="chartOrdens" width="400" height="200"></canvas>
-        </div>
+<section id="tab-dashboard" class="panel" role="tabpanel" aria-labelledby="tabbtn-dashboard" hidden>
+  <h3>Dashboard de Monitoramento</h3>
+  
+  <!-- Cards de status dos clientes -->
+  <div class="panel">
+    <h4 class="panel-title">Status dos Clientes por Frequência de Chamados</h4>
+    <div class="dash-cards" id="statusCards">
+      <!-- Será preenchido via JavaScript -->
+    </div>
+  </div>
+
+  <hr class="sep" />
+
+  <!-- Estatísticas principais -->
+  <div class="grid cols-3">
+    <div class="panel">
+      <h4>Atendimentos Esta Semana</h4>
+      <div class="kpi">
+        <div class="num" id="weekTickets">0</div>
+        <div class="muted">Chamados</div>
       </div>
-    </section>
+    </div>
+    <div class="panel">
+      <h4>Ordens Este Mês</h4>
+      <div class="kpi">
+        <div class="num" id="monthOrdens">0</div>
+        <div class="muted">Ordens de serviço</div>
+      </div>
+    </div>
+    <div class="panel">
+      <h4>Clientes Ativos</h4>
+      <div class="kpi">
+        <div class="num" id="activeClients">0</div>
+        <div class="muted">Com chamados</div>
+      </div>
+    </div>
+  </div>
+
+  <hr class="sep" />
+  
+  <!-- Gráficos e listas -->
+  <div class="grid cols-2">
+    <div class="panel">
+      <h4>Top 10 Clientes que Mais Chamam</h4>
+      <div id="topClientsList" class="client-list">
+        <!-- Será preenchido via JavaScript -->
+      </div>
+    </div>
+    <div class="panel">
+      <h4>Clientes que Menos Chamam</h4>
+      <div id="bottomClientsList" class="client-list">
+        <!-- Será preenchido via JavaScript -->
+      </div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h4>Evolução de Chamados por Semana</h4>
+    <canvas id="weeklyChart" width="400" height="200"></canvas>
+  </div>
+</section>
 
     <!-- ======================= ASSISTENTE ======================= -->
     <section id="tab-assistente" class="panel assist-wrap" role="tabpanel" aria-labelledby="tabbtn-assistente" hidden>

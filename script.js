@@ -994,12 +994,12 @@ function lancarParaOrdens(ticketId) {
   // Criar nova ordem de serviço baseada no atendimento
   const novaOrdem = {
     id: uid('ord'),
-    ticketId: ticketId, // Referência ao atendimento original
-    numero: `OS-${Date.now().toString().slice(-6)}`, // Número único
+    ticketId: ticketId,
+    numero: `OS-${Date.now().toString().slice(-6)}`,
     cliente: ticket.nome || 'Cliente não informado',
     servico: `${ticket.modulo || 'Serviço'} - ${ticket.motivo || 'Atendimento'}`,
     abertura: ymd(new Date()),
-    previsto: '', // Pode ser preenchido posteriormente
+    previsto: '',
     status: 'aberta',
     descricao: `Origem: Atendimento ${ticket.id}\nMódulo: ${ticket.modulo || '—'}\nMotivo: ${ticket.motivo || '—'}\nResponsável: ${ticket.responsavel || '—'}`
   };
@@ -1016,6 +1016,11 @@ function lancarParaOrdens(ticketId) {
   // Atualizar as interfaces
   renderKanban();
   renderOrdens();
+  
+  // ATUALIZAR O DASHBOARD também
+  if (state.ui.currentTab === 'dashboard') {
+    renderKPIs();
+  }
 
   // Mostrar mensagem de sucesso
   alert(`Atendimento lançado como ordem de serviço ${novaOrdem.numero} com sucesso!`);
@@ -1115,6 +1120,11 @@ function initAtendimentoForm() {
     state.tickets.push(novoTicket);
     persist();
     renderKanban();
+    
+    // ATUALIZAR O DASHBOARD também
+    if (state.ui.currentTab === 'dashboard') {
+      renderKPIs();
+    }
 
     // Limpar formulário
     $('#t_cliente').value = '';
@@ -1316,6 +1326,11 @@ function initOrdensForm(){
     persist();
     renderOrdens();
     
+    // ATUALIZAR O DASHBOARD também
+    if (state.ui.currentTab === 'dashboard') {
+      renderKPIs();
+    }
+    
     // Limpar formulário
     $('#o_id').value = '';
     $('#o_numero').value = $('#o_cliente').value = $('#o_servico').value = $('#o_descricao').value = '';
@@ -1333,142 +1348,286 @@ function initOrdensForm(){
 }
 
 /* ==========================================================================
-   8) DASHBOARD (KPIs)
+   8) DASHBOARD ATUALIZADO (MONITORAMENTO DE CLIENTES)
    ========================================================================== */
 
 function renderKPIs(){
-  // Estatísticas básicas
-  const stats = {
-    totalTickets: state.tickets.length,
-    totalOrdens: state.ordens.length,
-    totalClientes: state.clientes.length,
-    ticketsAbertos: state.tickets.filter(t=>t.col==='aberto').length,
-    ticketsAtendimento: state.tickets.filter(t=>t.col==='atendimento').length,
-    ticketsConcluidos: state.tickets.filter(t=>t.col==='concluido').length,
-    ordensAtrasadas: state.ordens.filter(o=> isAtrasada(o.previsto)).length,
-    ordensAbertas: state.ordens.filter(o=>o.status==='aberta').length,
-    ordensConcluidas: state.ordens.filter(o=>o.status==='concluida').length,
-  };
+  // Calcular estatísticas
+  const stats = calculateDashboardStats();
+  
+  // Atualizar KPIs principais
+  $('#weekTickets').textContent = stats.weekTickets;
+  $('#monthOrdens').textContent = stats.monthOrdens;
+  $('#activeClients').textContent = stats.activeClients;
+  
+  // Renderizar cards de status
+  renderStatusCards(stats.clientStatus);
+  
+  // Renderizar listas de clientes
+  renderClientLists(stats.topClients, stats.bottomClients);
+  
+  // Renderizar gráfico semanal
+  renderWeeklyChart(stats.weeklyData);
+}
 
-  // Atualizar cards do dashboard
-  const kpiCards = $('#kpiCards');
-  if (kpiCards){
-    kpiCards.innerHTML = '';
-    [
-      ['Total de Atendimentos', stats.totalTickets, 'd-abertas'],
-      ['Atendimentos Abertos', stats.ticketsAbertos, 'd-atend'],
-      ['Em Atendimento', stats.ticketsAtendimento, 'd-prog'],
-      ['Concluídos', stats.ticketsConcluidos, 'd-concluido'],
-      ['Total de Ordens', stats.totalOrdens, 'd-total'],
-      ['Ordens Abertas', stats.ordensAbertas, 'd-abertas'],
-      ['Ordens Atrasadas', stats.ordensAtrasadas, 'd-atraso'],
-      ['Ordens Concluídas', stats.ordensConcluidas, 'd-concluido'],
-    ].forEach(([lbl,val,klass])=>{
-      kpiCards.appendChild(h('div',{class:`dashcard ${klass}`},[
-        h('div',{},lbl),
-        h('div',{}, String(val))
-      ]));
+function calculateDashboardStats() {
+  const now = new Date();
+  const oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+  const oneMonthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+  
+  // Filtros por período
+  const weekTickets = state.tickets.filter(t => 
+    t.data && new Date(t.data + 'T00:00:00') >= oneWeekAgo
+  );
+  
+  const monthOrdens = state.ordens.filter(o => 
+    o.abertura && new Date(o.abertura + 'T00:00:00') >= oneMonthAgo
+  );
+  
+  // Calcular frequência de clientes
+  const clientStats = {};
+  const clientWeekStats = {};
+  
+  // Contar chamados por cliente (geral)
+  state.tickets.forEach(ticket => {
+    if (ticket.clienteId) {
+      clientStats[ticket.clienteId] = (clientStats[ticket.clienteId] || 0) + 1;
+    }
+  });
+  
+  // Contar chamados por cliente (última semana)
+  weekTickets.forEach(ticket => {
+    if (ticket.clienteId) {
+      clientWeekStats[ticket.clienteId] = (clientWeekStats[ticket.clienteId] || 0) + 1;
+    }
+  });
+  
+  // Classificar clientes por status
+  const clientStatus = { normal: 0, medio: 0, critico: 0 };
+  
+  Object.values(clientWeekStats).forEach(count => {
+    if (count >= 6) clientStatus.critico++;
+    else if (count >= 3) clientStatus.medio++;
+    else if (count >= 1) clientStatus.normal++;
+  });
+  
+  // Preparar lista de clientes ordenados
+  const clientList = Object.entries(clientStats)
+    .map(([clientId, count]) => {
+      const client = state.clientes.find(c => c.id === clientId);
+      const weekCount = clientWeekStats[clientId] || 0;
+      return {
+        id: clientId,
+        name: client?.nome || 'Cliente não encontrado',
+        code: client?.codigo || '—',
+        totalCount: count,
+        weekCount: weekCount,
+        status: weekCount >= 6 ? 'critico' : weekCount >= 3 ? 'medio' : 'normal'
+      };
+    })
+    .filter(client => client.totalCount > 0)
+    .sort((a, b) => b.totalCount - a.totalCount);
+  
+  // Top 10 que mais chamam
+  const topClients = clientList.slice(0, 10);
+  
+  // Clientes que menos chamam (com pelo menos 1 chamado)
+  const bottomClients = clientList
+    .filter(client => client.totalCount > 0)
+    .sort((a, b) => a.totalCount - b.totalCount)
+    .slice(0, 10);
+  
+  // Dados semanais para gráfico
+  const weeklyData = getWeeklyData();
+  
+  return {
+    weekTickets: weekTickets.length,
+    monthOrdens: monthOrdens.length,
+    activeClients: Object.keys(clientWeekStats).length,
+    clientStatus,
+    topClients,
+    bottomClients,
+    weeklyData
+  };
+}
+
+function renderStatusCards(clientStatus) {
+  const container = $('#statusCards');
+  if (!container) return;
+  
+  container.innerHTML = '';
+  
+  const cards = [
+    {
+      label: 'Clientes Normais',
+      count: clientStatus.normal,
+      class: 'normal',
+      description: '1-2 chamados/semana'
+    },
+    {
+      label: 'Clientes Médios',
+      count: clientStatus.medio,
+      class: 'medio',
+      description: '3-5 chamados/semana'
+    },
+    {
+      label: 'Clientes Críticos',
+      count: clientStatus.critico,
+      class: 'critico',
+      description: '6+ chamados/semana'
+    }
+  ];
+  
+  cards.forEach(card => {
+    const cardEl = h('div', { class: `status-card ${card.class}` }, [
+      h('div', { class: 'count' }, card.count.toString()),
+      h('div', { class: 'label' }, card.label),
+      h('div', { class: 'muted', style: 'font-size: 10px; margin-top: 4px; opacity: 0.8;' }, card.description)
+    ]);
+    
+    container.appendChild(cardEl);
+  });
+}
+
+function renderClientLists(topClients, bottomClients) {
+  renderClientList($('#topClientsList'), topClients, 'mais');
+  renderClientList($('#bottomClientsList'), bottomClients, 'menos');
+}
+
+function renderClientList(container, clients, type) {
+  if (!container) return;
+  
+  container.innerHTML = '';
+  
+  if (!clients.length) {
+    container.appendChild(h('div', { class: 'empty-state' }, [
+      h('p', { class: 'muted' }, `Nenhum cliente com chamados encontrado.`)
+    ]));
+    return;
+  }
+  
+  clients.forEach(client => {
+    const clientEl = h('div', { class: 'client-item' }, [
+      h('div', { class: 'client-info' }, [
+        h('div', { class: 'client-name' }, client.name),
+        h('div', { class: 'client-code' }, client.code)
+      ]),
+      h('div', { class: 'client-stats' }, [
+        h('div', { 
+          class: 'client-count',
+          style: `color: ${getStatusColor(client.status)}; font-weight: 800;` 
+        }, client.totalCount.toString()),
+        h('div', { class: 'client-period' }, `${client.weekCount} esta semana`)
+      ])
+    ]);
+    
+    container.appendChild(clientEl);
+  });
+}
+
+function getStatusColor(status) {
+  const colors = {
+    normal: '#16a34a',
+    medio: '#f59e0b',
+    critico: '#ef4444'
+  };
+  return colors[status] || '#6b7280';
+}
+
+function getWeeklyData() {
+  const weeklyData = [];
+  const now = new Date();
+  
+  // Coletar dados das últimas 8 semanas
+  for (let i = 7; i >= 0; i--) {
+    const weekStart = new Date(now.getTime() - i * 7 * 24 * 60 * 60 * 1000);
+    const weekEnd = new Date(weekStart.getTime() + 6 * 24 * 60 * 60 * 1000);
+    
+    const weekTickets = state.tickets.filter(ticket => {
+      if (!ticket.data) return false;
+      const ticketDate = new Date(ticket.data + 'T00:00:00');
+      return ticketDate >= weekStart && ticketDate <= weekEnd;
+    });
+    
+    const weekOrdens = state.ordens.filter(ordem => {
+      if (!ordem.abertura) return false;
+      const ordemDate = new Date(ordem.abertura + 'T00:00:00');
+      return ordemDate >= weekStart && ordemDate <= weekEnd;
+    });
+    
+    weeklyData.push({
+      week: `Sem ${i+1}`,
+      tickets: weekTickets.length,
+      ordens: weekOrdens.length,
+      date: weekStart
     });
   }
-
-  // Gráfico de atendimentos por módulo
-  renderModulosChart();
   
-  // Gráfico de ordens por status
-  renderOrdensChart();
+  return weeklyData;
 }
 
-function renderModulosChart(){
-  const ctx = $('#chartModulos');
+function renderWeeklyChart(weeklyData) {
+  const ctx = $('#weeklyChart');
   if (!ctx) return;
-
-  const modCount = {};
-  state.tickets.forEach(t=>{
-    const m = t.modulo || 'Outros';
-    modCount[m] = (modCount[m]||0) + 1;
-  });
-
+  
   // Limpar canvas
   ctx.width = ctx.width;
-
-  // Desenhar gráfico simples de barras
-  const mods = Object.keys(modCount);
-  const vals = Object.values(modCount);
-  const maxVal = Math.max(...vals, 1);
+  
+  const labels = weeklyData.map(w => w.week);
+  const ticketData = weeklyData.map(w => w.tickets);
+  const ordemData = weeklyData.map(w => w.ordens);
+  
+  const maxVal = Math.max(...ticketData, ...ordemData, 1);
   const w = ctx.width, h = ctx.height;
-  const barW = (w - 40) / mods.length;
-
+  const barWidth = (w - 60) / (weeklyData.length * 2);
+  
   const ctx2d = ctx.getContext('2d');
-  ctx2d.clearRect(0,0,w,h);
-
-  // Barras
-  mods.forEach((m,i)=>{
-    const barH = (vals[i]/maxVal) * (h-40);
-    const x = 20 + i*barW;
-    const y = h - 20 - barH;
-
-    ctx2d.fillStyle = ['#4f46e5','#10b981','#f59e0b','#ef4444','#8b5cf6'][i%5];
-    ctx2d.fillRect(x, y, barW-10, barH);
-
-    // Rótulo
+  ctx2d.clearRect(0, 0, w, h);
+  
+  // Desenhar gráfico de barras
+  weeklyData.forEach((week, i) => {
+    const xBase = 30 + i * (barWidth * 2);
+    
+    // Barra de tickets
+    const ticketHeight = (week.tickets / maxVal) * (h - 60);
+    ctx2d.fillStyle = '#3b82f6';
+    ctx2d.fillRect(xBase, h - 30 - ticketHeight, barWidth - 2, ticketHeight);
+    
+    // Barra de ordens
+    const ordemHeight = (week.ordens / maxVal) * (h - 60);
+    ctx2d.fillStyle = '#10b981';
+    ctx2d.fillRect(xBase + barWidth, h - 30 - ordemHeight, barWidth - 2, ordemHeight);
+    
+    // Rótulos
     ctx2d.fillStyle = '#374151';
-    ctx2d.font = '12px sans-serif';
+    ctx2d.font = '10px sans-serif';
     ctx2d.textAlign = 'center';
-    ctx2d.fillText(m, x + (barW-10)/2, h-5);
-    ctx2d.fillText(vals[i], x + (barW-10)/2, y-5);
+    ctx2d.fillText(week.week, xBase + barWidth, h - 10);
+    
+    // Valores
+    if (week.tickets > 0) {
+      ctx2d.fillStyle = '#1e40af';
+      ctx2d.fillText(week.tickets.toString(), xBase + (barWidth - 2) / 2, h - 35 - ticketHeight);
+    }
+    
+    if (week.ordens > 0) {
+      ctx2d.fillStyle = '#047857';
+      ctx2d.fillText(week.ordens.toString(), xBase + barWidth + (barWidth - 2) / 2, h - 35 - ordemHeight);
+    }
   });
-}
-
-function renderOrdensChart(){
-  const ctx = $('#chartOrdens');
-  if (!ctx) return;
-
-  const statusCount = {
-    aberta: state.ordens.filter(o=>o.status==='aberta').length,
-    andamento: state.ordens.filter(o=>o.status==='andamento').length,
-    pausada: state.ordens.filter(o=>o.status==='pausada').length,
-    concluida: state.ordens.filter(o=>o.status==='concluida').length,
-    cancelada: state.ordens.filter(o=>o.status==='cancelada').length,
-  };
-
-  // Limpar canvas
-  ctx.width = ctx.width;
-
-  const statuses = Object.keys(statusCount);
-  const vals = Object.values(statusCount);
-  const total = vals.reduce((a,b)=>a+b,0) || 1;
-
-  const ctx2d = ctx.getContext('2d');
-  const w = ctx.width, h = ctx.height;
-  const centerX = w/2, centerY = h/2;
-  const radius = Math.min(w,h)/2 - 20;
-
-  let startAngle = 0;
-  const colors = ['#4f46e5','#10b981','#f59e0b','#ef4444','#8b5cf6'];
-
-  statuses.forEach((s,i)=>{
-    const sliceAngle = (vals[i]/total) * 2 * Math.PI;
-    
-    ctx2d.beginPath();
-    ctx2d.moveTo(centerX, centerY);
-    ctx2d.arc(centerX, centerY, radius, startAngle, startAngle + sliceAngle);
-    ctx2d.closePath();
-    
-    ctx2d.fillStyle = colors[i%colors.length];
-    ctx2d.fill();
-
-    // Rótulo
-    const midAngle = startAngle + sliceAngle/2;
-    const labelX = centerX + (radius+15) * Math.cos(midAngle);
-    const labelY = centerY + (radius+15) * Math.sin(midAngle);
-    
-    ctx2d.fillStyle = '#374151';
-    ctx2d.font = '12px sans-serif';
-    ctx2d.textAlign = 'center';
-    ctx2d.fillText(`${s} (${vals[i]})`, labelX, labelY);
-
-    startAngle += sliceAngle;
-  });
+  
+  // Legenda
+  ctx2d.fillStyle = '#3b82f6';
+  ctx2d.fillRect(30, 10, 12, 12);
+  ctx2d.fillStyle = '#374151';
+  ctx2d.font = '12px sans-serif';
+  ctx2d.textAlign = 'left';
+  ctx2d.fillText('Chamados', 50, 20);
+  
+  ctx2d.fillStyle = '#10b981';
+  ctx2d.fillRect(120, 10, 12, 12);
+  ctx2d.fillStyle = '#374151';
+  ctx2d.fillText('Ordens', 140, 20);
 }
 
 /* ==========================================================================
