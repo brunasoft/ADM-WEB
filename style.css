@@ -192,6 +192,10 @@ p {
   display: block;
 }
 
+/* Espaçamentos utilitários */
+.mt-2 { margin-top: 16px; }
+.space-y-2 > * + * { margin-top: 8px; }
+
 /* ==========================================================================
    4) FORMULÁRIOS
    ========================================================================== */
@@ -293,6 +297,7 @@ header {
 }
 
 /* ==========================================================================
+/* ==========================================================================
    6) COMPONENTES
    ========================================================================== */
 /* Botões */
@@ -349,6 +354,17 @@ header {
 .btn.concluido { background: linear-gradient(135deg, #16a34a, #15803d); }
 .btn.lancar { background: linear-gradient(135deg, #ec4899, #db2777); }
 
+/* Botão Mover - COR NOVA */
+.btn.mover { 
+  background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+  color: white;
+}
+
+.btn.mover:hover {
+  background: linear-gradient(135deg, #7c3aed, #6d28d9);
+  transform: translateY(-1px);
+}
+
 /* Botões especiais */
 .btn.editar {
   background: transparent;
@@ -383,7 +399,6 @@ header {
   background: var(--panel-2);
   transform: translateY(-1px);
 }
-
 /* Chips */
 .chips {
   display: flex;
@@ -430,6 +445,13 @@ header {
 .pill.prog { background: var(--st-purple); }
 .pill.done { background: var(--st-green); }
 .pill.launched { background: #2563eb; }
+
+/* Status para ordens */
+.pill.aberta { background: var(--st-blue); }
+.pill.andamento { background: var(--st-orange); }
+.pill.pausada { background: var(--st-yellow); color: #111; }
+.pill.concluida { background: var(--st-green); }
+.pill.cancelada { background: var(--danger); }
 
 /* Tabelas */
 .table {
@@ -811,6 +833,8 @@ header {
 .d-atend { background: linear-gradient(135deg, #f59e0b, #b45309); }
 .d-prog { background: linear-gradient(135deg, #7c3aed, #5b21b6); }
 .d-atraso { background: linear-gradient(135deg, #ef4444, #b91c1c); }
+.d-concluido { background: linear-gradient(135deg, #16a34a, #15803d); }
+.d-total { background: linear-gradient(135deg, #3b82f6, #1d4ed8); }
 
 .theme-dark .d-atend {
   color: #fff;
@@ -1074,6 +1098,15 @@ header {
   border-bottom: 1px solid var(--border);
 }
 
+.col-count {
+  background: var(--primary);
+  color: white;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
 .tlist {
   display: flex;
   flex-direction: column;
@@ -1135,38 +1168,6 @@ header {
   margin-right: 4px;
 }
 
-.ticket .ps {
-  margin-top: 8px;
-}
-
-.ticket .ps-text {
-  background: var(--panel-2);
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  padding: 10px;
-  min-height: 40px;
-  line-height: 1.4;
-  font-size: 13px;
-  color: var(--text);
-}
-
-.ticket .assignee {
-  align-items: center;
-  gap: 8px;
-  margin: 8px 0;
-}
-
-.ticket .assignee .avatar {
-  width: 28px;
-  height: 28px;
-}
-
-.ticket .assignee-name {
-  font-size: 12px;
-  color: var(--slate);
-  font-weight: 600;
-}
-
 .ticket .actions {
   display: flex;
   flex-wrap: wrap;
@@ -1174,13 +1175,34 @@ header {
   margin-top: 12px;
 }
 
-/* Esconder botão do status atual */
-.ticket[data-status="aberto"] .btn.aberto,
-.ticket[data-status="atendimento"] .btn.atendimento,
-.ticket[data-status="aguardando"] .btn.aguardando,
-.ticket[data-status="programacao"] .btn.programacao,
-.ticket[data-status="concluido"] .btn.concluido {
-  display: none !important;
+/* Estados de drag & drop */
+.ticket.dragging {
+  opacity: 0.5;
+  transform: rotate(5deg);
+}
+
+.tlist.drag-over {
+  background: rgba(22, 163, 74, 0.05);
+  border: 2px dashed var(--primary);
+  border-radius: 12px;
+}
+
+/* Empty states */
+.empty-state {
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--muted);
+}
+
+.empty-state i {
+  font-size: 48px;
+  margin-bottom: 16px;
+  opacity: 0.5;
+}
+
+.empty-state p {
+  font-size: 14px;
+  margin: 0;
 }
 
 /* ==========================================================================
@@ -1277,7 +1299,7 @@ header {
   padding: 22px;
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  background: linear-gradient(180deg, var(--card) 0%, var(--card-2) 100%);
+  background: linear-gradient(180deg, var(--panel) 0%, var(--panel-2) 100%);
   box-shadow: var(--shadow);
   margin-bottom: 20px;
 }
@@ -1359,7 +1381,7 @@ header {
 
 /* Painéis do assistente */
 .assist-pane .panel {
-  background: linear-gradient(180deg, var(--card) 0%, rgba(23, 27, 59, .7) 100%);
+  background: linear-gradient(180deg, var(--panel) 0%, var(--panel-2) 100%);
   border: 1px solid var(--border);
   border-radius: var(--radius);
   padding: 18px;
@@ -1398,7 +1420,7 @@ header {
 
 .assist-pane .input {
   width: 100%;
-  background: #0e1330;
+  background: var(--input);
   color: var(--text);
   border: 1px solid var(--border);
   border-radius: 12px;
@@ -1431,8 +1453,8 @@ header {
 }
 
 .assist-pane .btn.primary {
-  background: linear-gradient(90deg, var(--primary), var(--accent));
-  color: #0a0f2e;
+  background: linear-gradient(90deg, var(--primary), var(--primary-2));
+  color: white;
   border-color: transparent;
   font-weight: 700;
 }
@@ -1440,6 +1462,7 @@ header {
 .assist-pane .btn.ghost {
   background: transparent;
   color: var(--text);
+  border: 1px solid var(--border);
 }
 
 .assist-pane .btn.ghost:hover {
@@ -1504,8 +1527,8 @@ header {
 }
 
 .chip.badge {
-  background: linear-gradient(90deg, var(--primary), var(--accent));
-  color: #0a0f2e;
+  background: linear-gradient(90deg, var(--primary), var(--primary-2));
+  color: white;
   font-weight: 700;
 }
 

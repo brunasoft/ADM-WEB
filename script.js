@@ -6,126 +6,6 @@
    0) HELPERS
    ========================================================================== */
 
-// ==== Persistência de ORDENS (Neon via /api/ordens) ====
-async function carregarOrdensDoBanco(){
-  try{
-    const ordens = await apiGet('/api/ordens');
-    state.ordens = (ordens || []).map(o => ({
-      id: o.id,
-      numero: o.numero,
-      titulo: o.titulo,
-      status: o.status || 'Lançado',
-      previsto: o.previsto || null,
-      created_at: o.created_at
-    }));
-    renderOrdens();
-  }catch(err){
-    console.warn('[DB] Falha ao carregar ordens:', err.message);
-  }
-}
-
-// ==== Persistência de ATENDIMENTOS (Neon via /api/atendimentos) ====
-async function carregarAtendimentosDoBanco(){
-  try{
-    const list = await apiGet('/api/atendimentos');
-    state.tickets = (list || []).map(a => ({
-      id: a.id,
-      titulo: a.titulo,
-      modulo: a.modulo || '',
-      motivo: a.motivo || '',
-      data: a.data || '',
-      solicitante: a.solicitante || '',
-      col: a.col || 'aberto',
-      clienteId: a.cliente_id,
-      codigo: a.codigo || '',
-      nome: a.nome || '',
-      problem: a.problem || '',
-      solution: a.solution || ''
-    }));
-    persist();
-    renderKanban();
-  }catch(e){
-    console.warn('[DB] Falha ao carregar atendimentos:', e.message);
-  }
-}
-
-// ==== Persistência de CLIENTES (Neon via /api/clientes) ====
-async function carregarClientesDoBanco(){
-  try {
-    const cli = await apiGet('/api/clientes');
-    state.clientes = cli || [];
-    persist(); 
-    renderClientes();
-    if (state.ui.currentTab === 'fila') renderKanban();
-  } catch (e) {
-    console.warn('[DB] Falha ao carregar clientes:', e.message);
-  }
-}
-
-async function salvarClienteNoBanco(c){
-  return apiPost('/api/clientes', c);
-}
-
-async function excluirClienteNoBanco(id){
-  return apiDelete(`/api/clientes?id=${encodeURIComponent(id)}`);
-}
-
-async function salvarAtendimentoNoBanco(t){
-  return apiPost('/api/atendimentos', {
-    id: t.id,
-    cliente_id: t.clienteId,
-    titulo: t.titulo,
-    modulo: t.modulo,
-    motivo: t.motivo,
-    data: t.data || null,
-    solicitante: t.solicitante || null,
-    col: t.col,
-    problem: t.problem || '',
-    solution: t.solution || ''
-  });
-}
-
-async function salvarOrdemNoBanco({ id, numero, titulo, status='Lançado', previsto=null }){
-  return apiPost('/api/ordens', { id, numero, titulo, status, previsto });
-}
-
-// ==== HTTP helpers ====
-async function apiPost(path, data){
-  const r = await fetch(path, {
-    method: 'POST',
-    headers: {'Content-Type':'application/json'},
-    body: JSON.stringify(data)
-  });
-  const j = await r.json().catch(()=> ({}));
-  if (!r.ok) throw new Error(j.error || `POST ${path} falhou`);
-  return j;
-}
-
-async function apiGet(path){
-  const r = await fetch(path);
-  const j = await r.json();
-  if (!r.ok) throw new Error(j.error || `GET ${path} falhou`);
-  return j;
-}
-
-async function apiDelete(path){
-  const r = await fetch(path, { method: 'DELETE' });
-  const j = await r.json().catch(()=> ({}));
-  if (!r.ok) throw new Error(j.error || `DELETE ${path} falhou`);
-  return j;
-}
-
-async function apiPatch(path, data){
-  const r = await fetch(path, {
-    method: 'PATCH',
-    headers: {'Content-Type':'application/json'},
-    body: JSON.stringify(data)
-  });
-  const j = await r.json().catch(()=> ({}));
-  if (!r.ok) throw new Error(j.error || `PATCH ${path} falhou`);
-  return j;
-}
-
 /** Seletores rápidos */
 const $  = (sel, root=document) => root.querySelector(sel);
 const $$ = (sel, root=document) => Array.from(root.querySelectorAll(sel));
@@ -778,16 +658,8 @@ async function delCliente(id){
   state.clientes = state.clientes.filter(c=>c.id!==id);
   persist();
   renderClientes();
-
-  try{
-    await excluirClienteNoBanco(id);
-  }catch(e){
-    console.error('[DB] Erro ao excluir cliente:', e);
-    alert('Não foi possível excluir o cliente no banco.');
-    state.clientes.push(bak);
-    persist();
-    renderClientes();
-  }
+  
+  alert('Cliente excluído com sucesso!');
 }
 
 function initClientesForm(){
@@ -807,19 +679,7 @@ function initClientesForm(){
 
       persist();
       renderClientes();
-
-      salvarClienteNoBanco({
-        id: alvo.id,
-        codigo: alvo.codigo || '',
-        nome: alvo.nome,
-        telefone: alvo.telefone || '',
-        responsavel: alvo.responsavel || ''
-      }).catch(e=>{
-        console.error('[DB] salvar cliente (edit):', e);
-        alert('Não foi possível salvar no banco.');
-        Object.assign(alvo, bak);
-        persist(); renderClientes();
-      });
+      alert('Cliente atualizado com sucesso!');
 
     } else {
       const novo = { id: uid('cli'), nome, codigo, telefone: tel, responsavel: resp };
@@ -827,19 +687,7 @@ function initClientesForm(){
       state.clientes.push(novo);
       persist();
       renderClientes();
-
-      salvarClienteNoBanco({
-        id: novo.id,
-        codigo: novo.codigo || '',
-        nome: novo.nome,
-        telefone: novo.telefone || '',
-        responsavel: novo.responsavel || ''
-      }).catch(e=>{
-        console.error('[DB] salvar cliente (novo):', e);
-        alert('Não foi possível salvar no banco.');
-        state.clientes = state.clientes.filter(c => c.id !== novo.id);
-        persist(); renderClientes();
-      });
+      alert('Cliente adicionado com sucesso!');
     }
 
     $('#c_nome').value = $('#c_codigo').value = $('#c_tel').value = $('#c_resp').value = '';
@@ -948,7 +796,7 @@ function initWhatsAppGenerator() {
 }
 
 /* ==========================================================================
-   6) ATENDIMENTO (KANBAN + MODAIS)
+   6) ATENDIMENTO (KANBAN + MODAIS) - CORRIGIDO
    ========================================================================== */
 
 function getCurrentProfile() {
@@ -964,14 +812,16 @@ function getCurrentProfile() {
 const COLS = ['aberto','atendimento','aguardando','programacao','concluido'];
 
 function renderKanban(){
+  // Atualizar dropdowns de módulos e motivos
   const modSel = $('#t_modulo'), motSel = $('#t_motivo');
   if (modSel && motSel){
-    modSel.innerHTML = '<option value="">Módulo</option>' + 
+    modSel.innerHTML = '<option value="">Selecione o módulo</option>' + 
       state.cad.modulos.map(m => `<option value="${esc(m)}">${esc(m)}</option>`).join('');
-    motSel.innerHTML = '<option value="">Motivo</option>' + 
+    motSel.innerHTML = '<option value="">Selecione o motivo</option>' + 
       state.cad.motivos.map(m => `<option value="${esc(m)}">${esc(m)}</option>`).join('');
   }
 
+  // Atualizar dropdown de clientes
   const cliSel = $('#t_cliente');
   const cliInfo = $('#t_cliente_info');
   if (cliSel){
@@ -992,469 +842,344 @@ function renderKanban(){
     if (cliInfo) cliInfo.textContent = c0 ? `${c0.codigo || '—'} — ${c0.nome || '—'}` : 'Nenhum cliente selecionado';
   }
 
+  // Renderizar colunas do kanban
   COLS.forEach(col => {
     const list = $(`#col-${col}`);
     if (!list) return;
     list.innerHTML = '';
 
     const items = state.tickets.filter(t => t.col === col);
+    
+    // Contador de itens
+    const countEl = $(`#count-${col}`);
+    if (countEl) countEl.textContent = items.length;
+
     if (!items.length){
-      list.appendChild(h('div', {class: 'chip'}, 'Vazio'));
+      const emptyState = h('div', {class: 'empty-state'}, [
+        h('i', {class: col === 'aberto' ? 'fas fa-inbox' : 
+                  col === 'atendimento' ? 'fas fa-user-clock' :
+                  col === 'aguardando' ? 'fas fa-clock' :
+                  col === 'programacao' ? 'fas fa-calendar-check' :
+                  'fas fa-check-circle'}),
+        h('p', {}, col === 'aberto' ? 'Nenhum atendimento em aberto' :
+                   col === 'atendimento' ? 'Nenhum atendimento em andamento' :
+                   col === 'aguardando' ? 'Nenhum atendimento aguardando' :
+                   col === 'programacao' ? 'Nenhum atendimento programado' :
+                   'Nenhum atendimento concluído')
+      ]);
+      list.appendChild(emptyState);
       return;
     }
 
     items.forEach(t => {
-      const card = cloneTpl('ticketCardTpl');
-      if (!card) return;
-
-      card.dataset.id = t.id;
-      card.dataset.status = col;
-
-      const tituloCliente = (t.codigo || t.nome) 
-        ? `${t.codigo || '—'} — ${t.nome || '—'}` 
-        : (t.titulo || 'Sem cliente');
-      
-      card.querySelector('[data-bind="clienteTitulo"]').textContent = tituloCliente;
-      card.querySelector('[data-bind="modulo"]').textContent = t.modulo || '—';
-      card.querySelector('[data-bind="motivo"]').textContent = t.motivo || '—';
-      card.querySelector('[data-bind="data"]').textContent = t.data ? formatDateForDisplay(t.data) : '—';
-      card.querySelector('[data-bind="solicitante"]').textContent = t.solicitante || '—';
-
-      const assNameEl = card.querySelector('[data-bind="assigneeName"]');
-      const assAvEl = card.querySelector('[data-bind="assigneeAvatar"]');
-      const profile = getCurrentProfile();
-      
-      if (assNameEl) assNameEl.textContent = t.assigneeName || profile.firstName;
-      if (assAvEl) {
-        if (t.assigneeAvatar) {
-          assAvEl.src = t.assigneeAvatar;
-        } else if (profile.foto) {
-          assAvEl.src = profile.foto;
-        } else {
-          const svg = encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32"><rect width="100%" height="100%" fill="#e5e7eb"/><circle cx="16" cy="12" r="6" fill="#94a3b8"/><rect x="6" y="20" width="20" height="7" rx="3.5" fill="#cbd5e1"/></svg>');
-          assAvEl.src = `data:image/svg+xml;charset=UTF-8,${svg}`;
-        }
-      }
-
-      const acts = card.querySelector('[data-bind="actions"]');
-      acts.innerHTML = '';
-      
-      const mkBtn = (cls, txt, fn) => 
-        h('button', {
-          class: `btn sm ${cls}`,
-          onClick: (ev) => {
-            ev.preventDefault();
-            ev.stopPropagation();
-            fn();
-          }
-        }, txt);
-
-      if (col === 'concluido') {
-        acts.appendChild(mkBtn('aberto reabrir', 'Reabrir', () => moveTicket(t.id, 'aberto')));
-      } else {
-        if (col !== 'aberto') acts.appendChild(mkBtn('aberto', 'Aberto', () => moveTicket(t.id, 'aberto')));
-        if (col !== 'atendimento') acts.appendChild(mkBtn('atendimento', 'Atendimento', () => moveTicket(t.id, 'atendimento')));
-        if (col !== 'aguardando') acts.appendChild(mkBtn('aguardando', 'Aguardando', () => moveTicket(t.id, 'aguardando')));
-        if (col !== 'programacao') acts.appendChild(mkBtn('programacao', 'Programação', () => moveTicket(t.id, 'programacao')));
-        if (col !== 'concluido') acts.appendChild(mkBtn('concluido', 'Concluir', () => moveTicket(t.id, 'concluido')));
-      }
-
-      acts.appendChild(mkBtn('excluir', 'Excluir', () => delTicket(t.id)));
-      
-      if (col === 'concluido') {
-        acts.appendChild(mkBtn('lancar pink', 'Lançar OS', () => createOrderFromTicket(t.id)));
-      }
-
-      card.addEventListener('click', (ev) => {
-        if (ev.target.closest('.actions') || ev.target.closest('button') || ev.target.closest('.btn')) return;
-        openTicketModal(t.id);
-      });
-
-      list.appendChild(card);
+      const card = createTicketCard(t, col);
+      if (card) list.appendChild(card);
     });
   });
 }
 
-function initKanbanClicks(){
-  const root = document.querySelector('.kanban');
-  if (!root) return;
-  if (root.__hasKanbanDelegation) return;
-  root.__hasKanbanDelegation = true;
+function createTicketCard(t, col) {
+  // Usar template diferente para a coluna "concluido"
+  const templateId = col === 'concluido' ? 'ticketCardConcluidoTpl' : 'ticketCardTpl';
+  const card = cloneTpl(templateId);
+  if (!card) return null;
 
-  root.addEventListener('click', (ev) => {
-    const btn  = ev.target.closest('button, .btn, [data-act]');
-    const card = ev.target.closest('.ticket');
-    if (!btn || !card) return;
+  card.dataset.id = t.id;
+  card.dataset.status = t.col;
 
-    ev.preventDefault();
-    ev.stopPropagation();
+  const tituloCliente = (t.codigo || t.nome) 
+    ? `${t.codigo || '—'} — ${t.nome || '—'}` 
+    : (t.titulo || 'Sem cliente');
+  
+  card.querySelector('[data-field="titulo"]').textContent = tituloCliente;
+  card.querySelector('[data-field="modulo"]').textContent = t.modulo || '—';
+  card.querySelector('[data-field="motivo"]').textContent = t.motivo || '—';
+  card.querySelector('[data-field="data"]').textContent = t.data ? brDate(t.data) : '—';
+  card.querySelector('[data-field="responsavel"]').textContent = t.responsavel || '—';
 
-    const id = card.dataset.id;
+  // Botões de ação
+  const btnEdit = card.querySelector('.btn.editar');
+  const btnDel = card.querySelector('.btn.excluir');
+  const btnLancar = card.querySelector('.btn.lancar');
 
-    if (btn.classList.contains('excluir') || btn.dataset.act === 'delete' || btn.dataset.act === 'del'){
-      delTicket(id); return;
-    }
-    if (btn.classList.contains('lancar') || btn.dataset.act === 'lancar' || btn.dataset.act === 'launch'){
-      createOrderFromTicket(id); return;
-    }
-    if (btn.classList.contains('editar') || btn.dataset.act === 'edit'){
-      openEditModal(id); return;
-    }
+  if (btnEdit) on(btnEdit, 'click', (e) => {
+    e.stopPropagation();
+    editTicket(t.id);
+  });
 
-    const targetCol =
-      btn.classList.contains('aberto')       ? 'aberto' :
-      btn.classList.contains('atendimento')  ? 'atendimento' :
-      btn.classList.contains('aguardando')   ? 'aguardando' :
-      btn.classList.contains('programacao')  ? 'programacao' :
-      btn.classList.contains('concluido')    ? 'concluido' :
-      btn.classList.contains('reabrir')      ? 'aberto' : null;
+  if (btnDel) on(btnDel, 'click', (e) => {
+    e.stopPropagation();
+    deleteTicket(t.id);
+  });
 
-    if (targetCol) moveTicket(id, targetCol);
-  }, true);
+  // Botão Lançar só existe no template de concluído
+  if (btnLancar) {
+    on(btnLancar, 'click', (e) => {
+      e.stopPropagation();
+      lancarParaOrdens(t.id);
+    });
+  }
+
+  // Drag and drop
+  card.draggable = true;
+  card.addEventListener('dragstart', (e) => {
+    e.dataTransfer.setData('text/plain', t.id);
+    card.classList.add('dragging');
+  });
+
+  card.addEventListener('dragend', () => {
+    card.classList.remove('dragging');
+  });
+
+  return card;
 }
 
-function initKanbanForm(){
-  on($('#t_add'), 'click', ()=>{
-    const modulo = $('#t_modulo').value;
-    const motivo = $('#t_motivo').value;
-    const data   = $('#t_data').value || ymd(new Date());
-    const solicitante = $('#t_solicitante').value.trim();
+function initKanbanDnD(){
+  COLS.forEach(col => {
+    const list = $(`#col-${col}`);
+    if (!list) return;
 
-    if (!isValidDate(data)) {
-      alert('Data inválida.');
-      return;
-    }
-
-    const selId = $('#t_cliente').value;
-    const cli   = state.clientes.find(c => c.id === selId);
-    if (!cli){
-      alert('Selecione um cliente.');
-      return;
-    }
-
-    const me = getCurrentProfile();
-    const titulo = `${cli.codigo || ''} ${cli.nome || ''}`.trim() || 'Atendimento';
-
-    const novo = {
-      id: uid('t'),
-      titulo,
-      modulo,
-      motivo,
-      data,
-      solicitante,
-      col: 'aberto',
-      clienteId: cli.id,
-      codigo:    cli.codigo || '',
-      nome:      cli.nome   || '',
-      assigneeName: me.firstName,
-      assigneeAvatar: me.foto,
-      problem: '',
-      solution: ''
-    };
-
-    state.tickets.push(novo);
-    persist();
-    renderKanban();
-
-    salvarAtendimentoNoBanco(novo).catch(err=>{
-      console.error('[DB] Erro ao salvar atendimento:', err);
-      alert('Não foi possível salvar no banco. Verifique conexão.');
+    list.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      list.classList.add('drag-over');
     });
 
-    $('#t_modulo').value = '';
-    $('#t_motivo').value = '';
-    $('#t_solicitante').value = '';
+    list.addEventListener('dragleave', () => {
+      list.classList.remove('drag-over');
+    });
+
+    list.addEventListener('drop', (e) => {
+      e.preventDefault();
+      list.classList.remove('drag-over');
+      
+      const ticketId = e.dataTransfer.getData('text/plain');
+      moveTicket(ticketId, col);
+    });
   });
 }
 
-async function moveTicket(id, novaCol){
-  const t = state.tickets.find(x => x.id === id);
-  if (!t) return;
+function moveTicket(ticketId, newCol) {
+  const ticket = state.tickets.find(t => t.id === ticketId);
+  if (!ticket) return;
 
-  const colAnterior = t.col;
-  t.col = novaCol;
+  // Atualizar responsável se estiver sendo movido para atendimento
+  if (newCol === 'atendimento' && ticket.col !== 'atendimento') {
+    const profile = getCurrentProfile();
+    ticket.responsavel = profile.firstName;
+  }
+
+  ticket.col = newCol;
   persist();
   renderKanban();
-
-  try{
-    await apiPatch('/api/atendimentos', { id, col: novaCol });
-  }catch(e){
-    console.error('[DB] moveTicket:', e);
-    alert('Não foi possível atualizar no banco.');
-    t.col = colAnterior;
-    persist();
-    renderKanban();
-  }
 }
 
-async function delTicket(id){
-  const bak = state.tickets.find(t => t.id === id);
-  if (!bak) return;
+/* ==========================================================================
+   FUNÇÃO PARA LANÇAR ATENDIMENTO PARA ORDENS
+   ========================================================================== */
 
-  state.tickets = state.tickets.filter(t => t.id !== id);
-  persist();
-  renderKanban();
-
-  try{
-    await apiDelete(`/api/atendimentos?id=${encodeURIComponent(id)}`);
-  }catch(e){
-    console.error('[DB] delTicket:', e);
-    alert('Não foi possível excluir no banco.');
-    state.tickets.push(bak);
-    persist();
-    renderKanban();
-  }
-}
-
-function openTicketModal(id) {
-  const t = state.tickets.find(x => x.id === id);
-  if (!t) return;
-
-  const modal = $('#ticketModal');
-  if (!modal) return;
-
-  $('#tm_id').value = t.id;
-  $('#tm_titulo').value = t.titulo || '';
-  $('#tm_modulo').value = t.modulo || '';
-  $('#tm_motivo').value = t.motivo || '';
-  $('#tm_data').value = t.data || '';
-  $('#tm_solicitante').value = t.solicitante || '';
-  $('#tm_problem').value = t.problem || '';
-  $('#tm_solution').value = t.solution || '';
-
-  const modSelect = $('#tm_modulo');
-  const motSelect = $('#tm_motivo');
-  
-  if (modSelect) {
-    modSelect.innerHTML = '<option value="">Selecione...</option>' + 
-      state.cad.modulos.map(m => `<option value="${esc(m)}" ${m === t.modulo ? 'selected' : ''}>${esc(m)}</option>`).join('');
-  }
-  
-  if (motSelect) {
-    motSelect.innerHTML = '<option value="">Selecione...</option>' + 
-      state.cad.motivos.map(m => `<option value="${esc(m)}" ${m === t.motivo ? 'selected' : ''}>${esc(m)}</option>`).join('');
+function lancarParaOrdens(ticketId) {
+  const ticket = state.tickets.find(t => t.id === ticketId);
+  if (!ticket) {
+    alert('Atendimento não encontrado.');
+    return;
   }
 
-  modal.hidden = false;
-  setupTicketModalEvents(modal, id);
-}
+  // Verificar se já existe uma ordem para este atendimento
+  const ordemExistente = state.ordens.find(o => o.ticketId === ticketId);
+  if (ordemExistente) {
+    alert('Este atendimento já foi lançado como ordem de serviço.');
+    return;
+  }
 
-function setupTicketModalEvents(modal, ticketId) {
-  const closeBtn = modal.querySelector('[data-close]');
-  const backdrop = modal.querySelector('.modal__backdrop');
-  const editBtn = $('#tm_edit');
-  const saveBtn = $('#tm_save');
-  const delBtn = $('#tm_del');
-
-  const closeModal = () => {
-    modal.hidden = true;
+  // Criar nova ordem de serviço baseada no atendimento
+  const novaOrdem = {
+    id: uid('ord'),
+    ticketId: ticketId, // Referência ao atendimento original
+    numero: `OS-${Date.now().toString().slice(-6)}`, // Número único
+    cliente: ticket.nome || 'Cliente não informado',
+    servico: `${ticket.modulo || 'Serviço'} - ${ticket.motivo || 'Atendimento'}`,
+    abertura: ymd(new Date()),
+    previsto: '', // Pode ser preenchido posteriormente
+    status: 'aberta',
+    descricao: `Origem: Atendimento ${ticket.id}\nMódulo: ${ticket.modulo || '—'}\nMotivo: ${ticket.motivo || '—'}\nResponsável: ${ticket.responsavel || '—'}`
   };
 
-  const handleEsc = (e) => {
-    if (e.key === 'Escape') closeModal();
-  };
+  // Adicionar à lista de ordens
+  state.ordens.push(novaOrdem);
 
-  if (closeBtn) closeBtn.onclick = closeModal;
-  if (backdrop) backdrop.onclick = closeModal;
+  // Remover o atendimento da lista de tickets (ou marcar como processado)
+  state.tickets = state.tickets.filter(t => t.id !== ticketId);
 
-  if (editBtn) {
-    editBtn.onclick = () => {
-      closeModal();
-      openEditModal(ticketId);
-    };
-  }
-
-  if (saveBtn) {
-    saveBtn.onclick = () => {
-      saveTicketModal(ticketId);
-      closeModal();
-    };
-  }
-
-  if (delBtn) {
-    delBtn.onclick = () => {
-      if (confirm('Tem certeza que deseja excluir este atendimento?')) {
-        delTicket(ticketId);
-        closeModal();
-      }
-    };
-  }
-
-  document.addEventListener('keydown', handleEsc);
-  modal._escHandler = handleEsc;
-}
-
-function saveTicketModal(id) {
-  const t = state.tickets.find(x => x.id === id);
-  if (!t) return;
-
-  const bak = {...t};
-
-  t.titulo = $('#tm_titulo').value.trim();
-  t.modulo = $('#tm_modulo').value;
-  t.motivo = $('#tm_motivo').value;
-  t.data = $('#tm_data').value;
-  t.solicitante = $('#tm_solicitante').value.trim();
-  t.problem = $('#tm_problem').value.trim();
-  t.solution = $('#tm_solution').value.trim();
-
+  // Persistir mudanças
   persist();
+
+  // Atualizar as interfaces
   renderKanban();
+  renderOrdens();
 
-  salvarAtendimentoNoBanco(t).catch(err => {
-    console.error('[DB] saveTicketModal:', err);
-    alert('Não foi possível salvar no banco.');
-    Object.assign(t, bak);
-    persist();
-    renderKanban();
-  });
+  // Mostrar mensagem de sucesso
+  alert(`Atendimento lançado como ordem de serviço ${novaOrdem.numero} com sucesso!`);
 
-  alert('Atendimento salvo com sucesso!');
+  // Opcional: navegar para a aba de ordens
+  setTab('ordens');
 }
 
-function openEditModal(id) {
+function editTicket(id) {
   const t = state.tickets.find(x => x.id === id);
   if (!t) return;
 
-  const modal = $('#editModal');
-  if (!modal) return;
-
+  // Preencher formulário
   $('#e_ticket_id').value = t.id;
   $('#e_titulo').value = t.titulo || '';
   $('#e_modulo').value = t.modulo || '';
   $('#e_motivo').value = t.motivo || '';
   $('#e_data').value = t.data || '';
 
-  const modSelect = $('#e_modulo');
-  const motSelect = $('#e_motivo');
-  
-  if (modSelect) {
-    modSelect.innerHTML = '<option value="">Selecione...</option>' + 
-      state.cad.modulos.map(m => `<option value="${esc(m)}" ${m === t.modulo ? 'selected' : ''}>${esc(m)}</option>`).join('');
-  }
-  
-  if (motSelect) {
-    motSelect.innerHTML = '<option value="">Selecione...</option>' + 
-      state.cad.motivos.map(m => `<option value="${esc(m)}" ${m === t.motivo ? 'selected' : ''}>${esc(m)}</option>`).join('');
-  }
-
-  modal.hidden = false;
-
-  const closeModal = () => modal.hidden = true;
-  const handleEsc = (e) => { if (e.key === 'Escape') closeModal(); };
-
-  on($('#e_cancel'), 'click', closeModal);
-  on($('#e_save'), 'click', saveEditModal);
-  on(modal.querySelector('.modal__backdrop'), 'click', closeModal);
-  document.addEventListener('keydown', handleEsc);
+  // Mostrar modal de edição
+  $('#editModal').hidden = false;
 }
 
-function saveEditModal() {
-  const id = $('#e_ticket_id').value;
-  const t = state.tickets.find(x => x.id === id);
-  if (!t) return;
+function deleteTicket(id) {
+  if (!confirm('Tem certeza que deseja excluir este atendimento?')) return;
 
-  const bak = {...t};
-
-  t.titulo = $('#e_titulo').value.trim();
-  t.modulo = $('#e_modulo').value;
-  t.motivo = $('#e_motivo').value;
-  t.data = $('#e_data').value;
-
+  state.tickets = state.tickets.filter(t => t.id !== id);
   persist();
   renderKanban();
-
-  salvarAtendimentoNoBanco(t).catch(err => {
-    console.error('[DB] saveEditModal:', err);
-    alert('Não foi possível salvar no banco.');
-    Object.assign(t, bak);
-    persist();
-    renderKanban();
-  });
-
-  $('#editModal').hidden = true;
-  alert('Atendimento atualizado com sucesso!');
 }
 
-function createOrderFromTicket(ticketId) {
-  const t = state.tickets.find(x => x.id === ticketId);
-  if (!t) return;
+/* ==========================================================================
+   FORMULÁRIO DE ATENDIMENTO - NOVO E CORRIGIDO
+   ========================================================================== */
 
-  const modal = $('#launchModal');
-  if (!modal) return;
+function initAtendimentoForm() {
+  const btnAdd = $('#t_add');
+  if (!btnAdd) return;
 
-  $('#m_ticket_id').value = ticketId;
-  $('#m_problem').value = t.problem || '';
-  $('#m_solution').value = t.solution || '';
-
-  modal.hidden = false;
-
-  const closeModal = () => modal.hidden = true;
-  const handleEsc = (e) => { if (e.key === 'Escape') closeModal(); };
-
-  on($('#m_cancel'), 'click', closeModal);
-  on($('#m_save'), 'click', saveOrderFromTicket);
-  on(modal.querySelector('.modal__backdrop'), 'click', closeModal);
-  document.addEventListener('keydown', handleEsc);
-}
-
-function saveOrderFromTicket() {
-  const ticketId = $('#m_ticket_id').value;
-  const t = state.tickets.find(x => x.id === ticketId);
-  if (!t) return;
-
-  const problem = $('#m_problem').value.trim();
-  const solution = $('#m_solution').value.trim();
-
-  if (!problem) {
-    alert('Informe o problema antes de lançar a ordem.');
-    return;
+  // Inicializar data atual
+  if ($('#t_data') && !$('#t_data').value) {
+    $('#t_data').value = ymd(new Date());
   }
 
-  t.problem = problem;
-  t.solution = solution;
+  on(btnAdd, 'click', () => {
+    const clienteId = $('#t_cliente').value;
+    const solicitante = $('#t_solicitante').value.trim();
+    const modulo = $('#t_modulo').value;
+    const motivo = $('#t_motivo').value;
+    const data = $('#t_data').value;
 
-  const nextNum = state.ordens.length + 1;
-  const numero = `OS${String(nextNum).padStart(3, '0')}`;
-  
-  const nova = {
-    id: uid('os'),
-    numero,
-    titulo: t.titulo || 'Ordem de Serviço',
-    status: 'Lançado',
-    previsto: ymd(new Date()),
-    created_at: new Date().toISOString(),
-    ticket_origin: ticketId
-  };
+    // Validações
+    if (!clienteId) {
+      alert('Selecione um cliente.');
+      return;
+    }
 
-  state.ordens.push(nova);
-  persist();
-  renderOrdens();
+    if (!modulo) {
+      alert('Selecione o módulo.');
+      return;
+    }
 
-  Promise.all([
-    salvarAtendimentoNoBanco(t),
-    salvarOrdemNoBanco(nova)
-  ]).catch(err => {
-    console.error('[DB] saveOrderFromTicket:', err);
-    alert('Não foi possível salvar no banco.');
-    state.ordens = state.ordens.filter(o => o.id !== nova.id);
+    if (!motivo) {
+      alert('Selecione o motivo.');
+      return;
+    }
+
+    if (!data || !isValidDate(data)) {
+      alert('Informe uma data válida.');
+      return;
+    }
+
+    // Buscar dados do cliente
+    const cliente = state.clientes.find(c => c.id === clienteId);
+    if (!cliente) {
+      alert('Cliente não encontrado.');
+      return;
+    }
+
+    // Criar novo ticket
+    const novoTicket = {
+      id: uid('tkt'),
+      clienteId: clienteId,
+      nome: cliente.nome,
+      codigo: cliente.codigo,
+      solicitante: solicitante || 'Não informado',
+      modulo: modulo,
+      motivo: motivo,
+      data: data,
+      responsavel: getCurrentProfile().firstName,
+      col: 'aberto',
+      descricao: '',
+      problema: '',
+      solucao: ''
+    };
+
+    state.tickets.push(novoTicket);
     persist();
-    renderOrdens();
+    renderKanban();
+
+    // Limpar formulário
+    $('#t_cliente').value = '';
+    $('#t_solicitante').value = '';
+    $('#t_modulo').value = '';
+    $('#t_motivo').value = '';
+    $('#t_data').value = ymd(new Date());
+    
+    // Atualizar info do cliente
+    const cliInfo = $('#t_cliente_info');
+    if (cliInfo) cliInfo.textContent = 'Nenhum cliente selecionado';
+
+    alert('Atendimento adicionado com sucesso!');
   });
 
-  $('#launchModal').hidden = true;
-  moveTicket(ticketId, 'concluido');
+  // Inicializar formulários de edição
+  initEditTicketForm();
+}
+
+function initEditTicketForm() {
+  const modal = $('#editModal');
+  const btnSave = $('#e_save');
+  const btnCancel = $('#e_cancel');
+
+  if (!modal || !btnSave) return;
+
+  on(btnSave, 'click', () => {
+    const id = $('#e_ticket_id').value;
+    const titulo = $('#e_titulo').value.trim();
+    const modulo = $('#e_modulo').value;
+    const motivo = $('#e_motivo').value;
+    const data = $('#e_data').value;
+
+    if (!titulo || !modulo || !motivo || !data) {
+      alert('Preencha todos os campos obrigatórios.');
+      return;
+    }
+
+    const ticket = state.tickets.find(t => t.id === id);
+    if (ticket) {
+      ticket.titulo = titulo;
+      ticket.modulo = modulo;
+      ticket.motivo = motivo;
+      ticket.data = data;
+
+      persist();
+      renderKanban();
+      modal.hidden = true;
+      alert('Atendimento atualizado com sucesso!');
+    }
+  });
+
+  on(btnCancel, 'click', () => {
+    modal.hidden = true;
+  });
+
+  // Fechar modal no backdrop
+  on(modal.querySelector('.modal__backdrop'), 'click', () => {
+    modal.hidden = true;
+  });
 }
 
 /* ==========================================================================
    7) ORDENS DE SERVIÇO
    ========================================================================== */
-
-function isAtrasada(previsto){
-  if (!previsto) return false;
-  const hoje = ymd(new Date());
-  return previsto < hoje;
-}
 
 function renderOrdens(){
   const tb = $('#tblOrdens');
@@ -1462,119 +1187,149 @@ function renderOrdens(){
   tb.innerHTML = '';
 
   if (!state.ordens.length){
-    tb.appendChild(h('tr',{}, h('td',{colspan:'5'},'Nenhuma ordem cadastrada.')));
+    tb.appendChild(h('tr',{}, h('td',{colspan:'7'},'Nenhuma ordem de serviço cadastrada.')));
     return;
   }
 
+  const hoje = new Date();
   state.ordens.forEach(o=>{
-    const atrasada = isAtrasada(o.previsto);
-    const tr = h('tr', {class: atrasada ? 'atrasada' : ''}, [
+    const tr = h('tr', {'data-id': o.id}, [
       h('td',{}, o.numero||'—'),
-      h('td',{}, o.titulo||'—'),
-      h('td',{}, o.status||'—'),
+      h('td',{}, o.cliente||'—'),
+      h('td',{}, o.servico||'—'),
+      h('td',{}, o.abertura ? brDate(o.abertura) : '—'),
       h('td',{}, o.previsto ? brDate(o.previsto) : '—'),
+      h('td',{}, [
+        h('span',{class: `pill ${o.status||'aberta'}`}, getStatusText(o.status))
+      ]),
       h('td',{}, [
         h('button',{class:'btn sm editar', onClick:()=>editOrdem(o.id)},'Editar'),
         h('button',{class:'btn sm excluir', onClick:()=>delOrdem(o.id)},'Excluir'),
       ])
     ]);
+
+    // Destacar ordens atrasadas
+    if (isAtrasada(o.previsto)) {
+      tr.classList.add('atrasada');
+    }
+
     tb.appendChild(tr);
   });
+}
+
+function getStatusText(status) {
+  const statusMap = {
+    'aberta': 'Aberta',
+    'andamento': 'Em Andamento',
+    'pausada': 'Pausada',
+    'concluida': 'Concluída',
+    'cancelada': 'Cancelada'
+  };
+  return statusMap[status] || status || 'Aberta';
+}
+
+function isAtrasada(dataPrevista) {
+  if (!dataPrevista) return false;
+  
+  try {
+    const hoje = new Date();
+    const prevista = new Date(dataPrevista + 'T00:00:00');
+    
+    // Considerar apenas a data, ignorando horas
+    hoje.setHours(0, 0, 0, 0);
+    prevista.setHours(0, 0, 0, 0);
+    
+    return prevista < hoje;
+  } catch {
+    return false;
+  }
 }
 
 function editOrdem(id){
   const o = state.ordens.find(x=>x.id===id);
   if (!o) return;
-  $('#o_edit_id').value = o.id;
-  $('#o_edit_numero').value = o.numero || '';
-  $('#o_edit_titulo').value = o.titulo || '';
-  $('#o_edit_status').value = o.status || 'Lançado';
-  $('#o_edit_previsto').value = o.previsto || '';
-  $('#editOrderModal').classList.add('open');
+  
+  $('#o_id').value = o.id;
+  $('#o_numero').value = o.numero || '';
+  $('#o_cliente').value = o.cliente || '';
+  $('#o_servico').value = o.servico || '';
+  $('#o_abertura').value = o.abertura || '';
+  $('#o_previsto').value = o.previsto || '';
+  $('#o_status').value = o.status || 'aberta';
+  $('#o_descricao').value = o.descricao || '';
 }
 
 function delOrdem(id){
-  const bak = state.ordens.find(o=>o.id===id);
-  if (!bak) return;
+  if (!confirm('Tem certeza que deseja excluir esta ordem de serviço?')) return;
 
   state.ordens = state.ordens.filter(o=>o.id!==id);
   persist();
   renderOrdens();
-
-  apiDelete(`/api/ordens?id=${encodeURIComponent(id)}`).catch(e=>{
-    console.error('[DB] delOrdem:', e);
-    alert('Não foi possível excluir no banco.');
-    state.ordens.push(bak);
-    persist();
-    renderOrdens();
-  });
+  
+  alert('Ordem de serviço excluída com sucesso!');
 }
 
 function initOrdensForm(){
   on($('#o_add'), 'click', ()=>{
+    const id = $('#o_id').value;
     const numero = $('#o_numero').value.trim();
-    const titulo = $('#o_titulo').value.trim();
-    const status = $('#o_status').value || 'Lançado';
+    const cliente = $('#o_cliente').value.trim();
+    const servico = $('#o_servico').value.trim();
+    const abertura = $('#o_abertura').value;
     const previsto = $('#o_previsto').value;
+    const status = $('#o_status').value;
+    const descricao = $('#o_descricao').value.trim();
 
-    if (!numero || !titulo){
-      alert('Informe número e título.');
+    if (!numero || !cliente || !servico || !abertura){
+      alert('Preencha os campos obrigatórios: Número, Cliente, Serviço e Data de Abertura.');
       return;
     }
 
-    const nova = {
-      id: uid('os'),
+    if (!isValidDate(abertura)) {
+      alert('Data de abertura inválida.');
+      return;
+    }
+
+    if (previsto && !isValidDate(previsto)) {
+      alert('Data prevista inválida.');
+      return;
+    }
+
+    const ordemData = {
+      id: id || uid('ord'),
       numero,
-      titulo,
-      status,
-      previsto: previsto || null,
-      created_at: new Date().toISOString()
+      cliente,
+      servico,
+      abertura,
+      previsto: previsto || '',
+      status: status || 'aberta',
+      descricao
     };
 
-    state.ordens.push(nova);
+    if (id){
+      const index = state.ordens.findIndex(x=>x.id===id);
+      if (index !== -1) state.ordens[index] = ordemData;
+    } else {
+      state.ordens.push(ordemData);
+    }
+
     persist();
     renderOrdens();
-
-    salvarOrdemNoBanco(nova).catch(err=>{
-      console.error('[DB] initOrdensForm:', err);
-      alert('Não foi possível salvar no banco.');
-      state.ordens = state.ordens.filter(o => o.id !== nova.id);
-      persist();
-      renderOrdens();
-    });
-
-    $('#o_numero').value = '';
-    $('#o_titulo').value = '';
-    $('#o_status').value = 'Lançado';
+    
+    // Limpar formulário
+    $('#o_id').value = '';
+    $('#o_numero').value = $('#o_cliente').value = $('#o_servico').value = $('#o_descricao').value = '';
+    $('#o_abertura').value = ymd(new Date());
     $('#o_previsto').value = '';
+    $('#o_status').value = 'aberta';
+    
+    alert(`Ordem de serviço ${id ? 'atualizada' : 'adicionada'} com sucesso!`);
   });
 
-  on($('#o_edit_save'), 'click', ()=>{
-    const id = $('#o_edit_id').value;
-    const o = state.ordens.find(x=>x.id===id);
-    if (!o) return;
-
-    const bak = {...o};
-    o.numero   = $('#o_edit_numero').value.trim();
-    o.titulo   = $('#o_edit_titulo').value.trim();
-    o.status   = $('#o_edit_status').value;
-    o.previsto = $('#o_edit_previsto').value || null;
-
-    persist();
-    renderOrdens();
-
-    salvarOrdemNoBanco(o).catch(err=>{
-      console.error('[DB] editOrdem:', err);
-      alert('Não foi possível salvar no banco.');
-      Object.assign(o, bak);
-      persist();
-      renderOrdens();
-    });
-
-    $('#editOrderModal').classList.remove('open');
-  });
-
-  on($('#o_edit_close'), 'click', ()=> $('#editOrderModal').classList.remove('open'));
+  // Inicializar data de abertura
+  if ($('#o_abertura') && !$('#o_abertura').value) {
+    $('#o_abertura').value = ymd(new Date());
+  }
 }
 
 /* ==========================================================================
@@ -1582,37 +1337,137 @@ function initOrdensForm(){
    ========================================================================== */
 
 function renderKPIs(){
-  const cont = $('#kpis');
-  if (!cont) return;
+  // Estatísticas básicas
+  const stats = {
+    totalTickets: state.tickets.length,
+    totalOrdens: state.ordens.length,
+    totalClientes: state.clientes.length,
+    ticketsAbertos: state.tickets.filter(t=>t.col==='aberto').length,
+    ticketsAtendimento: state.tickets.filter(t=>t.col==='atendimento').length,
+    ticketsConcluidos: state.tickets.filter(t=>t.col==='concluido').length,
+    ordensAtrasadas: state.ordens.filter(o=> isAtrasada(o.previsto)).length,
+    ordensAbertas: state.ordens.filter(o=>o.status==='aberta').length,
+    ordensConcluidas: state.ordens.filter(o=>o.status==='concluida').length,
+  };
 
-  const hoje = new Date();
-  const mesAtual = hoje.getMonth();
-  const anoAtual = hoje.getFullYear();
+  // Atualizar cards do dashboard
+  const kpiCards = $('#kpiCards');
+  if (kpiCards){
+    kpiCards.innerHTML = '';
+    [
+      ['Total de Atendimentos', stats.totalTickets, 'd-abertas'],
+      ['Atendimentos Abertos', stats.ticketsAbertos, 'd-atend'],
+      ['Em Atendimento', stats.ticketsAtendimento, 'd-prog'],
+      ['Concluídos', stats.ticketsConcluidos, 'd-concluido'],
+      ['Total de Ordens', stats.totalOrdens, 'd-total'],
+      ['Ordens Abertas', stats.ordensAbertas, 'd-abertas'],
+      ['Ordens Atrasadas', stats.ordensAtrasadas, 'd-atraso'],
+      ['Ordens Concluídas', stats.ordensConcluidas, 'd-concluido'],
+    ].forEach(([lbl,val,klass])=>{
+      kpiCards.appendChild(h('div',{class:`dashcard ${klass}`},[
+        h('div',{},lbl),
+        h('div',{}, String(val))
+      ]));
+    });
+  }
 
-  const atendMes = state.tickets.filter(t=>{
-    const dt = new Date(t.data || '');
-    return dt.getMonth() === mesAtual && dt.getFullYear() === anoAtual;
-  }).length;
+  // Gráfico de atendimentos por módulo
+  renderModulosChart();
+  
+  // Gráfico de ordens por status
+  renderOrdensChart();
+}
 
-  const ordensAtrasadas = state.ordens.filter(o=> isAtrasada(o.previsto)).length;
-  const ordensMes = state.ordens.filter(o=>{
-    const dt = new Date(o.created_at || '');
-    return dt.getMonth() === mesAtual && dt.getFullYear() === anoAtual;
-  }).length;
+function renderModulosChart(){
+  const ctx = $('#chartModulos');
+  if (!ctx) return;
 
-  const clientesAtivos = [...new Set(state.tickets.map(t=>t.clienteId))].length;
+  const modCount = {};
+  state.tickets.forEach(t=>{
+    const m = t.modulo || 'Outros';
+    modCount[m] = (modCount[m]||0) + 1;
+  });
 
-  cont.innerHTML = '';
-  [
-    ['Atendimentos (mês)', atendMes, 'd-atend'],
-    ['OS Emitidas (mês)', ordensMes, 'd-prog'],
-    ['OS Atrasadas', ordensAtrasadas, 'd-atraso'],
-    ['Clientes Ativos', clientesAtivos, 'd-abertas'],
-  ].forEach(([lbl,val,klass])=>{
-    cont.appendChild(h('div',{class:`kpi ${klass}`},[
-      h('h3',{},lbl),
-      h('div',{class:'num'}, String(val))
-    ]));
+  // Limpar canvas
+  ctx.width = ctx.width;
+
+  // Desenhar gráfico simples de barras
+  const mods = Object.keys(modCount);
+  const vals = Object.values(modCount);
+  const maxVal = Math.max(...vals, 1);
+  const w = ctx.width, h = ctx.height;
+  const barW = (w - 40) / mods.length;
+
+  const ctx2d = ctx.getContext('2d');
+  ctx2d.clearRect(0,0,w,h);
+
+  // Barras
+  mods.forEach((m,i)=>{
+    const barH = (vals[i]/maxVal) * (h-40);
+    const x = 20 + i*barW;
+    const y = h - 20 - barH;
+
+    ctx2d.fillStyle = ['#4f46e5','#10b981','#f59e0b','#ef4444','#8b5cf6'][i%5];
+    ctx2d.fillRect(x, y, barW-10, barH);
+
+    // Rótulo
+    ctx2d.fillStyle = '#374151';
+    ctx2d.font = '12px sans-serif';
+    ctx2d.textAlign = 'center';
+    ctx2d.fillText(m, x + (barW-10)/2, h-5);
+    ctx2d.fillText(vals[i], x + (barW-10)/2, y-5);
+  });
+}
+
+function renderOrdensChart(){
+  const ctx = $('#chartOrdens');
+  if (!ctx) return;
+
+  const statusCount = {
+    aberta: state.ordens.filter(o=>o.status==='aberta').length,
+    andamento: state.ordens.filter(o=>o.status==='andamento').length,
+    pausada: state.ordens.filter(o=>o.status==='pausada').length,
+    concluida: state.ordens.filter(o=>o.status==='concluida').length,
+    cancelada: state.ordens.filter(o=>o.status==='cancelada').length,
+  };
+
+  // Limpar canvas
+  ctx.width = ctx.width;
+
+  const statuses = Object.keys(statusCount);
+  const vals = Object.values(statusCount);
+  const total = vals.reduce((a,b)=>a+b,0) || 1;
+
+  const ctx2d = ctx.getContext('2d');
+  const w = ctx.width, h = ctx.height;
+  const centerX = w/2, centerY = h/2;
+  const radius = Math.min(w,h)/2 - 20;
+
+  let startAngle = 0;
+  const colors = ['#4f46e5','#10b981','#f59e0b','#ef4444','#8b5cf6'];
+
+  statuses.forEach((s,i)=>{
+    const sliceAngle = (vals[i]/total) * 2 * Math.PI;
+    
+    ctx2d.beginPath();
+    ctx2d.moveTo(centerX, centerY);
+    ctx2d.arc(centerX, centerY, radius, startAngle, startAngle + sliceAngle);
+    ctx2d.closePath();
+    
+    ctx2d.fillStyle = colors[i%colors.length];
+    ctx2d.fill();
+
+    // Rótulo
+    const midAngle = startAngle + sliceAngle/2;
+    const labelX = centerX + (radius+15) * Math.cos(midAngle);
+    const labelY = centerY + (radius+15) * Math.sin(midAngle);
+    
+    ctx2d.fillStyle = '#374151';
+    ctx2d.font = '12px sans-serif';
+    ctx2d.textAlign = 'center';
+    ctx2d.fillText(`${s} (${vals[i]})`, labelX, labelY);
+
+    startAngle += sliceAngle;
   });
 }
 
@@ -1621,538 +1476,125 @@ function renderKPIs(){
    ========================================================================== */
 
 function initConfig(){
-  $('#cfg_modulos').value = state.cad.modulos.join('\n');
-  $('#cfg_motivos').value = state.cad.motivos.join('\n');
-  $('#cfg_overdue').checked = state.ui.overdueHighlight;
-  
-  const statusChips = $('#cfg_status');
-  if (statusChips) {
-    statusChips.innerHTML = `
-      <span class="chip">Aberto</span>
-      <span class="chip">Em atendimento</span>
-      <span class="chip">Aguardando</span>
-      <span class="chip">Programação</span>
-      <span class="chip">Concluído</span>
-    `;
-  }
-  
-  on($('#cfg_save_modmot'), 'click', () => {
-    const modulos = $('#cfg_modulos').value.split('\n').map(m => m.trim()).filter(Boolean);
-    const motivos = $('#cfg_motivos').value.split('\n').map(m => m.trim()).filter(Boolean);
-    
-    if (modulos.length) state.cad.modulos = modulos;
-    if (motivos.length) state.cad.motivos = motivos;
-    
-    persist();
-    alert('Módulos e motivos salvos!');
-  });
-  
-  on($('#cfg_save'), 'click', () => {
-    state.ui.overdueHighlight = $('#cfg_overdue').checked;
-    persist();
-    alert('Configurações salvas!');
-  });
-}
-
-/* ==========================================================================
-   10) ASSISTENTE DE CÁLCULOS (CORRIGIDO)
-   ========================================================================== */
-
-function initAssistenteTabs(){
-  const tabs = $$('.assist-tab');
-  const panes = $$('.assist-pane');
-  const resultBoxes = $$('.result-box');
-
-  const show = (key) => {
-    tabs.forEach(t => {
-      const on = t.dataset.tab === key;
-      t.classList.toggle('active', on);
-      t.setAttribute('aria-selected', String(on));
+  // Módulos
+  const modList = $('#modList');
+  const modInput = $('#modulo');
+  if (modList){
+    modList.innerHTML = '';
+    state.cad.modulos.forEach(m=>{
+      modList.appendChild(h('li',{},[
+        h('span',{}, m),
+        h('button',{class:'btn sm excluir', onClick:()=>delModulo(m)},'Excluir')
+      ]));
     });
-    
-    panes.forEach(p => p.hidden = (p.id !== `pane-${key}`));
-    resultBoxes.forEach(box => box.hidden = (box.id !== `result-${key}`));
-  };
-
-  tabs.forEach(t => on(t, 'click', () => show(t.dataset.tab)));
-  show('folha');
-
-  // Atualizar parâmetros
-  const P = ASSIST_PARAM;
-  if ($('#p_min')) $('#p_min').textContent = fmtBRL(P.salarioMin);
-  if ($('#p_teto')) $('#p_teto').textContent = fmtBRL(P.tetoINSS);
-  if ($('#p_fgts')) $('#p_fgts').textContent = (P.fgts * 100).toFixed(1) + '%';
-  if ($('#p_fam')) {
-    $('#p_fam').textContent = `teto ${fmtBRL(P.familia.teto)} / ${fmtBRL(P.familia.valor)} por dep.`;
   }
-}
 
-function initAssistenteFolha(){
-  const btn = $('#btnCalcularFolha');
-  if (!btn) return;
-
-  on(btn, 'click', () => {
-    const salario = Number($('#f-salario')?.value || 0);
-    const outras = Number($('#f-outras')?.value || 0);
-    const dep = Number($('#f-dependentes')?.value || 0);
-    const compKey = $('#f-competencia')?.value === '2025-04' ? 'jan-abr-2025' : 'maio-2025';
-    const simp = ($('#f-simplificado')?.value === 'sim');
-
-    if (!salario) {
-      alert('Informe o salário base.');
+  on($('#addModulo'), 'click', ()=>{
+    const val = modInput.value.trim();
+    if (!val) return;
+    if (state.cad.modulos.includes(val)){
+      alert('Módulo já existe.');
       return;
     }
-
-    const baseINSS = salario + outras;
-    const rINSS = calcINSS_progressivo(baseINSS);
-    const fgts = calcFGTS(salario + outras);
-    const baseIR = (salario + outras) - rINSS.inss;
-    const rIR = calcIRRF(baseIR, dep, compKey, simp);
-    
-    // Salário-família
-    const familia = (salario <= ASSIST_PARAM.familia.teto) ? 
-      (ASSIST_PARAM.familia.valor * dep) : 0;
-
-    const descontos = rINSS.inss + rIR.irrf;
-    const proventos = salario + outras + familia;
-    const liquido = proventos - descontos;
-
-    // Atualizar resultados
-    if ($('#r-base-inss')) $('#r-base-inss').textContent = fmtBRL(baseINSS);
-    if ($('#r-inss')) $('#r-inss').textContent = fmtBRL(rINSS.inss);
-    if ($('#r-base-fgts')) $('#r-base-fgts').textContent = fmtBRL(salario + outras);
-    if ($('#r-fgts')) $('#r-fgts').textContent = fmtBRL(fgts);
-    if ($('#r-base-irrf')) $('#r-base-irrf').textContent = fmtBRL(rIR.base);
-    if ($('#r-irrf')) $('#r-irrf').textContent = fmtBRL(rIR.irrf);
-    if ($('#r-salario-familia')) $('#r-salario-familia').textContent = fmtBRL(familia);
-    if ($('#r-descontos')) $('#r-descontos').textContent = fmtBRL(descontos);
-    if ($('#r-proventos')) $('#r-proventos').textContent = fmtBRL(proventos);
-    if ($('#r-liquido')) $('#r-liquido').textContent = fmtBRL(liquido);
-
-    // Atualizar totais
-    if ($('#sum-folha-liq')) $('#sum-folha-liq').textContent = fmtBRL(liquido);
-    if ($('#sum-folha-desc')) $('#sum-folha-desc').textContent = fmtBRL(descontos);
-    if ($('#sum-folha-prov')) $('#sum-folha-prov').textContent = fmtBRL(proventos);
-    if ($('#sum-folha-fgts')) $('#sum-folha-fgts').textContent = fmtBRL(fgts);
-    
-    updateTotalGeral();
-  });
-
-  // Botão limpar
-  on($('#btnLimparFolha'), 'click', () => {
-    $('#f-salario').value = '';
-    $('#f-outras').value = '0';
-    $('#f-dependentes').value = '0';
-    $('#f-competencia').value = '2025-09';
-    $('#f-simplificado').value = 'nao';
-  });
-}
-
-function initAssistenteFerias(){
-  const btn = $('#btnCalcularFerias');
-  if (!btn) return;
-  
-  on(btn, 'click', () => {
-    const sal = Number($('#fer-salario')?.value || 0);
-    const dias = Number($('#fer-dias')?.value || 30);
-    const abono = ($('#fer-abono')?.value === '10');
-    const dep = Number($('#fer-dependentes')?.value || 0);
-    const compKey = $('#fer-competencia')?.value === 'jan-abr-2025' ? 'jan-abr-2025' : 'maio-2025';
-
-    if (!sal) {
-      alert('Informe o salário base.');
-      return;
-    }
-
-    // Cálculo básico das férias
-    const valorFerias = sal * (dias / 30);
-    const umterco = valorFerias / 3;
-    const abonoVal = abono ? (sal * 10 / 30) : 0;
-    const totalBruto = valorFerias + umterco + abonoVal;
-
-    // INSS sobre férias
-    const { inss } = calcINSS_progressivo(valorFerias);
-    
-    // IRRF sobre férias (base: valor das férias - INSS)
-    const baseIR = valorFerias - inss;
-    const { irrf } = calcIRRF(baseIR, dep, compKey, false);
-
-    const totalLiquido = totalBruto - inss - irrf;
-
-    // Atualizar resultados
-    if ($('#r-ferias-valor')) $('#r-ferias-valor').textContent = fmtBRL(valorFerias);
-    if ($('#r-ferias-terco')) $('#r-ferias-terco').textContent = fmtBRL(umterco);
-    if ($('#r-ferias-abono')) $('#r-ferias-abono').textContent = fmtBRL(abonoVal);
-    if ($('#r-ferias-inss')) $('#r-ferias-inss').textContent = fmtBRL(inss);
-    if ($('#r-ferias-irrf')) $('#r-ferias-irrf').textContent = fmtBRL(irrf);
-    if ($('#r-ferias-liquido')) $('#r-ferias-liquido').textContent = fmtBRL(totalLiquido);
-
-    // Atualizar totais
-    if ($('#sum-ferias-liq')) $('#sum-ferias-liq').textContent = fmtBRL(totalLiquido);
-    
-    updateTotalGeral();
-  });
-
-  // Botão limpar
-  on($('#btnLimparFerias'), 'click', () => {
-    $('#fer-salario').value = '';
-    $('#fer-dias').value = '30';
-    $('#fer-abono').value = '0';
-    $('#fer-dependentes').value = '0';
-    $('#fer-competencia').value = 'maio-2025';
-  });
-}
-
-function initAssistente13(){
-  const btn = $('#btnCalcular13');
-  if (!btn) return;
-  
-  on(btn, 'click', () => {
-    const sal = Number($('#d-salario')?.value || 0);
-    const meses = Number($('#d-meses')?.value || 12);
-    const dep = Number($('#d-dependentes')?.value || 0);
-    const adiant = ($('#d-adiant')?.value === '1');
-    const compKey = $('#d-competencia')?.value === 'jan-abr-2025' ? 'jan-abr-2025' : 'maio-2025';
-
-    if (!sal) {
-      alert('Informe o salário base.');
-      return;
-    }
-
-    // Cálculo do 13º
-    const valorBruto = sal * (meses / 12);
-    const adiantamento = adiant ? valorBruto * 0.5 : 0;
-    const valorSegundaParcela = valorBruto - adiantamento;
-
-    // INSS sobre a 2ª parcela
-    const { inss } = calcINSS_progressivo(valorSegundaParcela);
-    
-    // IRRF sobre a 2ª parcela
-    const baseIR = valorSegundaParcela - inss;
-    const { irrf } = calcIRRF(baseIR, dep, compKey, false);
-
-    const segundaParcelaLiquida = valorSegundaParcela - inss - irrf;
-
-    // Atualizar resultados
-    if ($('#r-decimo-bruto')) $('#r-decimo-bruto').textContent = fmtBRL(valorBruto);
-    if ($('#r-decimo-adiant')) $('#r-decimo-adiant').textContent = fmtBRL(adiantamento);
-    if ($('#r-decimo-inss')) $('#r-decimo-inss').textContent = fmtBRL(inss);
-    if ($('#r-decimo-irrf')) $('#r-decimo-irrf').textContent = fmtBRL(irrf);
-    if ($('#r-decimo-liquido')) $('#r-decimo-liquido').textContent = fmtBRL(segundaParcelaLiquida);
-
-    // Atualizar totais
-    if ($('#sum-decimo-liq')) $('#sum-decimo-liq').textContent = fmtBRL(segundaParcelaLiquida);
-    
-    updateTotalGeral();
-  });
-
-  // Botão limpar
-  on($('#btnLimpar13'), 'click', () => {
-    $('#d-salario').value = '';
-    $('#d-meses').value = '12';
-    $('#d-dependentes').value = '0';
-    $('#d-adiant').value = '1';
-    $('#d-competencia').value = 'maio-2025';
-  });
-}
-
-function initAssistenteHoras(){
-  const btn = $('#btnCalcularHoras');
-  if (!btn) return;
-  
-  on(btn, 'click', () => {
-    const salario = Number($('#h-salario')?.value || 0);
-    const horas = Number($('#h-horas')?.value || 0);
-    const adicional = Number($('#h-adic')?.value || 0.5);
-
-    if (!salario || !horas) {
-      alert('Informe salário e horas extras.');
-      return;
-    }
-
-    // Cálculo de horas extras
-    const valorHora = salario / 220; // 220 horas mensais
-    const valorHoraExtra = valorHora * (1 + adicional);
-    const totalHorasExtras = valorHoraExtra * horas;
-
-    // Atualizar resultados
-    if ($('#r-horas-valor')) $('#r-horas-valor').textContent = fmtBRL(valorHora);
-    if ($('#r-horas-adicional')) $('#r-horas-adicional').textContent = (adicional * 100) + '%';
-    if ($('#r-horas-total')) $('#r-horas-total').textContent = fmtBRL(totalHorasExtras);
-
-    // Atualizar totais
-    if ($('#sum-horas')) $('#sum-horas').textContent = fmtBRL(totalHorasExtras);
-    
-    updateTotalGeral();
-  });
-
-  // Botão limpar
-  on($('#btnLimparHoras'), 'click', () => {
-    $('#h-salario').value = '';
-    $('#h-horas').value = '';
-    $('#h-adic').value = '0.5';
-  });
-}
-
-function initAssistenteNoturno(){
-  const btn = $('#btnCalcularNoturno');
-  if (!btn) return;
-  
-  on(btn, 'click', () => {
-    const salario = Number($('#n-salario')?.value || 0);
-    const horas = Number($('#n-horas')?.value || 0);
-    const percentual = Number($('#n-perc')?.value || 0.2);
-
-    if (!salario || !horas) {
-      alert('Informe salário e horas noturnas.');
-      return;
-    }
-
-    // Cálculo do adicional noturno
-    const valorHora = salario / 220;
-    const valorAdicionalNoturno = valorHora * percentual;
-    const totalAdicional = valorAdicionalNoturno * horas;
-
-    // Atualizar resultados
-    if ($('#r-noturno-valor')) $('#r-noturno-valor').textContent = fmtBRL(valorHora);
-    if ($('#r-noturno-adicional')) $('#r-noturno-adicional').textContent = (percentual * 100) + '%';
-    if ($('#r-noturno-total')) $('#r-noturno-total').textContent = fmtBRL(totalAdicional);
-
-    // Atualizar totais
-    if ($('#sum-noturno')) $('#sum-noturno').textContent = fmtBRL(totalAdicional);
-    
-    updateTotalGeral();
-  });
-
-  // Botão limpar
-  on($('#btnLimparNoturno'), 'click', () => {
-    $('#n-salario').value = '';
-    $('#n-horas').value = '';
-    $('#n-perc').value = '0.20';
-  });
-}
-
-function initAssistenteRescisao(){
-  const btn = $('#btnCalcularRescisao');
-  if (!btn) return;
-  
-  on(btn, 'click', () => {
-    const salario = Number($('#r-salario')?.value || 0);
-    const meses = Number($('#r-meses')?.value || 12);
-    const saldoDias = Number($('#r-saldo-dias')?.value || 0);
-    const fgtsSaldo = Number($('#r-fgts-saldo')?.value || 0);
-    const feriasVencidas = ($('#r-ferias-vencidas')?.value === 'sim');
-    const motivo = $('#r-motivo')?.value || 'sem-justa';
-    const aviso = $('#r-aviso')?.value || 'indenizado';
-    const avisoDias = Number($('#r-aviso-dias')?.value || 30);
-
-    if (!salario) {
-      alert('Informe o salário base.');
-      return;
-    }
-
-    // Cálculos básicos da rescisão
-    const saldoSalario = salario * (saldoDias / 30);
-    const decimoProporcional = salario * (meses / 12);
-    const feriasProporcionais = salario * (meses / 12);
-    const umTercoFerias = feriasProporcionais / 3;
-    
-    // Férias vencidas
-    const feriasVencidasValor = feriasVencidas ? salario + (salario / 3) : 0;
-    
-    // Aviso prévio
-    let avisoPrevio = 0;
-    if (aviso === 'indenizado') {
-      avisoPrevio = salario;
-    } else if (aviso === 'trabalhado') {
-      avisoPrevio = salario * (avisoDias / 30);
-    }
-    
-    // Multa FGTS (40% para sem justa causa)
-    const multaFGTS = motivo === 'sem-justa' ? fgtsSaldo * 0.4 : 0;
-
-    // Totais
-    const totalBruto = saldoSalario + decimoProporcional + feriasProporcionais + 
-                      umTercoFerias + feriasVencidasValor + avisoPrevio + multaFGTS;
-
-    // INSS e IRRF (cálculos simplificados)
-    const { inss } = calcINSS_progressivo(totalBruto);
-    const { irrf } = calcIRRF(totalBruto - inss, 0, 'maio-2025', false);
-
-    const totalLiquido = totalBruto - inss - irrf;
-
-    // Atualizar resultados
-    if ($('#r-rescisao-saldo')) $('#r-rescisao-saldo').textContent = fmtBRL(saldoSalario);
-    if ($('#r-rescisao-decimo')) $('#r-rescisao-decimo').textContent = fmtBRL(decimoProporcional);
-    if ($('#r-rescisao-ferias')) $('#r-rescisao-ferias').textContent = fmtBRL(feriasProporcionais);
-    if ($('#r-rescisao-terco')) $('#r-rescisao-terco').textContent = fmtBRL(umTercoFerias);
-    if ($('#r-rescisao-aviso')) $('#r-rescisao-aviso').textContent = fmtBRL(avisoPrevio);
-    if ($('#r-rescisao-multa')) $('#r-rescisao-multa').textContent = fmtBRL(multaFGTS);
-    if ($('#r-rescisao-inss')) $('#r-rescisao-inss').textContent = fmtBRL(inss);
-    if ($('#r-rescisao-irrf')) $('#r-rescisao-irrf').textContent = fmtBRL(irrf);
-    if ($('#r-rescisao-liquido')) $('#r-rescisao-liquido').textContent = fmtBRL(totalLiquido);
-
-    // Atualizar totais
-    if ($('#sum-rescisao-liq')) $('#sum-rescisao-liq').textContent = fmtBRL(totalLiquido);
-    if ($('#sum-rescisao-multa')) $('#sum-rescisao-multa').textContent = fmtBRL(multaFGTS);
-    
-    updateTotalGeral();
-  });
-
-  // Botão limpar
-  on($('#btnLimparRescisao'), 'click', () => {
-    $('#r-salario').value = '';
-    $('#r-meses').value = '12';
-    $('#r-saldo-dias').value = '0';
-    $('#r-fgts-saldo').value = '';
-    $('#r-ferias-vencidas').value = 'nao';
-    $('#r-motivo').value = 'sem-justa';
-    $('#r-aviso').value = 'indenizado';
-    $('#r-aviso-dias').value = '30';
-  });
-}
-
-function updateTotalGeral() {
-  let total = 0;
-  
-  // Folha
-  if ($('#include-folha')?.checked) {
-    const valor = parseFloat($('#sum-folha-liq')?.textContent?.replace(/[^\d,]/g, '')?.replace(',', '.') || 0);
-    total += isNaN(valor) ? 0 : valor;
-  }
-  
-  // Férias
-  if ($('#include-ferias')?.checked) {
-    const valor = parseFloat($('#sum-ferias-liq')?.textContent?.replace(/[^\d,]/g, '')?.replace(',', '.') || 0);
-    total += isNaN(valor) ? 0 : valor;
-  }
-  
-  // 13º
-  if ($('#include-decimo')?.checked) {
-    const valor = parseFloat($('#sum-decimo-liq')?.textContent?.replace(/[^\d,]/g, '')?.replace(',', '.') || 0);
-    total += isNaN(valor) ? 0 : valor;
-  }
-  
-  // Horas Extras
-  if ($('#include-horas')?.checked) {
-    const valor = parseFloat($('#sum-horas')?.textContent?.replace(/[^\d,]/g, '')?.replace(',', '.') || 0);
-    total += isNaN(valor) ? 0 : valor;
-  }
-  
-  // Adicional Noturno
-  if ($('#include-noturno')?.checked) {
-    const valor = parseFloat($('#sum-noturno')?.textContent?.replace(/[^\d,]/g, '')?.replace(',', '.') || 0);
-    total += isNaN(valor) ? 0 : valor;
-  }
-  
-  // Rescisão
-  if ($('#include-rescisao')?.checked) {
-    const valor = parseFloat($('#sum-rescisao-liq')?.textContent?.replace(/[^\d,]/g, '')?.replace(',', '.') || 0);
-    total += isNaN(valor) ? 0 : valor;
-  }
-  
-  if ($('#sum-total')) {
-    $('#sum-total').textContent = fmtBRL(total);
-  }
-}
-
-// Inicializar eventos dos checkboxes
-function initAssistenteCheckboxes() {
-  const checkboxes = [
-    '#include-folha', '#include-ferias', '#include-decimo',
-    '#include-horas', '#include-noturno', '#include-rescisao'
-  ];
-  
-  checkboxes.forEach(selector => {
-    const checkbox = $(selector);
-    if (checkbox) {
-      on(checkbox, 'change', updateTotalGeral);
-    }
-  });
-}
-
-/* ==========================================================================
-   11) UTILITÁRIOS E INICIALIZAÇÃO
-   ========================================================================== */
-
-function initDateFields() {
-  const today = ymd(new Date());
-  const dateFields = [
-    '#t_data', '#ev_date', '#o_previsto', '#e_data', '#tm_data', '#u_dt'
-  ];
-  
-  dateFields.forEach(selector => {
-    const field = $(selector);
-    if (field && !field.value) field.value = today;
-  });
-}
-
-function initModalClosers() {
-  $$('.modal__backdrop').forEach(backdrop => {
-    on(backdrop, 'click', function() {
-      this.closest('.modal').hidden = true;
-    });
-  });
-
-  on(document, 'keydown', (e) => {
-    if (e.key === 'Escape') {
-      $$('.modal').forEach(modal => {
-        if (!modal.hidden) modal.hidden = true;
-      });
-    }
-  });
-}
-
-/* ==========================================================================
-   12) INICIALIZAÇÃO PRINCIPAL
-   ========================================================================== */
-
-async function init(){
-  console.log('🚀 Iniciando SOFT-ATA...');
-  
-  try {
-    // Inicializações básicas
-    initClock();
-    initThemeToggle();
-    initSidebar();
-    initTabs();
-    initDateFields();
-    initCalendarForm();
-    initClientesForm();
-    initKanbanClicks();
-    initKanbanForm();
-    initOrdensForm();
+    state.cad.modulos.push(val);
+    persist();
     initConfig();
-    initProfileModal();
-    initModalClosers();
-    initWhatsAppGenerator();
-    initUtilDateConverter();
-    
-    // Assistente
-    initAssistenteTabs();
-    initAssistente();
-    initFerias();
-    init13();
-    initHoras();
-    initNoturno();
-    initResc();
-    
-    applyHeaderProfile();
+    modInput.value = '';
+  });
 
-    // Carregar dados do banco
-    await Promise.allSettled([
-      carregarClientesDoBanco(),
-      carregarAtendimentosDoBanco(), 
-      carregarOrdensDoBanco()
-    ]);
-
-    // Renderizar aba atual
-    setTab(state.ui.currentTab);
-    
-    console.log('✅ SOFT-ATA totalmente funcional!');
-  } catch (error) {
-    console.error('❌ Erro na inicialização:', error);
+  // Motivos
+  const motList = $('#motList');
+  const motInput = $('#motivo');
+  if (motList){
+    motList.innerHTML = '';
+    state.cad.motivos.forEach(m=>{
+      motList.appendChild(h('li',{},[
+        h('span',{}, m),
+        h('button',{class:'btn sm excluir', onClick:()=>delMotivo(m)},'Excluir')
+      ]));
+    });
   }
+
+  on($('#addMotivo'), 'click', ()=>{
+    const val = motInput.value.trim();
+    if (!val) return;
+    if (state.cad.motivos.includes(val)){
+      alert('Motivo já existe.');
+      return;
+    }
+    state.cad.motivos.push(val);
+    persist();
+    initConfig();
+    motInput.value = '';
+  });
+
+  // Configurações de UI
+  const ovChk = $('#ovHighlight');
+  if (ovChk) ovChk.checked = state.ui.overdueHighlight;
+  on(ovChk, 'change', ()=> {
+    state.ui.overdueHighlight = ovChk.checked;
+    persist();
+  });
+}
+
+function delModulo(m){
+  state.cad.modulos = state.cad.modulos.filter(x=>x!==m);
+  persist();
+  initConfig();
+}
+
+function delMotivo(m){
+  state.cad.motivos = state.cad.motivos.filter(x=>x!==m);
+  persist();
+  initConfig();
+}
+
+/* ==========================================================================
+   10) ASSISTENTE DE CÁLCULOS TRABALHISTAS
+   ========================================================================== */
+
+function renderAssistente() {
+  console.log('Assistente carregado');
+}
+
+/* ==========================================================================
+   11) INICIALIZAÇÃO GERAL
+   ========================================================================== */
+
+function init(){
+  console.log('🚀 Inicializando SOFT-ATA...');
+  
+  // 1) Tema e relógio
+  initClock();
+  initThemeToggle();
+  
+  // 2) Perfil
+  initProfileModal();
+  applyHeaderProfile();
+  
+  // 3) Navegação
+  initSidebar();
+  initTabs();
+  
+  // 4) Módulos principais
+  initCalendarForm();
+  initClientesForm();
+  initAtendimentoForm();
+  initKanbanDnD();
+  initOrdensForm();
+  
+  // 5) Utilitários
+  initUtilDateConverter();
+  initWhatsAppGenerator();
+  
+  // 6) Renderização inicial
+  renderHome();
+  renderKanban();
+  renderClientes();
+  renderOrdens();
+  renderKPIs();
+  
+  console.log('✅ SOFT-ATA inicializado com sucesso!');
 }
 
 // Inicializar quando o DOM estiver pronto

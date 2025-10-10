@@ -8,9 +8,8 @@
   <!-- Font Awesome -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
 
-  <!-- CSS e JS do sistema -->
+  <!-- CSS do sistema -->
   <link rel="stylesheet" href="style.css" />
-  <script src="script.js" defer></script>
 </head>
 <body>
   <!-- ================================================================
@@ -40,7 +39,7 @@
             <button id="btnProfile" class="profile-btn" aria-label="Abrir perfil">
               <img id="profileAvatar" class="avatar" src="" alt="Foto do perfil" />
               <div class="profile-meta">
-                <div id="profileName" class="profile-name">Seu nome</div>
+                <div id="profileName" class="profile-name">Usuário</div>
                 <div id="profileSector" class="profile-sector">Setor</div>
               </div>
             </button>
@@ -56,18 +55,18 @@
   <nav class="sidebar" id="sidebar" aria-label="Navegação principal">
     <h2>Painel</h2>
     <div class="nav" id="navList" role="tablist" aria-orientation="vertical">
-      <button id="tabbtn-home"      data-go="home"      role="tab" aria-controls="tab-home"      aria-selected="false">Home</button>
-      <button id="tabbtn-fila"      data-go="fila"      role="tab" aria-controls="tab-fila"      aria-selected="false">Atendimento</button>
-      <button id="tabbtn-ordens"    data-go="ordens"    role="tab" aria-controls="tab-ordens"    aria-selected="false">Ordens</button>
-      <button id="tabbtn-clientes"  data-go="clientes"  role="tab" aria-controls="tab-clientes"  aria-selected="false">Cadastros</button>
+      <button id="tabbtn-home" data-go="home" role="tab" aria-controls="tab-home" aria-selected="false">Home</button>
+      <button id="tabbtn-fila" data-go="fila" role="tab" aria-controls="tab-fila" aria-selected="false">Atendimento</button>
+      <button id="tabbtn-ordens" data-go="ordens" role="tab" aria-controls="tab-ordens" aria-selected="false">Ordens</button>
+      <button id="tabbtn-clientes" data-go="clientes" role="tab" aria-controls="tab-clientes" aria-selected="false">Cadastros</button>
       <button id="tabbtn-dashboard" data-go="dashboard" role="tab" aria-controls="tab-dashboard" aria-selected="false">Dashboard</button>
-      <button id="tabbtn-util"      data-go="util"      role="tab" aria-controls="tab-util"      aria-selected="false">Utilitários</button>
-      <button id="tabbtn-manuais"   data-go="manuais"   role="tab" aria-controls="tab-manuais"   aria-selected="false">Manuais</button>
-      <button id="tabbtn-ideias"    data-go="ideias"    role="tab" aria-controls="tab-ideias"    aria-selected="false">Ideias & Melhorias</button>
-      <button id="tabbtn-atualiz"   data-go="atualiz"   role="tab" aria-controls="tab-atualiz"   aria-selected="false">Atualizações</button>
-      <button id="tabbtn-holerite"  data-go="holerite"  role="tab" aria-controls="tab-holerite"  aria-selected="false">Holerite</button>
+      <button id="tabbtn-util" data-go="util" role="tab" aria-controls="tab-util" aria-selected="false">Utilitários</button>
+      <button id="tabbtn-manuais" data-go="manuais" role="tab" aria-controls="tab-manuais" aria-selected="false">Manuais</button>
+      <button id="tabbtn-ideias" data-go="ideias" role="tab" aria-controls="tab-ideias" aria-selected="false">Ideias & Melhorias</button>
+      <button id="tabbtn-atualiz" data-go="atualiz" role="tab" aria-controls="tab-atualiz" aria-selected="false">Atualizações</button>
+      <button id="tabbtn-holerite" data-go="holerite" role="tab" aria-controls="tab-holerite" aria-selected="false">Holerite</button>
       <button id="tabbtn-assistente" data-go="assistente" role="tab" aria-controls="tab-assistente" aria-selected="false">Assistente</button>
-      <button id="tabbtn-config"    data-go="config"    role="tab" aria-controls="tab-config"    aria-selected="false">Configurações</button>
+      <button id="tabbtn-config" data-go="config" role="tab" aria-controls="tab-config" aria-selected="false">Configurações</button>
     </div>
   </nav>
 
@@ -207,8 +206,8 @@
             </div>
           </div>
 
-          <div class="row mt-2">
-            <button class="btn success rounded" id="t_add">
+          <div class="row" style="margin-top:16px">
+            <button class="btn success" id="t_add">
               <i class="fas fa-plus"></i>
               Adicionar Atendimento
             </button>
@@ -270,150 +269,71 @@
             </div>
           </div>
         </div>
-
-        <!-- Modal de Detalhes do Atendimento -->
-        <div id="ticketModal" class="modal" hidden aria-hidden="true" aria-labelledby="ticketModalTitle" role="dialog">
-          <div class="modal__backdrop" data-close aria-label="Fechar"></div>
-          <div class="modal__card">
-            <div class="modal__header">
-              <h3 class="modal__title" id="ticketModalTitle">
-                <i class="fas fa-ticket-alt"></i>
-                <span id="modalTitle">Detalhes do Atendimento</span>
-              </h3>
-              <button class="modal__close" id="modalClose" aria-label="Fechar">&times;</button>
-            </div>
-            
-            <div class="modal__body">
-              <div class="form-section">
-                <h4 class="form-section-title">Informações Básicas</h4>
-                <div class="grid cols-3">
-                  <div>
-                    <label for="tm_cliente">Cliente</label>
-                    <select id="tm_cliente" disabled>
-                      <option value="">Selecione um cliente</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label for="tm_solicitante">Solicitante</label>
-                    <input id="tm_solicitante" type="text" placeholder="Nome do solicitante">
-                  </div>
-                  <div>
-                    <label for="tm_data">Data</label>
-                    <input id="tm_data" type="date">
-                  </div>
-                </div>
-                
-                <div class="grid cols-2 mt-2">
-                  <div>
-                    <label for="tm_modulo">Módulo</label>
-                    <select id="tm_modulo">
-                      <option value="">Selecione o módulo</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label for="tm_motivo">Motivo</label>
-                    <select id="tm_motivo">
-                      <option value="">Selecione o motivo</option>
-                    </select>
-                  </div>
-                </div>
-              </div>
-              
-              <div class="form-section">
-                <h4 class="form-section-title">Detalhes do Atendimento</h4>
-                <div class="grid cols-2">
-                  <div>
-                    <label for="tm_problem">
-                      <i class="fas fa-exclamation-circle"></i>
-                      Problema
-                    </label>
-                    <textarea id="tm_problem" rows="6" placeholder="Descreva o problema encontrado"></textarea>
-                  </div>
-                  <div>
-                    <label for="tm_solution">
-                      <i class="fas fa-check-circle"></i>
-                      Solução
-                    </label>
-                    <textarea id="tm_solution" rows="6" placeholder="Descreva a solução aplicada"></textarea>
-                  </div>
-                </div>
-              </div>
-              
-              <div class="form-section">
-                <h4 class="form-section-title">Ações</h4>
-                <div class="grid cols-3">
-                  <div>
-                    <label>Status Atual</label>
-                    <div id="currentStatus" class="status-indicator status-aberto">Aberto</div>
-                  </div>
-                  <div>
-                    <label>Alterar Status</label>
-                    <select id="tm_status">
-                      <option value="aberto">Aberto</option>
-                      <option value="atendimento">Em Atendimento</option>
-                      <option value="aguardando">Aguardando Retorno</option>
-                      <option value="programacao">Programação</option>
-                      <option value="concluido">Concluído</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label>Responsável</label>
-                    <input id="tm_responsavel" type="text" placeholder="Nome do responsável">
-                  </div>
-                </div>
-              </div>
-            </div>
-            
-            <div class="modal__actions">
-              <button class="btn danger" id="tm_delete">
-                <i class="fas fa-trash"></i>
-                Excluir
-              </button>
-              <button class="btn accent" id="tm_cancel">
-                <i class="fas fa-times"></i>
-                Cancelar
-              </button>
-              <button class="btn success" id="tm_save">
-                <i class="fas fa-save"></i>
-                Salvar Alterações
-              </button>
-            </div>
-          </div>
-        </div>
       </div>
     </section>
 
     <!-- ========================== ORDENS ============================ -->
     <section id="tab-ordens" class="panel" role="tabpanel" aria-labelledby="tabbtn-ordens" hidden>
-      <h3>Ordens</h3>
+      <h3>Ordens de Serviço</h3>
+      
+      <!-- Formulário de ordens -->
+      <div class="panel">
+        <h4 class="panel-title">Nova Ordem de Serviço</h4>
+        <div class="grid cols-4">
+          <input id="o_numero" placeholder="Número da OS" />
+          <input id="o_cliente" placeholder="Cliente" />
+          <input id="o_servico" placeholder="Serviço" />
+          <input id="o_abertura" type="date" />
+        </div>
+        <div class="grid cols-3" style="margin-top:8px">
+          <input id="o_previsto" type="date" placeholder="Data prevista" />
+          <select id="o_status">
+            <option value="aberta">Aberta</option>
+            <option value="andamento">Em Andamento</option>
+            <option value="pausada">Pausada</option>
+            <option value="concluida">Concluída</option>
+            <option value="cancelada">Cancelada</option>
+          </select>
+          <button class="btn success" id="o_add">Adicionar OS</button>
+        </div>
+        <textarea id="o_descricao" placeholder="Descrição do serviço" style="margin-top:8px"></textarea>
+        <input type="hidden" id="o_id">
+      </div>
+
+      <hr class="sep" />
+      
       <table class="table">
         <thead>
-          <tr><th>#</th><th>Título</th><th>Status</th><th>Previsto</th><th></th></tr>
-        </thead>
-        <tbody id="tblOrdens">
-          <!-- Linha semente de exemplo (o JS pode limpar e repopular) -->
-          <tr data-id="seed-001">
-            <td>001</td>
-            <td>Exemplo</td>
-            <td><span class="pill open">Aberto</span></td>
-            <td>—</td>
-            <td>
-              <div class="row">
-                <button class="btn sm programacao" data-act="programacao">Programação</button>
-                <button class="btn sm excluir" data-act="del">Excluir</button>
-              </div>
-            </td>
+          <tr>
+            <th>#</th>
+            <th>Cliente</th>
+            <th>Serviço</th>
+            <th>Abertura</th>
+            <th>Previsto</th>
+            <th>Status</th>
+            <th></th>
           </tr>
-        </tbody>
+        </thead>
+        <tbody id="tblOrdens"></tbody>
       </table>
     </section>
 
     <!-- ======================== DASHBOARD =========================== -->
     <section id="tab-dashboard" class="panel" role="tabpanel" aria-labelledby="tabbtn-dashboard" hidden>
       <h3>Dashboard</h3>
-      <div class="kpis" id="kpis"></div>
+      <div class="dash-cards" id="kpiCards"></div>
       <hr class="sep" />
-      <div id="feed" class="grid"></div>
+      
+      <div class="grid cols-2">
+        <div class="panel">
+          <h4>Atendimentos por Módulo</h4>
+          <canvas id="chartModulos" width="400" height="200"></canvas>
+        </div>
+        <div class="panel">
+          <h4>Ordens por Status</h4>
+          <canvas id="chartOrdens" width="400" height="200"></canvas>
+        </div>
+      </div>
     </section>
 
     <!-- ======================= ASSISTENTE ======================= -->
@@ -987,129 +907,146 @@
       <h3>Holerite</h3>
       <p class="muted">Conteúdo a definir.</p>
     </section>
-
-    <!-- ============================= MODAIS ========================== -->
-
-    <!-- MODAL: Editar atendimento -->
-    <div id="editModal" class="modal" hidden aria-hidden="true" aria-labelledby="editModalTitle" role="dialog">
-      <div class="modal__backdrop" data-close aria-label="Fechar"></div>
-      <div class="modal__card">
-        <h3 id="editModalTitle">Editar atendimento</h3>
-        <p class="muted" style="margin-top:-6px">Altere os campos abaixo e salve.</p>
-
-        <input type="hidden" id="e_ticket_id">
-
-        <div class="grid cols-2" style="margin-top:10px; gap:10px">
-          <div>
-            <label for="e_titulo">Título</label>
-            <input id="e_titulo" placeholder="Título do chamado">
-          </div>
-          <div>
-            <label for="e_modulo">Módulo</label>
-            <select id="e_modulo"></select>
-          </div>
-          <div>
-            <label for="e_motivo">Motivo</label>
-            <select id="e_motivo"></select>
-          </div>
-          <div>
-            <label for="e_data">Data</label>
-            <input id="e_data" type="date">
-          </div>
-        </div>
-
-        <div class="row" style="justify-content:flex-end; gap:8px; margin-top:12px">
-          <button class="btn accent" id="e_cancel">Cancelar</button>
-          <button class="btn success" id="e_save">Salvar alterações</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- MODAL: Lançar ordem a partir do atendimento -->
-    <div id="launchModal" class="modal" hidden aria-hidden="true" aria-labelledby="launchModalTitle" role="dialog">
-      <div class="modal__backdrop" data-close aria-label="Fechar"></div>
-      <div class="modal__card">
-        <h3 id="launchModalTitle">Lançar Ordem</h3>
-        <p class="muted" style="margin-top:-6px">Preencha Problema e Solução para lançar a ordem.</p>
-
-        <input type="hidden" id="m_ticket_id">
-
-        <div class="grid cols-2" style="margin-top:10px; gap:10px">
-          <div>
-            <label for="m_problem">Problema</label>
-            <textarea id="m_problem" rows="6" placeholder="Descreva o problema"></textarea>
-          </div>
-          <div>
-            <label for="m_solution">Solução</label>
-            <textarea id="m_solution" rows="6" placeholder="Descreva a solução aplicada"></textarea>
-          </div>
-        </div>
-
-        <div class="row" style="justify-content:flex-end; gap:8px; margin-top:12px">
-          <button class="btn accent" id="m_cancel">Cancelar</button>
-          <button class="btn success" id="m_save">Lançar</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- MODAL: Perfil -->
-    <div id="profileModal" class="modal" hidden aria-hidden="true"
-         aria-labelledby="profileModalTitle" role="dialog">
-      <div class="modal__backdrop" data-close aria-label="Fechar"></div>
-
-      <div class="modal__card">
-        <div class="row" style="justify-content:space-between;align-items:center">
-          <h3 id="profileModalTitle">Perfil</h3>
-          <button class="btn ghost" id="profileModalClose" style="padding:4px 10px;font-size:14px" aria-label="Fechar">✖</button>
-        </div>
-        <p class="muted" style="margin-top:-6px">Adicione sua foto e dados básicos.</p>
-
-        <div class="grid cols-2" style="margin-top:10px; gap:12px">
-          <!-- Foto -->
-          <div>
-            <label for="pf_foto">Foto de perfil</label>
-            <input id="pf_foto" type="file" accept="image/*">
-            <div class="row" style="margin-top:8px">
-              <img id="pf_preview" class="avatar lg" src="" alt="Pré-visualização da foto">
-            </div>
-          </div>
-
-          <!-- Dados -->
-          <div class="grid cols-2" style="gap:10px">
-            <div style="grid-column:1 / -1">
-              <label for="pf_nome">Nome completo</label>
-              <input id="pf_nome" placeholder="Digite seu nome completo">
-            </div>
-            <div>
-              <label for="pf_nasc">Data de nascimento</label>
-              <input id="pf_nasc" type="date">
-            </div>
-            <div>
-              <label for="pf_setor">Setor</label>
-              <input id="pf_setor" placeholder="Ex.: Suporte, Fiscal, Comercial">
-            </div>
-
-            <div style="grid-column:1 / -1"><hr class="sep"></div>
-
-            <div>
-              <label for="pf_tel_setor">Telefone do setor</label>
-              <input id="pf_tel_setor" placeholder="(00) 0000-0000">
-            </div>
-            <div>
-              <label for="pf_email_corp">E-mail corporativo</label>
-              <input id="pf_email_corp" type="email" placeholder="voce@empresa.com.br">
-            </div>
-            <div>
-              <label for="pf_ramal">Ramal</label>
-              <input id="pf_ramal" placeholder="000">
-            </div>
-          </div>
-        </div>
-        <div class="modal__actions">
-          <button class="btn success" id="pf_save">Salvar</button>
-        </div>
-      </div>
-    </div>
   </main>
+
+  <!-- ============================= MODAIS ========================== -->
+
+  <!-- MODAL: Editar atendimento (rápido) -->
+  <div id="editModal" class="modal" hidden aria-hidden="true" aria-labelledby="editModalTitle" role="dialog">
+    <div class="modal__backdrop" data-close aria-label="Fechar"></div>
+    <div class="modal__card">
+      <h3 id="editModalTitle">Editar atendimento</h3>
+      <p class="muted" style="margin-top:-6px">Altere os campos abaixo e salve.</p>
+
+      <input type="hidden" id="e_ticket_id">
+
+      <div class="grid cols-2" style="margin-top:10px; gap:10px">
+        <div>
+          <label for="e_titulo">Título</label>
+          <input id="e_titulo" placeholder="Título do chamado">
+        </div>
+        <div>
+          <label for="e_modulo">Módulo</label>
+          <select id="e_modulo"></select>
+        </div>
+        <div>
+          <label for="e_motivo">Motivo</label>
+          <select id="e_motivo"></select>
+        </div>
+        <div>
+          <label for="e_data">Data</label>
+          <input id="e_data" type="date">
+        </div>
+      </div>
+
+      <div class="row" style="justify-content:flex-end; gap:8px; margin-top:12px">
+        <button class="btn accent" id="e_cancel">Cancelar</button>
+        <button class="btn success" id="e_save">Salvar alterações</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: Perfil -->
+  <div id="profileModal" class="modal" hidden aria-hidden="true"
+       aria-labelledby="profileModalTitle" role="dialog">
+    <div class="modal__backdrop" data-close aria-label="Fechar"></div>
+
+    <div class="modal__card">
+      <div class="row" style="justify-content:space-between;align-items:center">
+        <h3 id="profileModalTitle">Perfil</h3>
+        <button class="btn ghost" id="profileModalClose" style="padding:4px 10px;font-size:14px" aria-label="Fechar">✖</button>
+      </div>
+      <p class="muted" style="margin-top:-6px">Adicione sua foto e dados básicos.</p>
+
+      <div class="grid cols-2" style="margin-top:10px; gap:12px">
+        <!-- Foto -->
+        <div>
+          <label for="pf_foto">Foto de perfil</label>
+          <input id="pf_foto" type="file" accept="image/*">
+          <div class="row" style="margin-top:8px">
+            <img id="pf_preview" class="avatar lg" src="" alt="Pré-visualização da foto">
+          </div>
+        </div>
+
+        <!-- Dados -->
+        <div class="grid cols-2" style="gap:10px">
+          <div style="grid-column:1 / -1">
+            <label for="pf_nome">Nome completo</label>
+            <input id="pf_nome" placeholder="Digite seu nome completo">
+          </div>
+          <div>
+            <label for="pf_nasc">Data de nascimento</label>
+            <input id="pf_nasc" type="date">
+          </div>
+          <div>
+            <label for="pf_setor">Setor</label>
+            <input id="pf_setor" placeholder="Ex.: Suporte, Fiscal, Comercial">
+          </div>
+
+          <div style="grid-column:1 / -1"><hr class="sep"></div>
+
+          <div>
+            <label for="pf_tel_setor">Telefone do setor</label>
+            <input id="pf_tel_setor" placeholder="(00) 0000-0000">
+          </div>
+          <div>
+            <label for="pf_email_corp">E-mail corporativo</label>
+            <input id="pf_email_corp" type="email" placeholder="voce@empresa.com.br">
+          </div>
+          <div>
+            <label for="pf_ramal">Ramal</label>
+            <input id="pf_ramal" placeholder="000">
+          </div>
+        </div>
+      </div>
+      <div class="modal__actions">
+        <button class="btn success" id="pf_save">Salvar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Templates separados para cada coluna do Kanban -->
+  
+  <!-- Template para cartões de atendimento (ABERTO, ATENDIMENTO, AGUARDANDO, PROGRAMAÇÃO) -->
+  <template id="ticketCardTpl">
+    <div class="ticket" data-id="" data-status="">
+      <div class="head">
+        <div class="title" data-field="titulo"></div>
+      </div>
+      <div class="meta">
+        <div class="meta-line"><b>Módulo:</b> <span data-field="modulo"></span></div>
+        <div class="meta-line"><b>Motivo:</b> <span data-field="motivo"></span></div>
+        <div class="meta-line"><b>Data:</b> <span data-field="data"></span></div>
+        <div class="meta-line"><b>Responsável:</b> <span data-field="responsavel"></span></div>
+      </div>
+      <div class="actions">
+        <button class="btn sm editar">Editar</button>
+        <button class="btn sm excluir">Excluir</button>
+      </div>
+    </div>
+  </template>
+
+  <!-- Template específico para cartões de atendimento CONCLUÍDO -->
+  <template id="ticketCardConcluidoTpl">
+    <div class="ticket" data-id="" data-status="">
+      <div class="head">
+        <div class="title" data-field="titulo"></div>
+      </div>
+      <div class="meta">
+        <div class="meta-line"><b>Módulo:</b> <span data-field="modulo"></span></div>
+        <div class="meta-line"><b>Motivo:</b> <span data-field="motivo"></span></div>
+        <div class="meta-line"><b>Data:</b> <span data-field="data"></span></div>
+        <div class="meta-line"><b>Responsável:</b> <span data-field="responsavel"></span></div>
+      </div>
+      <div class="actions">
+        <button class="btn sm editar">Editar</button>
+        <button class="btn sm excluir">Excluir</button>
+        <button class="btn sm lancar">Lançar</button>
+      </div>
+    </div>
+  </template>
+
+  <!-- JS do sistema -->
+  <script src="script.js"></script>
 </body>
 </html>
